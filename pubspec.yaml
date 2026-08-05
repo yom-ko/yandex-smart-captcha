@@ -1,8 +1,8 @@
 name: yandex_smart_captcha
 description: Unofficial Flutter package for Yandex SmartCaptcha with a streamlined API.
 version: 3.1.8
-homepage: https://github.com/yom-ko/yandex_smart_captcha
-repository: https://github.com/yom-ko/yandex_smart_captcha
+homepage: https://github.com/yom-ko/yandex-smart-captcha
+repository: https://github.com/yom-ko/yandex-smart-captcha
 
 topics:
   - smart-captcha

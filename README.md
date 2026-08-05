@@ -10,7 +10,6 @@ This package was inspired by [flutter_yandex_smartcaptcha](https://pub.dev/packa
 
 One day at work, I urgently needed to integrate a Yandex CAPTCHA into a mobile app, and the `flutter_yandex_smartcaptcha` package came to the rescue. However, I discovered a serious bug and reported it to the author. When they didn’t respond, I decided to create a similar package myself and learn how to publish packages on pub.dev in the process. The end of the magnificent story.
 
-
 ## Usage
 
 Super simple! Here’s the most basic example:
@@ -29,22 +28,22 @@ YandexSmartCaptcha(
 In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it's useful if you need to trigger a challenge popup programmatically, but that’s rare.
 
 #### Configuration parameters
+
 | Parameter | Required | Default | Description |
-|:----------|:-----------:|:------------|:------------|
-| `clientKey` | ✔ |  | The client-side key passed to the Web SmartCaptcha. |
-| `alwaysShowChallenge` |  | `false` | If `true`, the user will always see a challenge. |
-| `language` |  | `ru` | The language for the Web SmartCaptcha UI. |
-| `invisibleMode` |  | `false` | If `true`, the CAPTCHA runs in invisible mode – without the "I’m not a robot" checkbox. |
-| `hideDPNBadge` |  | `false` | If `true` and `invisibleMode` is enabled, the badge linking to the Data Processing Notice (DPN) will be hidden. |
-| `dpnBadgePosition` |  | `bottomRight` | If `invisibleMode` is enabled, this option specifies the position of the DPN badge. |
-| `webViewMode` |  | `true` | If `true`, the CAPTCHA runs in a special WebView mode, improving challenge accuracy on mobile devices. |
-| `initialContentScale` |  | `1.0` | The initial scale factor for the Web SmartCaptcha content. |
-| `userScalableContent` |  | `false` | If `true`, the user can zoom in and out of the Web SmartCaptcha content. |
-| `maximumContentScale` |  | `3.0` | If `userScalableContent` is enabled, this defines the maximum scale factor for the content. |
-| `backgroundColor` |  | `null` | The background color of the `YandexSmartCaptcha` widget. |
+| :---------- | :-----------: | :------------ | :------------ |
+| `clientKey` | ✔ | | The client-side key passed to the Web SmartCaptcha. |
+| `alwaysShowChallenge` | | `false` | If `true`, the user will always see a challenge. |
+| `language` | | `ru` | The language for the Web SmartCaptcha UI. |
+| `invisibleMode` | | `false` | If `true`, the CAPTCHA runs in invisible mode – without the "I’m not a robot" checkbox. |
+| `hideDPNBadge` | | `false` | If `true` and `invisibleMode` is enabled, the badge linking to the Data Processing Notice (DPN) will be hidden. |
+| `dpnBadgePosition` | | `bottomRight` | If `invisibleMode` is enabled, this option specifies the position of the DPN badge. |
+| `webViewMode` | | `true` | If `true`, the CAPTCHA runs in a special WebView mode, improving challenge accuracy on mobile devices. |
+| `initialContentScale` | | `1.0` | The initial scale factor for the Web SmartCaptcha content. |
+| `userScalableContent` | | `false` | If `true`, the user can zoom in and out of the Web SmartCaptcha content. |
+| `maximumContentScale` | | `3.0` | If `userScalableContent` is enabled, this defines the maximum scale factor for the content. |
+| `backgroundColor` | | `null` | The background color of the `YandexSmartCaptcha` widget. |
 
 > ✱ "Web SmartCaptcha" refers to the underlying HTML document, hosted in a WebView, that runs the Yandex SmartCaptcha JavaScript code.
-
 
 ## Screenshots
 
@@ -52,15 +51,15 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 
 <div>
   <img
-    src="https://raw.githubusercontent.com/yom-ko/yandex_smart_captcha/refs/heads/main/assets/images/screen_1.webp"
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_1.webp"
     alt="The initial state of the Yandex SmartCaptcha container with the 'I’m not a robot' checkbox."
     width="250">
   <img
-    src="https://raw.githubusercontent.com/yom-ko/yandex_smart_captcha/refs/heads/main/assets/images/screen_2.webp"
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_2.webp"
     alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve."
     width="250">
   <img
-    src="https://raw.githubusercontent.com/yom-ko/yandex_smart_captcha/refs/heads/main/assets/images/screen_3.webp"
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_3.webp"
     alt="The state of the Yandex SmartCaptcha container with the 'I’m not a robot' box checked, after the user successfully solved the challenge."
     width="250">
 </div><br/>
@@ -69,11 +68,11 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 
 <div>
   <img
-    src="https://raw.githubusercontent.com/yom-ko/yandex_smart_captcha/refs/heads/main/assets/images/screen_laz_1.webp"
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_1.webp"
     alt="The initial state of the Yandex SmartCaptcha container with the 'I’m not a robot' checkbox, as seen in a real-world application."
     width="250">
   <img
-    src="https://raw.githubusercontent.com/yom-ko/yandex_smart_captcha/refs/heads/main/assets/images/screen_laz_2.webp"
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_2.webp"
     alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve in a real-world application."
     width="250">
 </div>
