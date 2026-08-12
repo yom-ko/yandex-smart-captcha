@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import 'src/web_captcha_data.dart';
 
 export 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
