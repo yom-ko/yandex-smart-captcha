@@ -13,7 +13,7 @@ void main() {
     expect($(YandexSmartCaptcha), findsOne);
 
     // Test the basic user flow for Web SmartCaptcha.
-    await $.native.tap(Selector(textContains: 'robot'));
+    await $.platformAutomator.tap(Selector(textContains: 'robot'));
 
     // TODO: Fix text entering later?
     // await $.native.enterTextByIndex(
@@ -23,7 +23,7 @@ void main() {
 
     await $.pump(const Duration(seconds: 2));
 
-    await $.native.tap(Selector(textContains: 'continue'));
+    await $.platformAutomator.tap(Selector(textContains: 'continue'));
 
     await $.pump(const Duration(seconds: 2));
 
