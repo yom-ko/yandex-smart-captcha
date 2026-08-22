@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 4.0.0
+- **BREAKING CHANGE**: Bump minimum Dart SDK constraint to `>=3.5.0` and Flutter to `>=3.24.0`.
+- Clean and improve Example
+
 ## 3.1.9
 - Update repository URLs
 
