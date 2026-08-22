@@ -28,8 +28,8 @@ platforms:
   ios:
 
 environment:
-  sdk: '>=3.0.1 <4.0.0'
-  flutter: '>=1.17.0'
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
 
 dependencies:
   flutter:
