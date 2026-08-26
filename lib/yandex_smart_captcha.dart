@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import 'src/web_captcha_data.dart';
+import 'src/web_smart_captcha.dart';
 
 export 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
@@ -240,7 +240,7 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
       :maximumContentScale,
     ) = widget.config;
 
-    final webCaptcha = WebCaptcha(
+    final webCaptcha = WebSmartCaptcha(
       clientKey: clientKey,
       alwaysShowChallenge: alwaysShowChallenge,
       language: language.name,
