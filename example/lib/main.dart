@@ -82,20 +82,23 @@ class _HomePageState extends State<HomePage> {
                   }
                   return true;
                 },
-                onNetworkError: () {
-                  debugPrint('call: onNetworkError');
-                },
-                onJavaScriptError: () {
-                  debugPrint('call: onJavaScriptError');
+                onCaptchaLoaded: () {
+                  debugPrint('called: onCaptchaLoaded');
                 },
                 onChallengeShown: () {
-                  debugPrint('call: onChallengeShown');
+                  debugPrint('called: onChallengeShown');
                 },
                 onChallengeHidden: () {
-                  debugPrint('call: onChallengeHidden');
+                  debugPrint('called: onChallengeHidden');
+                },
+                onNetworkError: () {
+                  debugPrint('called: onNetworkError');
+                },
+                onJavaScriptError: () {
+                  debugPrint('called: onJavaScriptError');
                 },
                 onChallengeSolved: (token) {
-                  debugPrint('call: onChallengeSolved $token');
+                  debugPrint('called: onChallengeSolved with token: $token');
                 },
               ),
             ),

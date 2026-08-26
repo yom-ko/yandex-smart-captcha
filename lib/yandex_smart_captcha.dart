@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+import 'src/captcha_event.dart';
 import 'src/web_smart_captcha.dart';
 
 export 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
@@ -171,6 +172,9 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// The controller for the [YandexSmartCaptcha] widget.
   final CaptchaController? controller;
 
+  /// Called when the CAPTCHA is loaded and ready.
+  final VoidCallback? onCaptchaLoaded;
+
   /// Called when the CAPTCHA challenge popup is shown.
   final VoidCallback? onChallengeShown;
 
@@ -194,6 +198,7 @@ class YandexSmartCaptcha extends StatefulWidget {
     required this.config,
     required this.onChallengeSolved,
     this.controller,
+    this.onCaptchaLoaded,
     this.onChallengeShown,
     this.onChallengeHidden,
     this.onNetworkError,
@@ -218,7 +223,6 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
   void initState() {
     super.initState();
 
-    // INIT SETTINGS
     _webViewSettings = InAppWebViewSettings(
       transparentBackground: true,
       useShouldOverrideUrlLoading: true,
@@ -226,7 +230,6 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
       allowsInlineMediaPlayback: true,
     );
 
-    // INIT CONFIG
     final CaptchaConfig(
       :clientKey,
       :alwaysShowChallenge,
@@ -254,7 +257,6 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
     );
     _webViewData = InAppWebViewInitialData(data: webCaptcha.html);
 
-    // INIT CONTROLLER
     _captchaController = widget.controller;
   }
 
@@ -305,36 +307,37 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
 
             controller
               ..addJavaScriptHandler(
-                  handlerName: networkErrorHandler,
+                  handlerName: CaptchaEvent.captchaLoaded.name,
                   callback: (args) {
-                    widget.onNetworkError?.call();
+                    _webCaptchaLoaded.value = true;
+                    widget.onCaptchaLoaded?.call();
                   })
               ..addJavaScriptHandler(
-                  handlerName: javaScriptErrorHandler,
-                  callback: (args) {
-                    widget.onJavaScriptError?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: challengeShownHandler,
+                  handlerName: CaptchaEvent.challengeShown.name,
                   callback: (args) {
                     widget.onChallengeShown?.call();
                   })
               ..addJavaScriptHandler(
-                  handlerName: challengeHiddenHandler,
+                  handlerName: CaptchaEvent.challengeHidden.name,
                   callback: (args) {
                     widget.onChallengeHidden?.call();
                   })
               ..addJavaScriptHandler(
-                  handlerName: challengeSolvedHandler,
+                  handlerName: CaptchaEvent.networkError.name,
+                  callback: (args) {
+                    widget.onNetworkError?.call();
+                  })
+              ..addJavaScriptHandler(
+                  handlerName: CaptchaEvent.javaScriptError.name,
+                  callback: (args) {
+                    widget.onJavaScriptError?.call();
+                  })
+              ..addJavaScriptHandler(
+                  handlerName: CaptchaEvent.challengeSolved.name,
                   callback: (args) {
                     var token = args.firstOrNull?.toString();
                     token = token == 'null' ? null : token;
                     widget.onChallengeSolved(token);
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: captchaLoadedHandler,
-                  callback: (args) {
-                    _webCaptchaLoaded.value = true;
                   });
           },
         ),

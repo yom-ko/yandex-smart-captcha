@@ -1,11 +1,6 @@
-// https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#methods
+import 'dart:convert';
 
-const networkErrorHandler = 'onNetworkError';
-const javaScriptErrorHandler = 'onJavaScriptError';
-const challengeShownHandler = 'onChallengeShown';
-const challengeHiddenHandler = 'onChallengeHidden';
-const captchaLoadedHandler = 'onCaptchaLoaded';
-const challengeSolvedHandler = 'onChallengeSolved';
+import 'captcha_event.dart';
 
 final class WebSmartCaptcha {
   final String _clientKey;
@@ -42,6 +37,16 @@ final class WebSmartCaptcha {
         _initialContentScale = initialContentScale,
         _userScalableContent = userScalableContent,
         _maximumContentScale = maximumContentScale {
+    final eventsJson = jsonEncode(
+      CaptchaEvent.values
+          .where((e) => e.subscribable)
+          .map((e) => {
+                'id': e.id,
+                'name': e.name,
+              })
+          .toList(),
+    );
+
     html = '''
 <!doctype html>
 <html lang="$_language">
@@ -56,51 +61,52 @@ final class WebSmartCaptcha {
   maximum-scale=$_maximumContentScale"
     />
     <title></title>
+    <script>
+      function onLoadFunction() {
+        if (!window.smartCaptcha) {
+          window.flutter_inappwebview.callHandler(
+            "${CaptchaEvent.networkError.name}",
+          );
+          return;
+        }
+
+        function resultCallback(token) {
+          window.flutter_inappwebview.callHandler(
+            "${CaptchaEvent.challengeSolved.name}",
+            token,
+          );
+        }
+
+        const widgetId = window.smartCaptcha.render("captcha-container", {
+          sitekey: "$_clientKey",
+          test: $_alwaysShowChallenge,
+          hl: "$_language",
+          invisible: $_invisibleMode,
+          hideShield: $_hideDPNBadge,
+          shieldPosition: "$_dpnBadgePosition",
+          webview: $_webViewMode,
+          callback: resultCallback,
+        });
+
+        const events = $eventsJson;
+        events.forEach(function (e) {
+          window.smartCaptcha.subscribe(widgetId, e.id, function () {
+            window.flutter_inappwebview.callHandler(e.name);
+          });
+        });
+
+        window.flutter_inappwebview.callHandler(
+          "${CaptchaEvent.captchaLoaded.name}",
+        );
+      }
+    </script>
     <script
       src="https://smartcaptcha.cloud.yandex.ru/captcha.js?render=onload&onload=onLoadFunction"
       defer
     ></script>
   </head>
   <body>
-    <script>
-      function onLoadFunction() {
-        if (window.smartCaptcha) {
-          const widgetId = window.smartCaptcha.render("captcha-container", {
-            sitekey: "$_clientKey",
-            test: $_alwaysShowChallenge,
-            hl: "$_language",
-            invisible: $_invisibleMode,
-            hideShield: $_hideDPNBadge,
-            shieldPosition: "$_dpnBadgePosition",
-            webview: $_webViewMode,
-            callback: resultCallback,
-          });
-
-          window.smartCaptcha.subscribe(widgetId, "network-error", () => {
-            window.flutter_inappwebview.callHandler($networkErrorHandler);
-          });
-          window.smartCaptcha.subscribe(widgetId, "javascript-error", () => {
-            window.flutter_inappwebview.callHandler("$javaScriptErrorHandler");
-          });
-          window.smartCaptcha.subscribe(widgetId, "challenge-visible", () => {
-            window.flutter_inappwebview.callHandler("$challengeShownHandler");
-          });
-          window.smartCaptcha.subscribe(widgetId, "challenge-hidden", () => {
-            window.flutter_inappwebview.callHandler("$challengeHiddenHandler");
-          });
-          window.flutter_inappwebview.callHandler("$captchaLoadedHandler");
-        } else {
-          window.flutter_inappwebview.callHandler("$networkErrorHandler");
-        }
-      }
-      function resultCallback(token) {
-        window.flutter_inappwebview.callHandler(
-          "$challengeSolvedHandler",
-          token,
-        );
-      }
-    </script>
-    <div id="captcha-container" style="height:100px"></div>
+    <div id="captcha-container" style="height: 100px"></div>
   </body>
 </html>
 ''';
