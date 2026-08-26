@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'captcha_event.dart';
 
+const widgetIdProp = 'wscWidgetId';
+
 final class WebSmartCaptcha {
   final String _clientKey;
   final bool _alwaysShowChallenge;
@@ -37,6 +39,7 @@ final class WebSmartCaptcha {
         _initialContentScale = initialContentScale,
         _userScalableContent = userScalableContent,
         _maximumContentScale = maximumContentScale {
+    const containerId = 'smart-captcha-container';
     final eventsJson = jsonEncode(
       CaptchaEvent.values
           .where((e) => e.subscribable)
@@ -77,7 +80,7 @@ final class WebSmartCaptcha {
           );
         }
 
-        const widgetId = window.smartCaptcha.render("captcha-container", {
+        const widgetId = window.smartCaptcha.render("$containerId", {
           sitekey: "$_clientKey",
           test: $_alwaysShowChallenge,
           hl: "$_language",
@@ -88,6 +91,7 @@ final class WebSmartCaptcha {
           callback: resultCallback,
         });
 
+        window.$widgetIdProp = widgetId;
         const events = $eventsJson;
         events.forEach(function (e) {
           window.smartCaptcha.subscribe(widgetId, e.id, function () {
@@ -106,7 +110,7 @@ final class WebSmartCaptcha {
     ></script>
   </head>
   <body>
-    <div id="captcha-container" style="height: 100px"></div>
+    <div id="$containerId" style="height:100px"></div>
   </body>
 </html>
 ''';

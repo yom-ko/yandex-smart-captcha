@@ -21,12 +21,13 @@ enum CaptchaEvent {
   /// Emitted when the captcha challenge is solved successfully.
   ///
   /// According to the documentation, the `success` event can be subscribed to,
-  /// but it doesn't work as expected, so we emit it in the callback instead.
+  /// but it doesn't work in reality, so we emit it manually in the `callback` function.
   challengeSolved('success', subscribable: false);
 
   const CaptchaEvent(this.id, {this.subscribable = true});
 
   /// Event identifier used with SmartCaptcha's native `subscribe` method.
+  /// If the event is not subscribable, this identifier is not actually used.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe.
   final String id;

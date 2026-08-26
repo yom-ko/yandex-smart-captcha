@@ -37,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     _config = const CaptchaConfig(
       clientKey: clientKey,
       alwaysShowChallenge: true,
@@ -52,7 +53,7 @@ class _HomePageState extends State<HomePage> {
     );
     _controller = CaptchaController()
       ..setReadyCallback(() {
-        debugPrint('call: SmartCaptcha controller is ready');
+        debugPrint('called: readyCallback – SmartCaptcha controller is ready');
       });
   }
 
@@ -74,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 onNavigationRequest: (url) {
-                  debugPrint('call: onNavigationRequest $url');
+                  debugPrint('called: onNavigationRequest $url');
                   if (url.contains('cloud.yandex')) {
                     // Block the navigation request when the user
                     // clicks on the 'SmartCaptcha by Yandex Cloud' link.

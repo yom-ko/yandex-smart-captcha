@@ -4,8 +4,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'src/captcha_event.dart';
 import 'src/web_smart_captcha.dart';
 
-export 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
-
 /// The supported languages for the Web SmartCaptcha widget UI.
 enum CaptchaLanguage {
   /// Russian
@@ -136,14 +134,16 @@ final class CaptchaController {
   /// during events like when the user clicks the submit button on a form.
   Future<dynamic> execute() async {
     return _inAppWebViewController?.evaluateJavascript(
-        source: 'window.smartCaptcha.execute()');
+      source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
+    );
   }
 
   /// Removes the Web SmartCaptcha JavaScript widgets hosted in the WebView,
   /// along with any listeners they create.
   Future<dynamic> destroy() async {
     return _inAppWebViewController?.evaluateJavascript(
-        source: 'window.smartCaptcha.destroy()');
+      source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
+    );
   }
 
   /// Sets a callback to be invoked when the underlying WebView controller is ready.
@@ -166,7 +166,7 @@ class YandexSmartCaptcha extends StatefulWidget {
 
   /// Called when the user successfully solves a CAPTCHA challenge. The callback usually receives
   /// a token string as an argument. WARNING: In very rare cases, if something goes completely wrong,
-  /// the token may be `null`.
+  /// the passed value may be `null`.
   final void Function(String? token) onChallengeSolved;
 
   /// The controller for the [YandexSmartCaptcha] widget.
@@ -187,8 +187,8 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when a JavaScript error is encountered.
   final VoidCallback? onJavaScriptError;
 
-  /// Called when a navigation request is made in the underlying WebView. Return `false` from the callback
-  /// to block the request; otherwise, return `true` to allow it.
+  /// Called when a navigation request is made in the underlying WebView. Return `false`
+  /// from the callback to block the request; otherwise, return `true` to allow it.
   final bool Function(String url)? onNavigationRequest;
 
   /// A widget to display while the Web SmartCaptcha is loading.
