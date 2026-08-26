@@ -54,8 +54,10 @@ final class WebCaptcha {
   user-scalable=$_userScalableContent,
   maximum-scale=$_maximumContentScale" />
   <title></title>
-  <script src="https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=onLoadFunction"
-    defer></script>
+  <script
+    src="https://smartcaptcha.cloud.yandex.ru/captcha.js?render=onload&onload=onLoadFunction"
+    defer
+  ></script>
 </head>
 
 <body>
