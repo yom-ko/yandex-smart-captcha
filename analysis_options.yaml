@@ -187,8 +187,8 @@ analyzer:
     todo: ignore
     sized_box_for_whitespace: ignore
   exclude:
-    - "**/*.g.dart"
-    - "**/*.freezed.dart"
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
     - test/.test_coverage.dart
     - lib/firebase_options.dart
     - build/**
@@ -198,5 +198,3 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
-  plugins:
-    - dart_enum_to_string_check

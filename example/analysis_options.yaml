@@ -199,5 +199,3 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
-  plugins:
-    - dart_enum_to_string_check
