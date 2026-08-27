@@ -6,39 +6,39 @@ const widgetIdProp = 'wscWidgetId';
 
 final class WebSmartCaptcha {
   final String _clientKey;
-  final bool _alwaysShowChallenge;
   final String _language;
-  final bool _invisibleMode;
-  final bool _hideDPNBadge;
-  final String _dpnBadgePosition;
-  final bool _webViewMode;
-  final double _initialContentScale;
-  final String _userScalableContent;
-  final double _maximumContentScale;
+  final bool _alwaysShowChallenge;
+  final bool _useInvisibleMode;
+  final String _badgePosition;
+  final bool _hideBadge;
+  final double _initialScale;
+  final String _allowUserScaling;
+  final double _maximumScale;
+  final bool _useWebViewMode;
 
   late final String html;
 
   WebSmartCaptcha({
     required String clientKey,
-    required bool alwaysShowChallenge,
     required String language,
-    required bool invisibleMode,
-    required bool hideDPNBadge,
-    required String dpnBadgePosition,
-    required bool webViewMode,
-    required double initialContentScale,
-    required String userScalableContent,
-    required double maximumContentScale,
+    required bool alwaysShowChallenge,
+    required bool useInvisibleMode,
+    required String badgePosition,
+    required bool hideBadge,
+    required double initialScale,
+    required String allowUserScaling,
+    required double maximumScale,
+    required bool useWebViewMode,
   })  : _clientKey = clientKey,
-        _alwaysShowChallenge = alwaysShowChallenge,
         _language = language,
-        _invisibleMode = invisibleMode,
-        _hideDPNBadge = hideDPNBadge,
-        _dpnBadgePosition = dpnBadgePosition,
-        _webViewMode = webViewMode,
-        _initialContentScale = initialContentScale,
-        _userScalableContent = userScalableContent,
-        _maximumContentScale = maximumContentScale {
+        _alwaysShowChallenge = alwaysShowChallenge,
+        _useInvisibleMode = useInvisibleMode,
+        _badgePosition = badgePosition,
+        _hideBadge = hideBadge,
+        _initialScale = initialScale,
+        _allowUserScaling = allowUserScaling,
+        _maximumScale = maximumScale,
+        _useWebViewMode = useWebViewMode {
     const containerId = 'smart-captcha-container';
     final eventsJson = jsonEncode(
       CaptchaEvent.values
@@ -59,9 +59,9 @@ final class WebSmartCaptcha {
       name="viewport"
       content="
   width=device-width,
-  initial-scale=$_initialContentScale,
-  user-scalable=$_userScalableContent,
-  maximum-scale=$_maximumContentScale"
+  initial-scale=$_initialScale,
+  user-scalable=$_allowUserScaling,
+  maximum-scale=$_maximumScale"
     />
     <title></title>
     <script>
@@ -82,12 +82,12 @@ final class WebSmartCaptcha {
 
         const widgetId = window.smartCaptcha.render("$containerId", {
           sitekey: "$_clientKey",
-          test: $_alwaysShowChallenge,
           hl: "$_language",
-          invisible: $_invisibleMode,
-          hideShield: $_hideDPNBadge,
-          shieldPosition: "$_dpnBadgePosition",
-          webview: $_webViewMode,
+          test: $_alwaysShowChallenge,
+          invisible: $_useInvisibleMode,
+          shieldPosition: "$_badgePosition",
+          hideShield: $_hideBadge,
+          webview: $_useWebViewMode,
           callback: resultCallback,
         });
 

@@ -40,16 +40,16 @@ class _HomePageState extends State<HomePage> {
 
     _config = const CaptchaConfig(
       clientKey: clientKey,
-      alwaysShowChallenge: true,
       language: CaptchaLanguage.en,
-      // invisibleMode: false,
-      // hideDPNBadge: false,
-      // dpnBadgePosition: DPNBadgePosition.bottomRight,
-      // webViewMode: true,
-      // initialContentScale: 1.0,
-      // userScalableContent: false,
-      // maximumContentScale: 3.0,
+      alwaysShowChallenge: true,
+      // useInvisibleMode: false,
+      // badgePosition: DPNBadgePosition.bottomRight,
+      // hideBadge: false,
+      // initialScale: 1.0,
+      // allowUserScaling: false,
+      // maximumScale: 3.0,
       backgroundColor: Colors.lightBlue,
+      // useWebViewMode: true,
     );
     _controller = CaptchaController()
       ..setReadyCallback(() {
