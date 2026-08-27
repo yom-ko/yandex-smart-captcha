@@ -1,4 +1,16 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 5.0.0
+- **BREAKING CHANGE**: API overhaul: rename several `CaptchaConfig` options for better declarativeness and consistency:
+  - `invisibleMode` → `useInvisibleMode`
+  - `dpnBadgePosition` → `badgePosition`
+  - `hideDPNBadge` → `hideBadge`
+  - `initialContentScale` → `initialScale`
+  - `userScalableContent` → `allowUserScaling`
+  - `maximumContentScale` → `maximumScale`
+  - `webViewMode` → `useWebViewMode`
+- Refactor and optimize core package logic.
+- Reduce package download size to ~40 KB by excluding unnecessary assets and example binaries.
+
 ## 4.0.0
 - **BREAKING CHANGE**: Bump minimum Dart SDK constraint to `>=3.5.0` and Flutter to `>=3.24.0`.
 - Clean and improve Example

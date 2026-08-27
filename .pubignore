@@ -1,0 +1,28 @@
+# Exclude native platform folders and local build artifacts in example/
+example/ios/
+example/android/
+example/web/
+example/macos/
+example/windows/
+example/linux/
+example/build/
+example/integration_test/
+example/test/
+example/.vscode/
+example/.dart_tool/
+example/analysis_options.yaml
+example/devtools_options.yaml
+
+# Exclude screenshot assets except the main search preview
+assets/images/*
+!assets/images/screen_2.webp
+
+# Exclude local environment variables, IDE settings, and build files
+.env
+.env.example
+.vscode/
+.dart_tool/
+.metadata
+.flutter-plugins-dependencies
+devtools_options.yaml
+integration_test/
