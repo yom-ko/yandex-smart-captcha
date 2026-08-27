@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 5.0.1
+- Refactor: Improve code organization for better maintainability.
+
 ## 5.0.0
 - **BREAKING CHANGE**: API overhaul: rename several `CaptchaConfig` options for better declarativeness and consistency:
   - `invisibleMode` → `useInvisibleMode`
