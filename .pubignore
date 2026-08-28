@@ -7,9 +7,9 @@ example/windows/
 example/linux/
 example/build/
 example/integration_test/
-example/test/
-example/.vscode/
 example/.dart_tool/
+example/.vscode/
+example/.idea/
 example/analysis_options.yaml
 example/devtools_options.yaml
 
@@ -18,11 +18,13 @@ assets/images/*
 !assets/images/screen_2.webp
 
 # Exclude local environment variables, IDE settings, and build files
+build/
+integration_test/
+.dart_tool/
+.vscode/
+.idea/
 .env
 .env.example
-.vscode/
-.dart_tool/
 .metadata
 .flutter-plugins-dependencies
 devtools_options.yaml
-integration_test/

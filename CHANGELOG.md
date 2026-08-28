@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 5.0.2
+- Tests: Add unit tests for core package logic.
+
 ## 5.0.1
 - Refactor: Improve code organization for better maintainability.
 
