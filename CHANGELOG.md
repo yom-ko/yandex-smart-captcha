@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 5.0.3
+- Tests: Improve example app tests.
+
 ## 5.0.2
 - Tests: Add unit tests for core package logic.
 
