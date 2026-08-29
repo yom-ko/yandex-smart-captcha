@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 5.0.4
+- Improve example app.
+
 ## 5.0.3
 - Tests: Improve example app tests.
 
