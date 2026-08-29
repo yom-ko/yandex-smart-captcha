@@ -31,30 +31,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late final CaptchaConfig _config;
-  late final CaptchaController _controller;
+  final _isLoaded = ValueNotifier<bool>(false);
+
+  final _config = const CaptchaConfig(
+    clientKey: clientKey,
+    language: CaptchaLanguage.en,
+    alwaysShowChallenge: true,
+    backgroundColor: Colors.lightBlue,
+  );
+  final _controller = CaptchaController();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _isLoaded.dispose();
 
-    _config = const CaptchaConfig(
-      clientKey: clientKey,
-      language: CaptchaLanguage.en,
-      alwaysShowChallenge: true,
-      // useInvisibleMode: false,
-      // badgePosition: DPNBadgePosition.bottomRight,
-      // hideBadge: false,
-      // initialScale: 1.0,
-      // allowUserScaling: false,
-      // maximumScale: 3.0,
-      backgroundColor: Colors.lightBlue,
-      // useWebViewMode: true,
-    );
-    _controller = CaptchaController()
-      ..setReadyCallback(() {
-        debugPrint('called: readyCallback – SmartCaptcha controller is ready');
-      });
+    super.dispose();
   }
 
   @override
@@ -67,13 +58,14 @@ class _HomePageState extends State<HomePage> {
               child: YandexSmartCaptcha(
                 config: _config,
                 controller: _controller,
-                loadingIndicator: const Center(
-                  child: SizedBox(
-                    height: 50,
-                    width: 50,
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
+                loadingIndicator:
+                    // You fully control the loading indicator layout.
+                    const Center(
+                      child: SizedBox.square(
+                        dimension: 50,
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
                 onNavigationRequest: (url) {
                   debugPrint('called: onNavigationRequest $url');
                   if (url.contains('cloud.yandex')) {
@@ -85,6 +77,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 onCaptchaLoaded: () {
                   debugPrint('called: onCaptchaLoaded');
+                  _isLoaded.value = true;
                 },
                 onChallengeShown: () {
                   debugPrint('called: onChallengeShown');
@@ -105,26 +98,21 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_controller.isReady) {
-                        _controller.execute();
-                      }
-                    },
-                    child: const Text('Execute'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_controller.isReady) {
-                        _controller.destroy();
-                      }
-                    },
-                    child: const Text('Destroy'),
-                  ),
-                ],
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _isLoaded,
+                builder: (_, isLoaded, child) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                      onPressed: isLoaded ? _controller.execute : null,
+                      child: const Text('Execute'),
+                    ),
+                    ElevatedButton(
+                      onPressed: isLoaded ? _controller.destroy : null,
+                      child: const Text('Destroy'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
