@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
 // Find your key in the Yandex Cloud admin panel.
-const clientKey = String.fromEnvironment('CLIENT_KEY');
+const clientKey = String.fromEnvironment(
+  'CLIENT_KEY',
+  defaultValue: 'your-yandex-smartcaptcha-client-key',
+);
 
 void main() {
   runApp(const App());
@@ -14,9 +17,9 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Yandex SmartCaptcha',
+      title: 'Yandex SmartCaptcha Example',
       theme: ThemeData(useMaterial3: true),
-      home: const HomePage(title: 'Example'),
+      home: const HomePage(title: 'Yandex SmartCaptcha'),
     );
   }
 }
@@ -31,25 +34,35 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _isLoaded = ValueNotifier<bool>(false);
+  final _isReady = ValueNotifier<bool>(false);
+  final _controller = CaptchaController();
   final _config = const CaptchaConfig(
     clientKey: clientKey,
     language: CaptchaLanguage.en,
     alwaysShowChallenge: true,
     backgroundColor: Colors.lightBlue,
   );
-  final _controller = CaptchaController();
 
   @override
   void dispose() {
-    _isLoaded.dispose();
+    _isReady.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _onExecutePressed() async {
+    await _controller.execute();
+  }
+
+  Future<void> _onDestroyPressed() async {
+    await _controller.destroy();
+    _isReady.value = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text(widget.title), centerTitle: true),
       body: SafeArea(
         child: Column(
           children: [
@@ -66,17 +79,16 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                 onNavigationRequest: (url) {
-                  debugPrint('called: onNavigationRequest $url');
+                  debugPrint('called: onNavigationRequest: $url');
+                  // Block navigation when clicking external links (e.g. Terms / Privacy).
                   if (url.contains('cloud.yandex')) {
-                    // Block the navigation request when the user
-                    // clicks on the 'SmartCaptcha by Yandex Cloud' link.
                     return false;
                   }
                   return true;
                 },
                 onCaptchaReady: () {
                   debugPrint('called: onCaptchaReady');
-                  _isLoaded.value = true;
+                  _isReady.value = true;
                 },
                 onChallengeShown: () {
                   debugPrint('called: onChallengeShown');
@@ -96,19 +108,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(16),
               child: ValueListenableBuilder<bool>(
-                valueListenable: _isLoaded,
-                builder: (_, isLoaded, child) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                valueListenable: _isReady,
+                builder: (_, isReady, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
-                      onPressed: isLoaded ? _controller.execute : null,
-                      child: const Text('Execute'),
+                    ElevatedButton.icon(
+                      onPressed: isReady ? _onExecutePressed : null,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Execute'),
                     ),
-                    ElevatedButton(
-                      onPressed: isLoaded ? _controller.destroy : null,
-                      child: const Text('Destroy'),
+                    FilledButton.tonalIcon(
+                      onPressed: isReady ? _onDestroyPressed : null,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Destroy'),
                     ),
                   ],
                 ),

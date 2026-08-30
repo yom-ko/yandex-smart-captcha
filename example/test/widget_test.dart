@@ -19,7 +19,7 @@ void main() {
     expect(find.byType(YandexSmartCaptcha), findsOne);
 
     final buttonExecute = find.widgetWithText(ElevatedButton, 'Execute');
-    final buttonDestroy = find.widgetWithText(ElevatedButton, 'Destroy');
+    final buttonDestroy = find.widgetWithText(FilledButton, 'Destroy');
 
     expect(buttonExecute, findsOneWidget);
     expect(buttonDestroy, findsOneWidget);
