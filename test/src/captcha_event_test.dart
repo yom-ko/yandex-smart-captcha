@@ -10,8 +10,8 @@ void main() {
     });
 
     group('ids', () {
-      test('captchaLoaded has id "captcha-loaded"', () {
-        expect(CaptchaEvent.captchaLoaded.id, equals('captcha-loaded'));
+      test('captchaReady has id "captcha-ready"', () {
+        expect(CaptchaEvent.captchaReady.id, equals('captcha-ready'));
       });
 
       test('challengeShown has id "challenge-visible"', () {
@@ -46,8 +46,8 @@ void main() {
     });
 
     group('subscribable', () {
-      test('captchaLoaded is not subscribable', () {
-        expect(CaptchaEvent.captchaLoaded.subscribable, isFalse);
+      test('captchaReady is not subscribable', () {
+        expect(CaptchaEvent.captchaReady.subscribable, isFalse);
       });
 
       test('challengeSolved is not subscribable', () {

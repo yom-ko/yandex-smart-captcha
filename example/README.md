@@ -1,4 +1,3 @@
-
 # Example app
 
 This is a simple app demonstrating the usage of the Yandex SmartCaptcha package.

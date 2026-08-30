@@ -32,7 +32,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _isLoaded = ValueNotifier<bool>(false);
-
   final _config = const CaptchaConfig(
     clientKey: clientKey,
     language: CaptchaLanguage.en,
@@ -75,8 +74,8 @@ class _HomePageState extends State<HomePage> {
                   }
                   return true;
                 },
-                onCaptchaLoaded: () {
-                  debugPrint('called: onCaptchaLoaded');
+                onCaptchaReady: () {
+                  debugPrint('called: onCaptchaReady');
                   _isLoaded.value = true;
                 },
                 onChallengeShown: () {

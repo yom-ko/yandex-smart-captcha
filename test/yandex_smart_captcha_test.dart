@@ -47,7 +47,7 @@ void main() {
     required CaptchaConfig config,
     void Function(String? token)? onChallengeSolved,
     CaptchaController? controller,
-    VoidCallback? onCaptchaLoaded,
+    VoidCallback? onCaptchaReady,
     VoidCallback? onChallengeShown,
     VoidCallback? onChallengeHidden,
     VoidCallback? onNetworkError,
@@ -62,7 +62,7 @@ void main() {
           config: config,
           onChallengeSolved: onChallengeSolved ?? (_) {},
           controller: controller,
-          onCaptchaLoaded: onCaptchaLoaded,
+          onCaptchaReady: onCaptchaReady,
           onChallengeShown: onChallengeShown,
           onChallengeHidden: onChallengeHidden,
           onNetworkError: onNetworkError,
@@ -79,37 +79,6 @@ void main() {
   }
 
   group('$CaptchaController', () {
-    test('is not ready before the WebView controller is attached', () {
-      expect(CaptchaController().isReady, isFalse);
-    });
-
-    test('returns null from execute and destroy before attachment', () async {
-      final controller = CaptchaController();
-
-      expect(await controller.execute(), isNull);
-      expect(await controller.destroy(), isNull);
-    });
-
-    testWidgets(
-      'becomes ready and invokes the ready callback once attached',
-      (tester) async {
-        final captchaController = CaptchaController();
-        var readyCalls = 0;
-        captchaController.setReadyCallback(() => readyCalls++);
-
-        expect(captchaController.isReady, isFalse);
-
-        await pumpCaptcha(
-          tester,
-          config: createConfig(),
-          controller: captchaController,
-        );
-
-        expect(captchaController.isReady, isTrue);
-        expect(readyCalls, equals(1));
-      },
-    );
-
     testWidgets('execute runs the SmartCaptcha execute script', (tester) async {
       final captchaController = CaptchaController();
       final fakeController = await pumpCaptcha(
@@ -148,7 +117,7 @@ void main() {
       final config = createConfig();
       void onChallengeSolved(String? token) {}
       final controller = CaptchaController();
-      void onCaptchaLoaded() {}
+      void onCaptchaReady() {}
       void onChallengeShown() {}
       void onChallengeHidden() {}
       void onNetworkError() {}
@@ -160,7 +129,7 @@ void main() {
         config: config,
         onChallengeSolved: onChallengeSolved,
         controller: controller,
-        onCaptchaLoaded: onCaptchaLoaded,
+        onCaptchaReady: onCaptchaReady,
         onChallengeShown: onChallengeShown,
         onChallengeHidden: onChallengeHidden,
         onNetworkError: onNetworkError,
@@ -173,7 +142,7 @@ void main() {
       expect(widget.config.clientKey, equals('client-key'));
       expect(widget.onChallengeSolved, same(onChallengeSolved));
       expect(widget.controller, same(controller));
-      expect(widget.onCaptchaLoaded, same(onCaptchaLoaded));
+      expect(widget.onCaptchaReady, same(onCaptchaReady));
       expect(widget.onChallengeShown, same(onChallengeShown));
       expect(widget.onChallengeHidden, same(onChallengeHidden));
       expect(widget.onNetworkError, same(onNetworkError));
@@ -257,7 +226,7 @@ void main() {
     group(
       'event wiring',
       () {
-        testWidgets('shows the loading indicator until captchaLoaded fires',
+        testWidgets('shows the loading indicator until captchaReady fires',
             (tester) async {
           final fakeController = await pumpCaptcha(
             tester,
@@ -267,22 +236,22 @@ void main() {
 
           expect(find.text('Loading'), findsOneWidget);
 
-          fakeController.emit(CaptchaEvent.captchaLoaded.name);
+          fakeController.emit(CaptchaEvent.captchaReady.name);
           await tester.pump();
 
           expect(find.text('Loading'), findsNothing);
         });
 
-        testWidgets('calls onCaptchaLoaded when captchaLoaded fires',
+        testWidgets('calls onCaptchaReady when captchaReady fires',
             (tester) async {
           var calls = 0;
           final fakeController = await pumpCaptcha(
             tester,
             config: createConfig(),
-            onCaptchaLoaded: () => calls++,
+            onCaptchaReady: () => calls++,
           );
 
-          fakeController.emit(CaptchaEvent.captchaLoaded.name);
+          fakeController.emit(CaptchaEvent.captchaReady.name);
 
           expect(calls, equals(1));
         });

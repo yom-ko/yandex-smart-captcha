@@ -100,7 +100,7 @@ final class WebSmartCaptcha {
         });
 
         window.flutter_inappwebview.callHandler(
-          "${CaptchaEvent.captchaLoaded.name}",
+          "${CaptchaEvent.captchaReady.name}",
         );
       }
     </script>

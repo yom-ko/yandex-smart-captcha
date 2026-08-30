@@ -1,39 +1,42 @@
-/// Events related to the Yandex SmartCaptcha lifecycle.
-enum CaptchaEvent {
-  /// Emitted when the captcha is loaded successfully.
-  captchaLoaded('captcha-loaded', subscribable: false),
+import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
 
-  /// Emitted when the captcha challenge is shown.
+/// Lifecycle events emitted by [YandexSmartCaptcha].
+enum CaptchaEvent {
+  /// Emitted when the CAPTCHA is fully loaded and initialized.
+  captchaReady('captcha-ready', subscribable: false),
+
+  /// Emitted when the CAPTCHA challenge popup becomes visible.
   challengeShown('challenge-visible'),
 
-  /// Emitted when the captcha challenge is hidden.
+  /// Emitted when the CAPTCHA challenge popup is hidden or dismissed.
   challengeHidden('challenge-hidden'),
 
-  /// Emitted when a network error occurs.
+  /// Emitted when a network error occurs while loading or executing the CAPTCHA.
   networkError('network-error'),
 
-  /// Emitted when a JavaScript error occurs.
+  /// Emitted when an uncaught JavaScript error occurs inside the CAPTCHA WebView.
   javaScriptError('javascript-error'),
 
-  /// Emitted when the captcha token expires or is invalidated.
+  /// Emitted when the CAPTCHA token expires or is invalidated.
   tokenExpired('token-expired'),
 
-  /// Emitted when the captcha challenge is solved successfully.
+  /// Emitted when the user successfully solves a CAPTCHA challenge.
   ///
-  /// According to the documentation, the `success` event can be subscribed to,
-  /// but it doesn't work in reality, so we emit it manually in the `callback` function.
+  /// Note: Although Yandex SmartCaptcha docs list the `success` event as subscribable,
+  /// it is not dispatched reliably, so it is handled manually via the `callback` function.
   challengeSolved('success', subscribable: false);
 
   const CaptchaEvent(this.id, {this.subscribable = true});
 
-  /// Event identifier used with SmartCaptcha's native `subscribe` method.
-  /// If the event is not subscribable, this identifier is not actually used.
+  /// The event identifier passed to SmartCaptcha's native `subscribe` method.
   ///
-  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe.
+  /// If [subscribable] is `false`, this value is not registered with the JS bridge.
+  ///
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   final String id;
 
-  /// Whether this event is registered with SmartCaptcha's native `subscribe` method.
+  /// Whether this event is registered via SmartCaptcha's native `subscribe` method.
   ///
-  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe.
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   final bool subscribable;
 }

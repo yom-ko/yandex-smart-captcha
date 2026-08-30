@@ -120,11 +120,11 @@ void main() {
         expect(html, contains('token,'));
       });
 
-      test('contains captchaLoaded event handler', () {
+      test('contains captchaReady event handler', () {
         final html = createCaptcha().html;
 
         expect(html, contains('window.flutter_inappwebview.callHandler('));
-        expect(html, contains('"${CaptchaEvent.captchaLoaded.name}"'));
+        expect(html, contains('"${CaptchaEvent.captchaReady.name}"'));
       });
 
       test('contains every subscribable event in JSON string', () {
