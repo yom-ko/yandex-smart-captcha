@@ -1,5 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
 
+## 6.0.1
+- Improve example app.
+
 ## 6.0.0
 - **BREAKING CHANGE**:
   - Remove `setReadyCallback()` method and `isReady` getter from `CaptchaController`. Use the `onCaptchaReady` callback on `YandexSmartCaptcha` widget instead.
