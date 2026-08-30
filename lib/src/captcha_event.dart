@@ -30,7 +30,7 @@ enum CaptchaEvent {
 
   /// The event identifier passed to SmartCaptcha's native `subscribe` method.
   ///
-  /// If [subscribable] is `false`, this value is not registered with the JS bridge.
+  /// If [subscribable] is `false`, this identifier is not passed to `subscribe`.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   final String id;
