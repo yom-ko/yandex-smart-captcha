@@ -3,10 +3,6 @@ import 'package:yandex_smart_captcha/src/dpn_badge_position.dart';
 
 void main() {
   group('$DPNBadgePosition', () {
-    test('contains exactly 6 supported positions', () {
-      expect(DPNBadgePosition.values, hasLength(6));
-    });
-
     test('contains all supported positions in documented order', () {
       expect(
         DPNBadgePosition.values,

@@ -39,6 +39,32 @@ void main() {
     );
   }
 
+  YandexSmartCaptcha captchaWidget({
+    required CaptchaConfig config,
+    void Function(String? token)? onChallengeSolved,
+    CaptchaController? controller,
+    VoidCallback? onCaptchaReady,
+    VoidCallback? onChallengeShown,
+    VoidCallback? onChallengeHidden,
+    VoidCallback? onNetworkError,
+    VoidCallback? onJavaScriptError,
+    bool Function(String url)? onNavigationRequest,
+    Widget? loadingIndicator,
+  }) {
+    return YandexSmartCaptcha(
+      config: config,
+      onChallengeSolved: onChallengeSolved ?? (_) {},
+      controller: controller,
+      onCaptchaReady: onCaptchaReady,
+      onChallengeShown: onChallengeShown,
+      onChallengeHidden: onChallengeHidden,
+      onNetworkError: onNetworkError,
+      onJavaScriptError: onJavaScriptError,
+      onNavigationRequest: onNavigationRequest,
+      loadingIndicator: loadingIndicator,
+    );
+  }
+
   /// Pumps a [YandexSmartCaptcha] widget and returns the
   /// [PlatformInAppWebViewControllerFake] backing its WebView,
   /// so tests can inspect the generated HTML, simulate JavaScript
@@ -59,9 +85,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: YandexSmartCaptcha(
+        child: captchaWidget(
           config: config,
-          onChallengeSolved: onChallengeSolved ?? (_) {},
+          onChallengeSolved: onChallengeSolved,
           controller: controller,
           onCaptchaReady: onCaptchaReady,
           onChallengeShown: onChallengeShown,
@@ -80,9 +106,16 @@ void main() {
   }
 
   group('$CaptchaController', () {
-    testWidgets('execute runs the SmartCaptcha execute script', (tester) async {
+    test('does nothing before it is attached to a WebView', () async {
       final captchaController = CaptchaController();
-      final fakeController = await pumpCaptcha(
+
+      await captchaController.execute();
+      await captchaController.destroy();
+    });
+
+    testWidgets('execute runs SmartCaptcha execute script', (tester) async {
+      final captchaController = CaptchaController();
+      final webViewController = await pumpCaptcha(
         tester,
         config: createConfig(),
         controller: captchaController,
@@ -91,14 +124,14 @@ void main() {
       await captchaController.execute();
 
       expect(
-        fakeController.evaluatedJavascriptSources,
+        webViewController.evaluatedJavascriptSources,
         contains('window.smartCaptcha.execute(window.$widgetIdProp)'),
       );
     });
 
-    testWidgets('destroy runs the SmartCaptcha destroy script', (tester) async {
+    testWidgets('destroy runs SmartCaptcha destroy script', (tester) async {
       final captchaController = CaptchaController();
-      final fakeController = await pumpCaptcha(
+      final webViewController = await pumpCaptcha(
         tester,
         config: createConfig(),
         controller: captchaController,
@@ -107,10 +140,64 @@ void main() {
       await captchaController.destroy();
 
       expect(
-        fakeController.evaluatedJavascriptSources,
+        webViewController.evaluatedJavascriptSources,
         contains('window.smartCaptcha.destroy(window.$widgetIdProp)'),
       );
     });
+
+    testWidgets('moves WebView control to a replacement WebView controller',
+        (tester) async {
+      final oldController = CaptchaController();
+      final newController = CaptchaController();
+      final webViewController = await pumpCaptcha(
+        tester,
+        config: createConfig(),
+        controller: oldController,
+      );
+      await tester.pump();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: captchaWidget(
+            config: createConfig(),
+            controller: newController,
+          ),
+        ),
+      );
+      final replacementWebView =
+          tester.widget<InAppWebView>(find.byType(InAppWebView));
+      final replacementWebViewController =
+          (replacementWebView.platform as PlatformInAppWebViewWidgetFake)
+              .controller;
+
+      await oldController.execute();
+      expect(webViewController.evaluatedJavascriptSources, isEmpty);
+
+      await newController.execute();
+      expect(
+        replacementWebViewController.evaluatedJavascriptSources,
+        equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
+      );
+    });
+
+    testWidgets(
+      'detaches its WebView controller when disposed',
+      (tester) async {
+        final captchaController = CaptchaController();
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          controller: captchaController,
+        );
+        await tester.pump();
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await captchaController.destroy();
+
+        expect(webViewController.evaluatedJavascriptSources, isEmpty);
+      },
+    );
   });
 
   group('$YandexSmartCaptcha', () {
@@ -224,142 +311,284 @@ void main() {
       });
     });
 
-    group(
-      'event wiring',
-      () {
-        testWidgets('shows the loading indicator until captchaReady fires',
-            (tester) async {
-          final fakeController = await pumpCaptcha(
+    group('WebView configuration', () {
+      testWidgets('uses the expected WebView settings', (tester) async {
+        await pumpCaptcha(tester, config: createConfig());
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final settings = webView.platform.params.initialSettings!;
+
+        expect(settings.transparentBackground, isTrue);
+        expect(settings.useShouldOverrideUrlLoading, isTrue);
+        expect(settings.mediaPlaybackRequiresUserGesture, isFalse);
+        expect(settings.allowsInlineMediaPlayback, isTrue);
+      });
+
+      testWidgets('grants every requested WebView permission', (tester) async {
+        final webViewController =
+            await pumpCaptcha(tester, config: createConfig());
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final request = PermissionRequest(
+          origin: WebUri('https://captcha.example'),
+          resources: [PermissionResourceType.CAMERA],
+        );
+        final response = await webView.platform.params.onPermissionRequest!(
+          InAppWebViewController.fromPlatform(platform: webViewController),
+          request,
+        );
+
+        expect(response?.action, PermissionResponseAction.GRANT);
+        expect(response?.resources, same(request.resources));
+      });
+
+      testWidgets('allows navigation by default', (tester) async {
+        final webViewController =
+            await pumpCaptcha(tester, config: createConfig());
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final policy = await webView.platform.params.shouldOverrideUrlLoading!(
+          InAppWebViewController.fromPlatform(platform: webViewController),
+          NavigationAction(
+            request: URLRequest(url: WebUri('https://captcha.example')),
+            isForMainFrame: true,
+          ),
+        );
+
+        expect(policy, NavigationActionPolicy.ALLOW);
+      });
+
+      testWidgets('uses the navigation callback decision and URL',
+          (tester) async {
+        String? requestedUrl;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onNavigationRequest: (url) {
+            requestedUrl = url;
+            return false;
+          },
+        );
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final policy = await webView.platform.params.shouldOverrideUrlLoading!(
+          InAppWebViewController.fromPlatform(platform: webViewController),
+          NavigationAction(
+            request: URLRequest(url: WebUri('https://captcha.example/path')),
+            isForMainFrame: true,
+          ),
+        );
+
+        expect(requestedUrl, 'https://captcha.example/path');
+        expect(policy, NavigationActionPolicy.CANCEL);
+      });
+
+      testWidgets('accepts JavaScript console messages', (tester) async {
+        final webViewController =
+            await pumpCaptcha(tester, config: createConfig());
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        webView.platform.params.onConsoleMessage!(
+          InAppWebViewController.fromPlatform(platform: webViewController),
+          ConsoleMessage(message: 'message'),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+    });
+
+    group('event wiring', () {
+      testWidgets('shows the loading indicator until captchaReady fires',
+          (tester) async {
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          loadingIndicator: const Text('Loading'),
+        );
+
+        expect(find.text('Loading'), findsOneWidget);
+
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+        await tester.pump();
+
+        expect(find.text('Loading'), findsNothing);
+      });
+
+      testWidgets(
+        'shows the loading indicator again when the WebView is recreated',
+        (tester) async {
+          final webViewController = await pumpCaptcha(
             tester,
             config: createConfig(),
             loadingIndicator: const Text('Loading'),
           );
-
-          expect(find.text('Loading'), findsOneWidget);
-
-          fakeController.emit(CaptchaEvent.captchaReady.name);
+          webViewController.emit(CaptchaEvent.captchaReady.name);
           await tester.pump();
 
           expect(find.text('Loading'), findsNothing);
-        });
 
-        testWidgets('calls onCaptchaReady when captchaReady fires',
-            (tester) async {
-          var calls = 0;
-          final fakeController = await pumpCaptcha(
-            tester,
-            config: createConfig(),
-            onCaptchaReady: () => calls++,
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: captchaWidget(
+                config: createConfig(),
+                loadingIndicator: const Text('Loading'),
+              ),
+            ),
           );
+          await tester.pump();
 
-          fakeController.emit(CaptchaEvent.captchaReady.name);
+          expect(find.text('Loading'), findsOneWidget);
+        },
+      );
 
-          expect(calls, equals(1));
-        });
-
-        testWidgets('calls onChallengeShown when challengeShown fires',
-            (tester) async {
-          var calls = 0;
-          final fakeController = await pumpCaptcha(
-            tester,
-            config: createConfig(),
-            onChallengeShown: () => calls++,
-          );
-
-          fakeController.emit(CaptchaEvent.challengeShown.name);
-
-          expect(calls, equals(1));
-        });
-
-        testWidgets('calls onChallengeHidden when challengeHidden fires',
-            (tester) async {
-          var calls = 0;
-          final fakeController = await pumpCaptcha(
-            tester,
-            config: createConfig(),
-            onChallengeHidden: () => calls++,
-          );
-
-          fakeController.emit(CaptchaEvent.challengeHidden.name);
-
-          expect(calls, equals(1));
-        });
-
-        testWidgets('calls onNetworkError when networkError fires',
-            (tester) async {
-          var calls = 0;
-          final fakeController = await pumpCaptcha(
-            tester,
-            config: createConfig(),
-            onNetworkError: () => calls++,
-          );
-
-          fakeController.emit(CaptchaEvent.networkError.name);
-
-          expect(calls, equals(1));
-        });
-
-        testWidgets('calls onJavaScriptError when javaScriptError fires',
-            (tester) async {
-          var calls = 0;
-          final fakeController = await pumpCaptcha(
-            tester,
-            config: createConfig(),
-            onJavaScriptError: () => calls++,
-          );
-
-          fakeController.emit(CaptchaEvent.javaScriptError.name);
-
-          expect(calls, equals(1));
-        });
-
-        testWidgets(
-          'calls onChallengeSolved with the token from challengeSolved',
+      testWidgets('calls onCaptchaReady when captchaReady fires',
           (tester) async {
-            String? receivedToken;
-            final fakeController = await pumpCaptcha(
-              tester,
-              config: createConfig(),
-              onChallengeSolved: (token) => receivedToken = token,
-            );
-
-            fakeController.emit(CaptchaEvent.challengeSolved.name, ['a-token']);
-
-            expect(receivedToken, equals('a-token'));
-          },
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onCaptchaReady: () => calls++,
         );
 
-        testWidgets(
-          'calls onChallengeSolved with null when the token is the string "null"',
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+
+        expect(calls, equals(1));
+      });
+
+      testWidgets(
+          'keeps the loading indicator hidden after repeated ready events',
           (tester) async {
-            String? receivedToken = 'not-null';
-            final fakeController = await pumpCaptcha(
-              tester,
-              config: createConfig(),
-              onChallengeSolved: (token) => receivedToken = token,
-            );
-
-            fakeController.emit(CaptchaEvent.challengeSolved.name, ['null']);
-
-            expect(receivedToken, isNull);
-          },
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          loadingIndicator: const Text('Loading'),
         );
 
-        testWidgets('calls onChallengeSolved with null when no token is passed',
-            (tester) async {
-          String? receivedToken = 'not-null';
-          final fakeController = await pumpCaptcha(
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+        await tester.pump();
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+        await tester.pump();
+
+        expect(find.text('Loading'), findsNothing);
+      });
+
+      testWidgets('calls onChallengeShown when challengeShown fires',
+          (tester) async {
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onChallengeShown: () => calls++,
+        );
+
+        webViewController.emit(CaptchaEvent.challengeShown.name);
+
+        expect(calls, equals(1));
+      });
+
+      testWidgets('calls onChallengeHidden when challengeHidden fires',
+          (tester) async {
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onChallengeHidden: () => calls++,
+        );
+
+        webViewController.emit(CaptchaEvent.challengeHidden.name);
+
+        expect(calls, equals(1));
+      });
+
+      testWidgets('calls onNetworkError when networkError fires',
+          (tester) async {
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onNetworkError: () => calls++,
+        );
+
+        webViewController.emit(CaptchaEvent.networkError.name);
+
+        expect(calls, equals(1));
+      });
+
+      testWidgets('calls onJavaScriptError when javaScriptError fires',
+          (tester) async {
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onJavaScriptError: () => calls++,
+        );
+
+        webViewController.emit(CaptchaEvent.javaScriptError.name);
+
+        expect(calls, equals(1));
+      });
+
+      testWidgets(
+        'calls onChallengeSolved with the token from challengeSolved',
+        (tester) async {
+          String? receivedToken;
+          final webViewController = await pumpCaptcha(
             tester,
             config: createConfig(),
             onChallengeSolved: (token) => receivedToken = token,
           );
 
-          fakeController.emit(CaptchaEvent.challengeSolved.name, []);
+          webViewController
+              .emit(CaptchaEvent.challengeSolved.name, ['a-token']);
+
+          expect(receivedToken, equals('a-token'));
+        },
+      );
+
+      testWidgets(
+        'calls onChallengeSolved with null when the token is the string "null"',
+        (tester) async {
+          String? receivedToken = 'not-null';
+          final webViewController = await pumpCaptcha(
+            tester,
+            config: createConfig(),
+            onChallengeSolved: (token) => receivedToken = token,
+          );
+
+          webViewController.emit(CaptchaEvent.challengeSolved.name, ['null']);
 
           expect(receivedToken, isNull);
-        });
-      },
-    );
+        },
+      );
+
+      testWidgets('calls onChallengeSolved with null when no token is passed',
+          (tester) async {
+        String? receivedToken = 'not-null';
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onChallengeSolved: (token) => receivedToken = token,
+        );
+
+        webViewController.emit(CaptchaEvent.challengeSolved.name, []);
+
+        expect(receivedToken, isNull);
+      });
+
+      testWidgets('stringifies a non-string challenge token', (tester) async {
+        String? receivedToken;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onChallengeSolved: (token) => receivedToken = token,
+        );
+
+        webViewController.emit(CaptchaEvent.challengeSolved.name, [42]);
+
+        expect(receivedToken, '42');
+      });
+    });
 
     group('rendering', () {
       testWidgets(

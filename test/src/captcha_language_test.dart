@@ -3,10 +3,6 @@ import 'package:yandex_smart_captcha/src/captcha_language.dart';
 
 void main() {
   group('$CaptchaLanguage', () {
-    test('contains exactly 8 supported languages', () {
-      expect(CaptchaLanguage.values, hasLength(8));
-    });
-
     test('contains all supported languages in documented order', () {
       expect(
         CaptchaLanguage.values,

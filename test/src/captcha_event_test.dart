@@ -3,76 +3,25 @@ import 'package:yandex_smart_captcha/src/captcha_event.dart';
 
 void main() {
   group('$CaptchaEvent', () {
-    group('values', () {
-      test('contains exactly 7 events', () {
-        expect(CaptchaEvent.values, hasLength(7));
-      });
+    test('defines the supported events and their SmartCaptcha contracts', () {
+      expect(
+        CaptchaEvent.values.map((e) => (e.name, e.id, e.subscribable)),
+        equals([
+          ('captchaReady', 'captcha-ready', false),
+          ('challengeShown', 'challenge-visible', true),
+          ('challengeHidden', 'challenge-hidden', true),
+          ('networkError', 'network-error', true),
+          ('javaScriptError', 'javascript-error', true),
+          ('tokenExpired', 'token-expired', true),
+          ('challengeSolved', 'success', false),
+        ]),
+      );
     });
 
-    group('ids', () {
-      test('captchaReady has id "captcha-ready"', () {
-        expect(CaptchaEvent.captchaReady.id, equals('captcha-ready'));
-      });
+    test('uses unique SmartCaptcha event identifiers', () {
+      final ids = CaptchaEvent.values.map((event) => event.id).toSet();
 
-      test('challengeShown has id "challenge-visible"', () {
-        expect(CaptchaEvent.challengeShown.id, equals('challenge-visible'));
-      });
-
-      test('challengeHidden has id "challenge-hidden"', () {
-        expect(CaptchaEvent.challengeHidden.id, equals('challenge-hidden'));
-      });
-
-      test('networkError has id "network-error"', () {
-        expect(CaptchaEvent.networkError.id, equals('network-error'));
-      });
-
-      test('javaScriptError has id "javascript-error"', () {
-        expect(CaptchaEvent.javaScriptError.id, equals('javascript-error'));
-      });
-
-      test('tokenExpired has id "token-expired"', () {
-        expect(CaptchaEvent.tokenExpired.id, equals('token-expired'));
-      });
-
-      test('challengeSolved has id "success"', () {
-        expect(CaptchaEvent.challengeSolved.id, equals('success'));
-      });
-
-      test('ids are unique across all events', () {
-        final ids = CaptchaEvent.values.map((e) => e.id);
-
-        expect(ids.toSet(), hasLength(CaptchaEvent.values.length));
-      });
-    });
-
-    group('subscribable', () {
-      test('captchaReady is not subscribable', () {
-        expect(CaptchaEvent.captchaReady.subscribable, isFalse);
-      });
-
-      test('challengeSolved is not subscribable', () {
-        expect(CaptchaEvent.challengeSolved.subscribable, isFalse);
-      });
-
-      test('challengeShown is subscribable', () {
-        expect(CaptchaEvent.challengeShown.subscribable, isTrue);
-      });
-
-      test('challengeHidden is subscribable', () {
-        expect(CaptchaEvent.challengeHidden.subscribable, isTrue);
-      });
-
-      test('networkError is subscribable', () {
-        expect(CaptchaEvent.networkError.subscribable, isTrue);
-      });
-
-      test('javaScriptError is subscribable', () {
-        expect(CaptchaEvent.javaScriptError.subscribable, isTrue);
-      });
-
-      test('tokenExpired is subscribable', () {
-        expect(CaptchaEvent.tokenExpired.subscribable, isTrue);
-      });
+      expect(ids, hasLength(CaptchaEvent.values.length));
     });
   });
 }

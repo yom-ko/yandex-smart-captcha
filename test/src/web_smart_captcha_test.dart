@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
 import 'package:yandex_smart_captcha/src/web_smart_captcha.dart';
@@ -27,6 +29,14 @@ void main() {
       maximumScale: maximumScale,
       useWebViewMode: useWebViewMode,
     );
+  }
+
+  List<Map<String, dynamic>> subscribedEventsFrom(String html) {
+    final match = RegExp(r'const events = (\[.*\]);').firstMatch(html);
+
+    expect(match, isNotNull);
+    return (jsonDecode(match!.group(1)!) as List<dynamic>)
+        .cast<Map<String, dynamic>>();
   }
 
   group('$WebSmartCaptcha', () {
@@ -95,21 +105,18 @@ void main() {
     });
 
     group('event wiring', () {
-      test('contains exactly 4 callHandler calls', () {
-        final html = createCaptcha().html;
-
-        expect(
-          'window.flutter_inappwebview.callHandler('.allMatches(html),
-          hasLength(4),
-        );
-      });
-
-      test('contains networkError event handler', () {
+      test('reports a missing SmartCaptcha script before rendering', () {
         final html = createCaptcha().html;
 
         expect(html, contains('if (!window.smartCaptcha)'));
         expect(html, contains('"${CaptchaEvent.networkError.name}"'));
         expect(html, contains('return;'));
+        expect(
+          html.indexOf('return;'),
+          lessThan(
+            html.indexOf('const widgetId = window.smartCaptcha.render('),
+          ),
+        );
       });
 
       test('contains challengeSolved event handler', () {
@@ -127,23 +134,18 @@ void main() {
         expect(html, contains('"${CaptchaEvent.captchaReady.name}"'));
       });
 
-      test('contains every subscribable event in JSON string', () {
+      test('subscribes to exactly the native SmartCaptcha events', () {
         final html = createCaptcha().html;
 
-        for (final event in CaptchaEvent.values.where((e) => e.subscribable)) {
-          expect(html, contains('"id":"${event.id}","name":"${event.name}"'));
-        }
-      });
-
-      test('does not contain callback-only events in JSON string', () {
-        final html = createCaptcha().html;
-
-        for (final event in CaptchaEvent.values.where((e) => !e.subscribable)) {
-          expect(
-            html,
-            isNot(contains('"id":"${event.id}","name":"${event.name}"')),
-          );
-        }
+        expect(
+          subscribedEventsFrom(html),
+          equals(
+            CaptchaEvent.values
+                .where((event) => event.subscribable)
+                .map((event) => {'id': event.id, 'name': event.name})
+                .toList(),
+          ),
+        );
       });
 
       test('renders and subscribes widget using configured container', () {
