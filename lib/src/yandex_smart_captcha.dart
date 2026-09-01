@@ -101,7 +101,7 @@ class YandexSmartCaptcha extends StatefulWidget {
 }
 
 class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
-  final _webCaptchaLoaded = ValueNotifier<bool>(false);
+  final _webCaptchaReady = ValueNotifier<bool>(false);
 
   final _webViewSettings = InAppWebViewSettings(
     transparentBackground: true,
@@ -162,7 +162,7 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
   @override
   void dispose() {
     widget.controller?._detachWebViewController();
-    _webCaptchaLoaded.dispose();
+    _webCaptchaReady.dispose();
 
     super.dispose();
   }
@@ -194,6 +194,7 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
             debugPrint('YandexSmartCaptcha JS console message: $message');
           },
           onWebViewCreated: (controller) {
+            _webCaptchaReady.value = false;
             _webViewController = controller;
             widget.controller?._attachWebViewController(controller);
 
@@ -201,7 +202,7 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
               ..addJavaScriptHandler(
                   handlerName: CaptchaEvent.captchaReady.name,
                   callback: (args) {
-                    _webCaptchaLoaded.value = true;
+                    _webCaptchaReady.value = true;
                     widget.onCaptchaReady?.call();
                   })
               ..addJavaScriptHandler(
@@ -235,10 +236,10 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
         ),
         if (widget.loadingIndicator != null)
           ValueListenableBuilder<bool>(
-            valueListenable: _webCaptchaLoaded,
+            valueListenable: _webCaptchaReady,
             child: widget.loadingIndicator,
-            builder: (_, loaded, child) =>
-                loaded ? const SizedBox.shrink() : child!,
+            builder: (_, ready, child) =>
+                ready ? const SizedBox.shrink() : child!,
           ),
       ],
     );
