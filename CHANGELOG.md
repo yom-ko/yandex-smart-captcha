@@ -1,4 +1,6 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 6.0.3
+- Tests: Add/improve unit tests for core package logic.
 
 ## 6.0.2
 - Remove `CaptchaEvent` from public API.
