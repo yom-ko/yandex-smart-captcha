@@ -24,8 +24,9 @@ final class CaptchaController {
 
   /// Removes the Web SmartCaptcha widget and its associated event listeners.
   ///
-  /// Calling [execute] or otherwise interacting with the controller after calling
-  /// this method will have no effect.
+  /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
+  /// Calling [execute] or otherwise interacting with the controller after calling this method
+  /// will have no effect.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#destroy
   Future<void> destroy() async {
