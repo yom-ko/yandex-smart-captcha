@@ -35,6 +35,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _isReady = ValueNotifier<bool>(false);
+
   final _controller = CaptchaController();
   final _config = const CaptchaConfig(
     clientKey: clientKey,
@@ -80,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                 onNavigationRequest: (url) {
                   debugPrint('called: onNavigationRequest: $url');
-                  // Block navigation when clicking external links (e.g. Terms / Privacy).
+                  // Block navigation when clicking external links (e.g. Terms/Privacy).
                   if (url.contains('cloud.yandex')) {
                     return false;
                   }
