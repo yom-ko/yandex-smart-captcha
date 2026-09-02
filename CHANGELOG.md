@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.0.0
+- **BREAKING CHANGE**: Reorganize parameters by layer:
+  - Move all web-level settings to `CaptchaConfig`.
+  - Move runtime, Flutter-level, and callback settings to `YandexSmartCaptcha`.
+
 ## 6.0.3
 - Tests: Add/improve unit tests for core package logic.
 
