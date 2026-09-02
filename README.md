@@ -27,7 +27,7 @@ YandexSmartCaptcha(
 )
 ```
 
-In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it's useful if you need to trigger a challenge popup programmatically, but that’s rare.
+In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it is useful if you need to trigger validation, reset the widget, or destroy it programmatically.
 
 ### CaptchaConfig parameters
 
@@ -73,6 +73,7 @@ Provide access to the Web SmartCaptcha's imperative methods.
 | Method      | Description                                                             |
 | :---------- | :---------------------------------------------------------------------- |
 | `execute()` | Starts user validation.                                                 |
+| `reset()`   | Resets the Web SmartCaptcha widget to its initial state.                |
 | `destroy()` | Removes the Web SmartCaptcha widget and its associated event listeners. |
 
 ## Screenshots

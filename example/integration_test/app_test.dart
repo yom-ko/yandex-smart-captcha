@@ -21,15 +21,20 @@ void main() {
 
     // Test the CaptchaController methods.
     final buttonExecute = $('Execute');
+    final buttonReset = $('Reset');
     final buttonDestroy = $('Destroy');
 
     expect(buttonExecute, findsOneWidget);
+    expect(buttonReset, findsOneWidget);
     expect(buttonDestroy, findsOneWidget);
 
     await buttonExecute.tap();
+    await $.pump(const Duration(seconds: 2));
 
+    await buttonReset.tap();
     await $.pump(const Duration(seconds: 2));
 
     await buttonDestroy.tap();
+    await $.pump(const Duration(seconds: 2));
   });
 }

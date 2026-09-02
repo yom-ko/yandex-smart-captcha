@@ -7,7 +7,8 @@ import 'web_smart_captcha.dart';
 
 /// A controller for [YandexSmartCaptcha].
 ///
-/// Provides programmatic control over the underlying Web SmartCaptcha instance.
+/// Provides programmatic control over the underlying Web SmartCaptcha instance
+/// by exposing its imperative methods.
 final class CaptchaController {
   InAppWebViewController? _webViewController;
 
@@ -19,6 +20,17 @@ final class CaptchaController {
   Future<void> execute() async {
     await _webViewController?.evaluateJavascript(
       source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
+    );
+  }
+
+  /// Resets the Web SmartCaptcha widget to its initial state.
+  ///
+  /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
+  ///
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#reset
+  Future<void> reset() async {
+    await _webViewController?.evaluateJavascript(
+      source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
     );
   }
 

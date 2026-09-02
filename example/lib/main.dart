@@ -35,6 +35,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _isReady = ValueNotifier<bool>(false);
+  final _isSolved = ValueNotifier<bool>(false);
 
   final _controller = CaptchaController();
   final _config = const CaptchaConfig(
@@ -45,6 +46,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _isSolved.dispose();
     _isReady.dispose();
 
     super.dispose();
@@ -54,8 +56,14 @@ class _HomePageState extends State<HomePage> {
     await _controller.execute();
   }
 
+  Future<void> _onResetPressed() async {
+    await _controller.reset();
+    _isSolved.value = false;
+  }
+
   Future<void> _onDestroyPressed() async {
     await _controller.destroy();
+    _isSolved.value = false;
     _isReady.value = false;
   }
 
@@ -105,6 +113,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 onChallengeSolved: (token) {
                   debugPrint('called: onChallengeSolved with token: $token');
+                  _isSolved.value = token != null;
                 },
               ),
             ),
@@ -119,6 +128,14 @@ class _HomePageState extends State<HomePage> {
                       onPressed: isReady ? _onExecutePressed : null,
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Execute'),
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isSolved,
+                      builder: (_, isSolved, _) => ElevatedButton.icon(
+                        onPressed: isSolved ? _onResetPressed : null,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset'),
+                      ),
                     ),
                     FilledButton.tonalIcon(
                       onPressed: isReady ? _onDestroyPressed : null,

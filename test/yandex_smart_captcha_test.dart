@@ -112,6 +112,7 @@ void main() {
       final captchaController = CaptchaController();
 
       await captchaController.execute();
+      await captchaController.reset();
       await captchaController.destroy();
     });
 
@@ -128,6 +129,22 @@ void main() {
       expect(
         webViewController.evaluatedJavascriptSources,
         contains('window.smartCaptcha.execute(window.$widgetIdProp)'),
+      );
+    });
+
+    testWidgets('reset runs SmartCaptcha reset script', (tester) async {
+      final captchaController = CaptchaController();
+      final webViewController = await pumpCaptcha(
+        tester,
+        config: createConfig(),
+        controller: captchaController,
+      );
+
+      await captchaController.reset();
+
+      expect(
+        webViewController.evaluatedJavascriptSources,
+        contains('window.smartCaptcha.reset(window.$widgetIdProp)'),
       );
     });
 

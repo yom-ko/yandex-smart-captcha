@@ -19,15 +19,46 @@ void main() {
     expect(find.byType(YandexSmartCaptcha), findsOne);
 
     final buttonExecute = find.widgetWithText(ElevatedButton, 'Execute');
+    final buttonReset = find.widgetWithText(ElevatedButton, 'Reset');
     final buttonDestroy = find.widgetWithText(FilledButton, 'Destroy');
 
+    final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+    final webViewController =
+        (webView.platform as PlatformInAppWebViewWidgetFake).controller
+          ..emit('captchaReady');
+
+    await tester.pump();
+
     expect(buttonExecute, findsOneWidget);
+    expect(buttonReset, findsOneWidget);
     expect(buttonDestroy, findsOneWidget);
+    expect(tester.widget<ElevatedButton>(buttonReset).onPressed, isNull);
 
     await tester.tap(buttonExecute);
-
     await tester.pump(const Duration(seconds: 2));
 
+    webViewController.emit('challengeSolved', ['token']);
+    await tester.pump();
+
+    expect(tester.widget<ElevatedButton>(buttonReset).onPressed, isNotNull);
+
+    await tester.tap(buttonReset);
+    await tester.pump();
+
+    expect(
+      webViewController.evaluatedJavascriptSources,
+      contains('window.smartCaptcha.reset(window.wscWidgetId)'),
+    );
+    expect(tester.widget<ElevatedButton>(buttonReset).onPressed, isNull);
+
+    webViewController.emit('challengeSolved', ['token']);
+    await tester.pump();
+
     await tester.tap(buttonDestroy);
+    await tester.pump();
+
+    expect(tester.widget<ElevatedButton>(buttonExecute).onPressed, isNull);
+    expect(tester.widget<ElevatedButton>(buttonReset).onPressed, isNull);
+    expect(tester.widget<FilledButton>(buttonDestroy).onPressed, isNull);
   });
 }
