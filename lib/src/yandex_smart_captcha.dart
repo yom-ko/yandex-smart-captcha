@@ -57,11 +57,11 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Provides the verification token string. May be `null` if token extraction fails.
   final void Function(String? token) onChallengeSolved;
 
+  /// The background color of the widget container.
+  final Color? backgroundColor;
+
   /// A custom widget displayed while the Web SmartCaptcha content is loading.
   final Widget? loadingIndicator;
-
-  /// An optional controller to programmatically interact with the CAPTCHA.
-  final CaptchaController? controller;
 
   /// Called when the CAPTCHA script is fully loaded and initialized.
   final VoidCallback? onCaptchaReady;
@@ -83,17 +83,21 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Return `true` to allow navigation, or `false` to block it.
   final bool Function(String url)? onNavigationRequest;
 
+  /// An optional controller to programmatically interact with the CAPTCHA.
+  final CaptchaController? controller;
+
   const YandexSmartCaptcha({
     required this.config,
     required this.onChallengeSolved,
+    this.backgroundColor,
     this.loadingIndicator,
-    this.controller,
     this.onCaptchaReady,
     this.onChallengeShown,
     this.onChallengeHidden,
     this.onNetworkError,
     this.onJavaScriptError,
     this.onNavigationRequest,
+    this.controller,
     super.key,
   });
 
@@ -173,8 +177,8 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (widget.config.backgroundColor != null)
-          ColoredBox(color: widget.config.backgroundColor!),
+        if (widget.backgroundColor != null)
+          ColoredBox(color: widget.backgroundColor!),
         InAppWebView(
           initialData: _webViewData,
           initialSettings: _webViewSettings,

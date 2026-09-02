@@ -10,7 +10,7 @@ This package was inspired by [flutter_yandex_smartcaptcha](https://pub.dev/packa
 
 ## Motivation
 
-One day at work, I urgently needed to integrate a Yandex CAPTCHA into a mobile app, and the `flutter_yandex_smartcaptcha` package came to the rescue. However, I discovered a serious bug and reported it to the author. When they didn’t respond, I decided to create a similar package myself and learn how to publish packages on pub.dev in the process. The end of the magnificent story.
+One day at work, I urgently needed to integrate a Yandex CAPTCHA into a mobile app, and the `flutter_yandex_smartcaptcha` package came to the rescue. However, I discovered a serious bug and reported it to the author. When they didn’t respond, I decided to create a similar package myself and learn how to publish packages on pub.dev in the process. End of story.
 
 ## Usage
 
@@ -29,23 +29,51 @@ YandexSmartCaptcha(
 
 In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it's useful if you need to trigger a challenge popup programmatically, but that’s rare.
 
-### Configuration parameters
+### CaptchaConfig parameters
+
+This is an immutable configuration for Web SmartCaptcha.
+
+> The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget.
 
 | Parameter             | Required | Default       | Description                                                                                                        |
 | :-------------------- | :------: | :------------ | :----------------------------------------------------------------------------------------------------------------- |
 | `clientKey`           |    ✔     |               | The client-side key passed to Web SmartCaptcha.                                                                    |
 | `language`            |          | `ru`          | The language for the Web SmartCaptcha UI.                                                                          |
-| `alwaysShowChallenge` |          | `false`       | If true, the user will *always* be presented with a challenge (useful for testing).                                |
-| `useInvisibleMode`    |          | `false`       | If `true`, runs the CAPTCHA in invisible mode – without the "I’m not a robot" checkbox.                            |
+| `alwaysShowChallenge` |          | `false`       | If true, the user will *always* be presented with a challenge. Useful for testing.                                 |
+| `useInvisibleMode`    |          | `false`       | If `true`, runs the CAPTCHA in invisible mode – without the "I'm not a robot" checkbox.                            |
 | `badgePosition`       |          | `bottomRight` | If `useInvisibleMode` is enabled, specifies the position of the badge linking to the Data Processing Notice (DPN). |
 | `hideBadge`           |          | `false`       | If `true` and `useInvisibleMode` is enabled, hides the DPN badge.                                                  |
-| `initialScale`        |          | `1.0`         | The initial scale factor for the Web SmartCaptcha content.                                                         |
-| `allowUserScaling`    |          | `false`       | If `true`, the user can scale the Web SmartCaptcha content using gestures.                                         |
-| `maximumScale`        |          | `3.0`         | If `allowUserScaling` is enabled, specifies the maximum scale factor for the content.                              |
-| `backgroundColor`     |          | `null`        | The background color of the `YandexSmartCaptcha` widget.                                                           |
 | `useWebViewMode`      |          | `true`        | If `true`, runs the CAPTCHA in a mobile-optimized WebView mode to improve challenge accuracy.                      |
+| `initialScale`        |          | `1.0`         | The initial scale factor for the Web SmartCaptcha content.                                                         |
+| `allowUserScaling`    |          | `false`       | If `true`, the user can scale the Web SmartCaptcha content using gestures or controls.                             |
+| `maximumScale`        |          | `3.0`         | If `allowUserScaling` is enabled, specifies the maximum scale factor for the content.                              |
 
-> ✱ "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that executes Yandex SmartCaptcha's JavaScript code.
+### YandexSmartCaptcha parameters
+
+Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, and callback registration.
+
+| Parameter             | Required | Default | Description                                                                 |
+| :-------------------- | :------: | :------ | :-------------------------------------------------------------------------- |
+| `config`              |    ✔     |         | The configuration settings for this CAPTCHA instance.                       |
+| `onChallengeSolved`   |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.               |
+| `backgroundColor`     |          | `null`  | The background color of the widget container.                               |
+| `loadingIndicator`    |          | `null`  | A custom widget displayed while the Web SmartCaptcha content is loading.    |
+| `onCaptchaReady`      |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.             |
+| `onChallengeShown`    |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                    |
+| `onChallengeHidden`   |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                          |
+| `onNetworkError`      |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA.  |
+| `onJavaScriptError`   |          | `null`  | Called when an uncaught JavaScript error occurs inside the CAPTCHA WebView. |
+| `onNavigationRequest` |          | `null`  | Called when a navigation request is made inside the WebView.                |
+| `controller`          |          | `null`  | A controller to programmatically interact with the CAPTCHA.                 |
+
+### CaptchaController methods
+
+Provide access to the Web SmartCaptcha's imperative methods.
+
+| Method      | Description                                                             |
+| :---------- | :---------------------------------------------------------------------- |
+| `execute()` | Starts user validation.                                                 |
+| `destroy()` | Removes the Web SmartCaptcha widget and its associated event listeners. |
 
 ## Screenshots
 
@@ -54,7 +82,7 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 <div>
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_1.webp"
-    alt="The initial state of the Yandex SmartCaptcha container with the 'I’m not a robot' checkbox."
+    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' checkbox."
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_2.webp"
@@ -62,7 +90,7 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_3.webp"
-    alt="The state of the Yandex SmartCaptcha container with the 'I’m not a robot' box checked, after the user successfully solved the challenge."
+    alt="The state of the Yandex SmartCaptcha container with the 'I'm not a robot' box checked, after the user successfully solved the challenge."
     width="250">
 </div><br/>
 
@@ -71,7 +99,7 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 <div>
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_1.webp"
-    alt="The initial state of the Yandex SmartCaptcha container with the 'I’m not a robot' checkbox, as seen in a real-world application."
+    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' checkbox, as seen in a real-world application."
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_2.webp"

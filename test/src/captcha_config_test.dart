@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
@@ -16,7 +15,6 @@ void main() {
       expect(config.initialScale, 1.0);
       expect(config.allowUserScaling, isFalse);
       expect(config.maximumScale, 3.0);
-      expect(config.backgroundColor, isNull);
       expect(config.useWebViewMode, isTrue);
     });
 
@@ -31,7 +29,6 @@ void main() {
         initialScale: 1.5,
         allowUserScaling: true,
         maximumScale: 4,
-        backgroundColor: Colors.red,
         useWebViewMode: false,
       );
 
@@ -44,7 +41,6 @@ void main() {
       expect(config.initialScale, 1.5);
       expect(config.allowUserScaling, isTrue);
       expect(config.maximumScale, 4.0);
-      expect(config.backgroundColor, Colors.red);
       expect(config.useWebViewMode, isFalse);
     });
   });

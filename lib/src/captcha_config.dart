@@ -1,5 +1,3 @@
-import 'dart:ui' show Color;
-
 import 'captcha_language.dart';
 import 'dpn_badge_position.dart';
 import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
@@ -50,6 +48,13 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `hideShield`.
   final bool hideBadge;
 
+  /// Whether to enable specialized mobile WebView optimization mode.
+  ///
+  /// Improves challenge accuracy and rendering on mobile devices.
+  ///
+  /// Corresponding JavaScript parameter: `webview`.
+  final bool useWebViewMode;
+
   /// The initial scale factor for the Web SmartCaptcha HTML content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
@@ -68,16 +73,6 @@ final class CaptchaConfig {
   /// Actual behavior may vary depending on the underlying platform.
   final double maximumScale;
 
-  /// The background color of the [YandexSmartCaptcha] widget container.
-  final Color? backgroundColor;
-
-  /// Whether to enable specialized mobile WebView optimization mode.
-  ///
-  /// Improves challenge accuracy and rendering on mobile devices.
-  ///
-  /// Corresponding JavaScript parameter: `webview`.
-  final bool useWebViewMode;
-
   const CaptchaConfig({
     required this.clientKey,
     this.language = CaptchaLanguage.ru,
@@ -85,10 +80,9 @@ final class CaptchaConfig {
     this.useInvisibleMode = false,
     this.badgePosition = DPNBadgePosition.bottomRight,
     this.hideBadge = false,
+    this.useWebViewMode = true,
     this.initialScale = 1.0,
     this.allowUserScaling = false,
     this.maximumScale = 3.0,
-    this.backgroundColor,
-    this.useWebViewMode = true,
   });
 }

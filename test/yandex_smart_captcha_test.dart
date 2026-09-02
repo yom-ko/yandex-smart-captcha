@@ -21,7 +21,6 @@ void main() {
     double initialScale = 1,
     bool allowUserScaling = false,
     double maximumScale = 3,
-    Color? backgroundColor,
     bool useWebViewMode = true,
   }) {
     return CaptchaConfig(
@@ -34,7 +33,6 @@ void main() {
       initialScale: initialScale,
       allowUserScaling: allowUserScaling,
       maximumScale: maximumScale,
-      backgroundColor: backgroundColor,
       useWebViewMode: useWebViewMode,
     );
   }
@@ -42,26 +40,28 @@ void main() {
   YandexSmartCaptcha captchaWidget({
     required CaptchaConfig config,
     void Function(String? token)? onChallengeSolved,
-    CaptchaController? controller,
+    Color? backgroundColor,
+    Widget? loadingIndicator,
     VoidCallback? onCaptchaReady,
     VoidCallback? onChallengeShown,
     VoidCallback? onChallengeHidden,
     VoidCallback? onNetworkError,
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
-    Widget? loadingIndicator,
+    CaptchaController? controller,
   }) {
     return YandexSmartCaptcha(
       config: config,
       onChallengeSolved: onChallengeSolved ?? (_) {},
-      controller: controller,
+      backgroundColor: backgroundColor,
+      loadingIndicator: loadingIndicator,
       onCaptchaReady: onCaptchaReady,
       onChallengeShown: onChallengeShown,
       onChallengeHidden: onChallengeHidden,
       onNetworkError: onNetworkError,
       onJavaScriptError: onJavaScriptError,
       onNavigationRequest: onNavigationRequest,
-      loadingIndicator: loadingIndicator,
+      controller: controller,
     );
   }
 
@@ -73,14 +73,15 @@ void main() {
     WidgetTester tester, {
     required CaptchaConfig config,
     void Function(String? token)? onChallengeSolved,
-    CaptchaController? controller,
+    Color? backgroundColor,
+    Widget? loadingIndicator,
     VoidCallback? onCaptchaReady,
     VoidCallback? onChallengeShown,
     VoidCallback? onChallengeHidden,
     VoidCallback? onNetworkError,
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
-    Widget? loadingIndicator,
+    CaptchaController? controller,
   }) async {
     await tester.pumpWidget(
       Directionality(
@@ -88,14 +89,15 @@ void main() {
         child: captchaWidget(
           config: config,
           onChallengeSolved: onChallengeSolved,
-          controller: controller,
+          backgroundColor: backgroundColor,
+          loadingIndicator: loadingIndicator,
           onCaptchaReady: onCaptchaReady,
           onChallengeShown: onChallengeShown,
           onChallengeHidden: onChallengeHidden,
           onNetworkError: onNetworkError,
           onJavaScriptError: onJavaScriptError,
           onNavigationRequest: onNavigationRequest,
-          loadingIndicator: loadingIndicator,
+          controller: controller,
         ),
       ),
     );
@@ -201,34 +203,37 @@ void main() {
   });
 
   group('$YandexSmartCaptcha', () {
-    test('stores its configuration and callbacks', () {
+    test('stores its configuration, widget properties, and callbacks', () {
       final config = createConfig();
       void onChallengeSolved(String? token) {}
-      final controller = CaptchaController();
+      const backgroundColor = Colors.red;
+      const loadingIndicator = SizedBox.shrink();
       void onCaptchaReady() {}
       void onChallengeShown() {}
       void onChallengeHidden() {}
       void onNetworkError() {}
       void onJavaScriptError() {}
       bool onNavigationRequest(String url) => true;
-      const loadingIndicator = SizedBox.shrink();
+      final controller = CaptchaController();
 
       final widget = YandexSmartCaptcha(
         config: config,
         onChallengeSolved: onChallengeSolved,
-        controller: controller,
+        backgroundColor: backgroundColor,
+        loadingIndicator: loadingIndicator,
         onCaptchaReady: onCaptchaReady,
         onChallengeShown: onChallengeShown,
         onChallengeHidden: onChallengeHidden,
         onNetworkError: onNetworkError,
         onJavaScriptError: onJavaScriptError,
         onNavigationRequest: onNavigationRequest,
-        loadingIndicator: loadingIndicator,
+        controller: controller,
       );
 
       expect(widget.config, same(config));
       expect(widget.config.clientKey, equals('client-key'));
       expect(widget.onChallengeSolved, same(onChallengeSolved));
+      expect(widget.backgroundColor, same(backgroundColor));
       expect(widget.controller, same(controller));
       expect(widget.onCaptchaReady, same(onCaptchaReady));
       expect(widget.onChallengeShown, same(onChallengeShown));
@@ -605,7 +610,8 @@ void main() {
         (tester) async {
           await pumpCaptcha(
             tester,
-            config: createConfig(backgroundColor: Colors.red),
+            config: createConfig(),
+            backgroundColor: Colors.red,
           );
 
           final coloredBox = tester.widget<ColoredBox>(find.byType(ColoredBox));
