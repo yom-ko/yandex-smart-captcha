@@ -35,12 +35,12 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `invisible`.
   final bool useInvisibleMode;
 
-  /// The position of the Data Processing Notice badge when [useInvisibleMode] is enabled.
+  /// The position of the Data Processing Notice badge when [useInvisibleMode] is `true`.
   ///
   /// Corresponding JavaScript parameter: `shieldPosition`.
   final DPNBadgePosition badgePosition;
 
-  /// Whether to hide the Data Processing Notice badge when [useInvisibleMode] is enabled.
+  /// Whether to hide the Data Processing Notice badge when [useInvisibleMode] is `true`.
   ///
   /// Note: Hiding the badge requires you to inform users about data processing
   /// through an alternative method in your app.
@@ -55,13 +55,13 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `webview`.
   final bool useWebViewMode;
 
-  /// The initial scale factor for the Web SmartCaptcha HTML content.
+  /// The initial scale factor for the Web SmartCaptcha content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
   /// Actual behavior may vary depending on the underlying platform.
   final double initialScale;
 
-  /// Whether the user can zoom in and out of the CAPTCHA content.
+  /// Whether the user can scale the Web SmartCaptcha content using gestures.
   ///
   /// Sets the `user-scalable` attribute of the viewport meta tag.
   /// Actual behavior may vary depending on the underlying platform.

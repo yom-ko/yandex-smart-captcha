@@ -35,18 +35,18 @@ This is an immutable configuration for Web SmartCaptcha.
 
 > The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget.
 
-| Parameter             | Required | Default       | Description                                                                                                        |
-| :-------------------- | :------: | :------------ | :----------------------------------------------------------------------------------------------------------------- |
-| `clientKey`           |    ✔     |               | The client-side key passed to Web SmartCaptcha.                                                                    |
-| `language`            |          | `ru`          | The language for the Web SmartCaptcha UI.                                                                          |
-| `alwaysShowChallenge` |          | `false`       | If true, the user will *always* be presented with a challenge. Useful for testing.                                 |
-| `useInvisibleMode`    |          | `false`       | If `true`, runs the CAPTCHA in invisible mode – without the "I'm not a robot" checkbox.                            |
-| `badgePosition`       |          | `bottomRight` | If `useInvisibleMode` is enabled, specifies the position of the badge linking to the Data Processing Notice (DPN). |
-| `hideBadge`           |          | `false`       | If `true` and `useInvisibleMode` is enabled, hides the DPN badge.                                                  |
-| `useWebViewMode`      |          | `true`        | If `true`, runs the CAPTCHA in a mobile-optimized WebView mode to improve challenge accuracy.                      |
-| `initialScale`        |          | `1.0`         | The initial scale factor for the Web SmartCaptcha content.                                                         |
-| `allowUserScaling`    |          | `false`       | If `true`, the user can scale the Web SmartCaptcha content using gestures or controls.                             |
-| `maximumScale`        |          | `3.0`         | If `allowUserScaling` is enabled, specifies the maximum scale factor for the content.                              |
+| Parameter             | Required | Default       | Description                                                                               |
+| :-------------------- | :------: | :------------ | :---------------------------------------------------------------------------------------- |
+| `clientKey`           |    ✔     |               | The client-side key passed to Web SmartCaptcha.                                           |
+| `language`            |          | `ru`          | The language for the Web SmartCaptcha UI.                                                 |
+| `alwaysShowChallenge` |          | `false`       | Whether the CAPTCHA should always display a challenge. Useful for testing.                |
+| `useInvisibleMode`    |          | `false`       | Whether to run CAPTCHA in invisible mode – without the "I'm not a robot" checkbox.        |
+| `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`. |
+| `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                          |
+| `useWebViewMode`      |          | `true`        | Whether to enable specialized mobile WebView optimization mode.                           |
+| `initialScale`        |          | `1.0`         | The initial scale factor for the Web SmartCaptcha content.                                |
+| `allowUserScaling`    |          | `false`       | Whether the user can scale the Web SmartCaptcha content using gestures.                   |
+| `maximumScale`        |          | `3.0`         | The maximum scale factor when `allowUserScaling` is `true`.                               |
 
 ### YandexSmartCaptcha parameters
 
