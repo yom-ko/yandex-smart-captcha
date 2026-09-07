@@ -73,6 +73,7 @@ final class CaptchaConfig {
   /// Actual behavior may vary depending on the underlying platform.
   final double maximumScale;
 
+  /// Creates configuration settings for Web SmartCaptcha.
   const CaptchaConfig({
     required this.clientKey,
     this.language = CaptchaLanguage.ru,

@@ -12,6 +12,9 @@ import 'web_smart_captcha.dart';
 final class CaptchaController {
   InAppWebViewController? _webViewController;
 
+  /// Creates a controller for [YandexSmartCaptcha].
+  CaptchaController();
+
   /// Starts user validation.
   ///
   /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
@@ -108,6 +111,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Defaults to `about:blank`.
   final String? baseUrl;
 
+  /// Creates a Yandex SmartCaptcha widget.
   const YandexSmartCaptcha({
     required this.config,
     required this.onChallengeSolved,

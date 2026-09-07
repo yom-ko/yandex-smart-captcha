@@ -19,6 +19,7 @@ enum DPNBadgePosition {
   /// Bottom-right corner
   bottomRight('bottom-right');
 
+  /// Creates a DPN badge position with its SmartCaptcha identifier.
   const DPNBadgePosition(this.id);
 
   /// The identifier passed to SmartCaptcha's native `shieldPosition` parameter.
