@@ -98,6 +98,13 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// An optional controller to programmatically interact with the CAPTCHA.
   final CaptchaController? controller;
 
+  /// The HTTP(S) URL used to load SmartCaptcha content in the WebView.
+  ///
+  /// Required for Same-Origin Policy compliance. Usually, the URL's host
+  /// should match an allowed host in the Yandex Cloud console.
+  /// Defaults to `about:blank`.
+  final String? baseUrl;
+
   const YandexSmartCaptcha({
     required this.config,
     required this.onChallengeSolved,
@@ -110,6 +117,7 @@ class YandexSmartCaptcha extends StatefulWidget {
     this.onJavaScriptError,
     this.onNavigationRequest,
     this.controller,
+    this.baseUrl,
     super.key,
   });
 
@@ -161,7 +169,10 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
       maximumScale: maximumScale.clamp(0.1, 10),
     );
 
-    _webViewData = InAppWebViewInitialData(data: webCaptcha.html);
+    _webViewData = InAppWebViewInitialData(
+      data: webCaptcha.html,
+      baseUrl: widget.baseUrl != null ? WebUri(widget.baseUrl!) : null,
+    );
   }
 
   @override

@@ -78,6 +78,8 @@ class _HomePageState extends State<HomePage> {
               child: YandexSmartCaptcha(
                 config: _config,
                 controller: _controller,
+                // Optionally, specify a base URL for the WebView.
+                baseUrl: 'https://example.com',
                 backgroundColor: Colors.lightBlue,
                 loadingIndicator:
                     // You fully control the loading indicator layout.

@@ -52,19 +52,20 @@ This is an immutable configuration for Web SmartCaptcha.
 
 Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, and callback registration.
 
-| Parameter             | Required | Default | Description                                                                 |
-| :-------------------- | :------: | :------ | :-------------------------------------------------------------------------- |
-| `config`              |    ✔     |         | The configuration settings for this CAPTCHA instance.                       |
-| `onChallengeSolved`   |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.               |
-| `backgroundColor`     |          | `null`  | The background color of the widget container.                               |
-| `loadingIndicator`    |          | `null`  | A custom widget displayed while the Web SmartCaptcha content is loading.    |
-| `onCaptchaReady`      |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.             |
-| `onChallengeShown`    |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                    |
-| `onChallengeHidden`   |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                          |
-| `onNetworkError`      |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA.  |
-| `onJavaScriptError`   |          | `null`  | Called when an uncaught JavaScript error occurs inside the CAPTCHA WebView. |
-| `onNavigationRequest` |          | `null`  | Called when a navigation request is made inside the WebView.                |
-| `controller`          |          | `null`  | A controller to programmatically interact with the CAPTCHA.                 |
+| Parameter             | Required | Default | Description                                                                                                           |
+| :-------------------- | :------: | :------ | :-------------------------------------------------------------------------------------------------------------------- |
+| `config`              |    ✔     |         | The configuration settings for this CAPTCHA instance.                                                                 |
+| `onChallengeSolved`   |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.                                                         |
+| `backgroundColor`     |          | `null`  | The background color of the widget container.                                                                         |
+| `loadingIndicator`    |          | `null`  | A custom widget displayed while the Web SmartCaptcha content is loading.                                              |
+| `onCaptchaReady`      |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.                                                       |
+| `onChallengeShown`    |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                                                              |
+| `onChallengeHidden`   |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                                                                    |
+| `onNetworkError`      |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA.                                            |
+| `onJavaScriptError`   |          | `null`  | Called when an uncaught JavaScript error occurs inside the CAPTCHA WebView.                                           |
+| `onNavigationRequest` |          | `null`  | Called when a navigation request is made inside the WebView.                                                          |
+| `controller`          |          | `null`  | A controller to programmatically interact with the CAPTCHA.                                                           |
+| `baseUrl`             |          | `null`  | A valid HTTP(S) base URL for SmartCaptcha content. Required for domain validation and resolving origin policy issues. |
 
 ### CaptchaController methods
 

@@ -49,6 +49,7 @@ void main() {
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
     CaptchaController? controller,
+    String? baseUrl,
   }) {
     return YandexSmartCaptcha(
       config: config,
@@ -62,6 +63,7 @@ void main() {
       onJavaScriptError: onJavaScriptError,
       onNavigationRequest: onNavigationRequest,
       controller: controller,
+      baseUrl: baseUrl,
     );
   }
 
@@ -82,6 +84,7 @@ void main() {
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
     CaptchaController? controller,
+    String? baseUrl,
   }) async {
     await tester.pumpWidget(
       Directionality(
@@ -98,6 +101,7 @@ void main() {
           onJavaScriptError: onJavaScriptError,
           onNavigationRequest: onNavigationRequest,
           controller: controller,
+          baseUrl: baseUrl,
         ),
       ),
     );
@@ -232,6 +236,7 @@ void main() {
       void onJavaScriptError() {}
       bool onNavigationRequest(String url) => true;
       final controller = CaptchaController();
+      const baseUrl = 'https://example.com';
 
       final widget = YandexSmartCaptcha(
         config: config,
@@ -245,6 +250,7 @@ void main() {
         onJavaScriptError: onJavaScriptError,
         onNavigationRequest: onNavigationRequest,
         controller: controller,
+        baseUrl: baseUrl,
       );
 
       expect(widget.config, same(config));
@@ -259,6 +265,7 @@ void main() {
       expect(widget.onJavaScriptError, same(onJavaScriptError));
       expect(widget.onNavigationRequest, same(onNavigationRequest));
       expect(widget.loadingIndicator, same(loadingIndicator));
+      expect(widget.baseUrl, baseUrl);
     });
 
     test('creates a state for the widget', () {
@@ -334,6 +341,30 @@ void main() {
     });
 
     group('WebView configuration', () {
+      testWidgets('uses about:blank when no base URL is provided',
+          (tester) async {
+        await pumpCaptcha(tester, config: createConfig());
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+
+        expect(webView.platform.params.initialData?.baseUrl, isNull);
+      });
+
+      testWidgets('uses the configured base URL', (tester) async {
+        await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          baseUrl: 'https://example.com',
+        );
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+
+        expect(
+          webView.platform.params.initialData?.baseUrl,
+          WebUri('https://example.com'),
+        );
+      });
+
       testWidgets('uses the expected WebView settings', (tester) async {
         await pumpCaptcha(tester, config: createConfig());
 
