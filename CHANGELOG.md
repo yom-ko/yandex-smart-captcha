@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.2.0
+- Add new parameters to `YandexSmartCaptcha`:
+  - `baseUrl` — for domain validation and resolving origin policy issues.
+  - `onTokenExpired` — for handling token expiration.
+
 ## 7.1.0
 - Add reset() method to `CaptchaController`.
 - Improve README.
