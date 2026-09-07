@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
-// Find your key in the Yandex Cloud admin panel.
+// Find your key in the Yandex Cloud console.
 const clientKey = String.fromEnvironment(
   'CLIENT_KEY',
   defaultValue: 'your-yandex-smartcaptcha-client-key',
