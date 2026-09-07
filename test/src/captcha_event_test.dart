@@ -10,10 +10,10 @@ void main() {
           ('captchaReady', 'captcha-ready', false),
           ('challengeShown', 'challenge-visible', true),
           ('challengeHidden', 'challenge-hidden', true),
+          ('challengeSolved', 'success', false),
+          ('tokenExpired', 'token-expired', true),
           ('networkError', 'network-error', true),
           ('javaScriptError', 'javascript-error', true),
-          ('tokenExpired', 'token-expired', true),
-          ('challengeSolved', 'success', false),
         ]),
       );
     });

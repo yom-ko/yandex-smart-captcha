@@ -11,20 +11,20 @@ enum CaptchaEvent {
   /// Emitted when the CAPTCHA challenge popup is hidden or dismissed.
   challengeHidden('challenge-hidden'),
 
-  /// Emitted when a network error occurs while loading or executing the CAPTCHA.
-  networkError('network-error'),
-
-  /// Emitted when an uncaught JavaScript error occurs inside the CAPTCHA WebView.
-  javaScriptError('javascript-error'),
-
-  /// Emitted when the CAPTCHA token expires or is invalidated.
-  tokenExpired('token-expired'),
-
   /// Emitted when the user successfully solves a CAPTCHA challenge.
   ///
   /// Note: Although Yandex SmartCaptcha docs list the `success` event as subscribable,
   /// it is not dispatched reliably, so it is handled manually via the `callback` function.
-  challengeSolved('success', subscribable: false);
+  challengeSolved('success', subscribable: false),
+
+  /// Emitted when the CAPTCHA token expires or is invalidated.
+  tokenExpired('token-expired'),
+
+  /// Emitted when a network error occurs while loading or executing the CAPTCHA.
+  networkError('network-error'),
+
+  /// Emitted when an uncaught JavaScript error occurs inside the CAPTCHA WebView.
+  javaScriptError('javascript-error');
 
   const CaptchaEvent(this.id, {this.subscribable = true});
 

@@ -45,6 +45,7 @@ void main() {
     VoidCallback? onCaptchaReady,
     VoidCallback? onChallengeShown,
     VoidCallback? onChallengeHidden,
+    VoidCallback? onTokenExpired,
     VoidCallback? onNetworkError,
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
@@ -59,6 +60,7 @@ void main() {
       onCaptchaReady: onCaptchaReady,
       onChallengeShown: onChallengeShown,
       onChallengeHidden: onChallengeHidden,
+      onTokenExpired: onTokenExpired,
       onNetworkError: onNetworkError,
       onJavaScriptError: onJavaScriptError,
       onNavigationRequest: onNavigationRequest,
@@ -80,6 +82,7 @@ void main() {
     VoidCallback? onCaptchaReady,
     VoidCallback? onChallengeShown,
     VoidCallback? onChallengeHidden,
+    VoidCallback? onTokenExpired,
     VoidCallback? onNetworkError,
     VoidCallback? onJavaScriptError,
     bool Function(String url)? onNavigationRequest,
@@ -97,6 +100,7 @@ void main() {
           onCaptchaReady: onCaptchaReady,
           onChallengeShown: onChallengeShown,
           onChallengeHidden: onChallengeHidden,
+          onTokenExpired: onTokenExpired,
           onNetworkError: onNetworkError,
           onJavaScriptError: onJavaScriptError,
           onNavigationRequest: onNavigationRequest,
@@ -232,6 +236,7 @@ void main() {
       void onCaptchaReady() {}
       void onChallengeShown() {}
       void onChallengeHidden() {}
+      void onTokenExpired() {}
       void onNetworkError() {}
       void onJavaScriptError() {}
       bool onNavigationRequest(String url) => true;
@@ -246,6 +251,7 @@ void main() {
         onCaptchaReady: onCaptchaReady,
         onChallengeShown: onChallengeShown,
         onChallengeHidden: onChallengeHidden,
+        onTokenExpired: onTokenExpired,
         onNetworkError: onNetworkError,
         onJavaScriptError: onJavaScriptError,
         onNavigationRequest: onNavigationRequest,
@@ -261,6 +267,7 @@ void main() {
       expect(widget.onCaptchaReady, same(onCaptchaReady));
       expect(widget.onChallengeShown, same(onChallengeShown));
       expect(widget.onChallengeHidden, same(onChallengeHidden));
+      expect(widget.onTokenExpired, same(onTokenExpired));
       expect(widget.onNetworkError, same(onNetworkError));
       expect(widget.onJavaScriptError, same(onJavaScriptError));
       expect(widget.onNavigationRequest, same(onNavigationRequest));
@@ -552,6 +559,20 @@ void main() {
         webViewController.emit(CaptchaEvent.challengeHidden.name);
 
         expect(calls, equals(1));
+      });
+
+      testWidgets('calls onTokenExpired when tokenExpired fires',
+         (tester) async {
+       var calls = 0;
+       final webViewController = await pumpCaptcha(
+         tester,
+         config: createConfig(),
+         onTokenExpired: () => calls++,
+       );
+
+       webViewController.emit(CaptchaEvent.tokenExpired.name);
+
+       expect(calls, equals(1));
       });
 
       testWidgets('calls onNetworkError when networkError fires',

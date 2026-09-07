@@ -107,15 +107,18 @@ class _HomePageState extends State<HomePage> {
                 onChallengeHidden: () {
                   debugPrint('called: onChallengeHidden');
                 },
+                onChallengeSolved: (token) {
+                  debugPrint('called: onChallengeSolved with token: $token');
+                  _isSolved.value = token != null;
+                },
+                onTokenExpired: () {
+                  debugPrint('called: onTokenExpired');
+                },
                 onNetworkError: () {
                   debugPrint('called: onNetworkError');
                 },
                 onJavaScriptError: () {
                   debugPrint('called: onJavaScriptError');
-                },
-                onChallengeSolved: (token) {
-                  debugPrint('called: onChallengeSolved with token: $token');
-                  _isSolved.value = token != null;
                 },
               ),
             ),

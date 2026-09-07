@@ -84,6 +84,9 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when the CAPTCHA challenge popup is hidden.
   final VoidCallback? onChallengeHidden;
 
+  /// Called when the CAPTCHA token expires or is invalidated.
+  final VoidCallback? onTokenExpired;
+
   /// Called when a network error occurs while loading or executing the CAPTCHA.
   final VoidCallback? onNetworkError;
 
@@ -113,6 +116,7 @@ class YandexSmartCaptcha extends StatefulWidget {
     this.onCaptchaReady,
     this.onChallengeShown,
     this.onChallengeHidden,
+    this.onTokenExpired,
     this.onNetworkError,
     this.onJavaScriptError,
     this.onNavigationRequest,
@@ -244,6 +248,18 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
                     widget.onChallengeHidden?.call();
                   })
               ..addJavaScriptHandler(
+                  handlerName: CaptchaEvent.challengeSolved.name,
+                  callback: (args) {
+                    var token = args.firstOrNull?.toString();
+                    token = token == 'null' ? null : token;
+                    widget.onChallengeSolved(token);
+                  })
+              ..addJavaScriptHandler(
+                  handlerName: CaptchaEvent.tokenExpired.name,
+                  callback: (args) {
+                    widget.onTokenExpired?.call();
+                  })
+              ..addJavaScriptHandler(
                   handlerName: CaptchaEvent.networkError.name,
                   callback: (args) {
                     widget.onNetworkError?.call();
@@ -252,13 +268,6 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
                   handlerName: CaptchaEvent.javaScriptError.name,
                   callback: (args) {
                     widget.onJavaScriptError?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.challengeSolved.name,
-                  callback: (args) {
-                    var token = args.firstOrNull?.toString();
-                    token = token == 'null' ? null : token;
-                    widget.onChallengeSolved(token);
                   });
           },
         ),

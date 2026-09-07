@@ -61,6 +61,7 @@ Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, a
 | `onCaptchaReady`      |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.                                                       |
 | `onChallengeShown`    |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                                                              |
 | `onChallengeHidden`   |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                                                                    |
+| `onTokenExpired`      |          | `null`  | Called when the CAPTCHA token expires or is invalidated.                                                              |
 | `onNetworkError`      |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA.                                            |
 | `onJavaScriptError`   |          | `null`  | Called when an uncaught JavaScript error occurs inside the CAPTCHA WebView.                                           |
 | `onNavigationRequest` |          | `null`  | Called when a navigation request is made inside the WebView.                                                          |
