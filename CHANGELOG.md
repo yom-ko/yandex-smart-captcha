@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.2.2
+- Update screenshots.
+
 ## 7.2.1
 - Improve and expand Dartdoc coverage.
 
