@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.2.4
+- Improve example app.
+
 ## 7.2.3
 - Improve README.
 - Improve Dartdoc terminology.
