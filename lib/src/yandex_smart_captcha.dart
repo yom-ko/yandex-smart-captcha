@@ -64,7 +64,7 @@ final class CaptchaController {
 ///
 /// Wraps an internal WebView executing the Web SmartCaptcha script.
 class YandexSmartCaptcha extends StatefulWidget {
-  /// The configuration settings for this CAPTCHA instance.
+  /// The configuration for this CAPTCHA instance.
   final CaptchaConfig config;
 
   /// Called when the user successfully solves a CAPTCHA challenge.

@@ -52,7 +52,7 @@ Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, a
 
 | Parameter             | Required | Default | Description                                                                                                           |
 | :-------------------- | :------: | :------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `config`              |    ✔     |         | The configuration settings for this CAPTCHA instance.                                                                 |
+| `config`              |    ✔     |         | The configuration for this CAPTCHA instance.                                                                          |
 | `onChallengeSolved`   |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.                                                         |
 | `backgroundColor`     |          | `null`  | The background color of the widget container.                                                                         |
 | `loadingIndicator`    |          | `null`  | A custom widget displayed while the Web SmartCaptcha content is loading.                                              |

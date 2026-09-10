@@ -76,7 +76,7 @@ void main() {
     });
 
     group('configuration', () {
-      test('serializes all widget options', () {
+      test('serializes all widget configuration', () {
         final html = createCaptcha(
           clientKey: 'test-key',
           language: 'ru',

@@ -2,7 +2,7 @@ import 'captcha_language.dart';
 import 'dpn_badge_position.dart';
 import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
 
-/// Configuration settings for [YandexSmartCaptcha].
+/// Configuration for [YandexSmartCaptcha].
 ///
 /// Most options are passed directly to the underlying Web SmartCaptcha instance.
 /// See the [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#methods)
@@ -15,8 +15,8 @@ final class CaptchaConfig {
 
   /// The language for the Web SmartCaptcha UI.
   ///
-  /// For languages other than Russian, this setting also affects the CAPTCHA
-  /// challenge language (typically switching it to English).
+  /// For languages other than Russian, this option also affects
+  /// the CAPTCHA challenge language (typically switching it to English).
   ///
   /// Corresponding JavaScript parameter: `hl`.
   final CaptchaLanguage language;
@@ -73,7 +73,7 @@ final class CaptchaConfig {
   /// Actual behavior may vary depending on the underlying platform.
   final double maximumScale;
 
-  /// Creates configuration settings for Web SmartCaptcha.
+  /// Creates configuration for Web SmartCaptcha.
   const CaptchaConfig({
     required this.clientKey,
     this.language = CaptchaLanguage.ru,
