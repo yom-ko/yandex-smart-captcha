@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.2.3
+- Improve README.
+- Improve Dartdoc terminology.
+
 ## 7.2.2
 - Update screenshots.
 
