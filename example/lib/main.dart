@@ -91,11 +91,10 @@ class _HomePageState extends State<HomePage> {
                     ),
                 onNavigationRequest: (url) {
                   debugPrint('called: onNavigationRequest: $url');
-                  // Block navigation when clicking external links (e.g. Terms/Privacy).
-                  if (url.contains('cloud.yandex')) {
-                    return false;
-                  }
-                  return true;
+                  // Block navigation when clicking Yandex Cloud links,
+                  return !url.contains('cloud.yandex');
+                  // ...or simply block any web navigation.
+                  // return false;
                 },
                 onCaptchaReady: () {
                   debugPrint('called: onCaptchaReady');
