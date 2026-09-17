@@ -1,5 +1,3 @@
-<!-- GENERATED FILE. DO NOT EDIT MANUALLY! Edit source in .agents/ and run build-agent-context.sh -->
-
 # Project overview
 
 This repository is a Flutter package that wraps the Yandex SmartCaptcha Web widget in a mobile WebView. The public API is intentionally small and centered around a single widget: `YandexSmartCaptcha`.
