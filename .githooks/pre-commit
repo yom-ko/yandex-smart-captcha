@@ -4,12 +4,10 @@ set -euo pipefail
 ROOT_DIR="$(git rev-parse --show-toplevel)"
 cd "$ROOT_DIR"
 
-# Nothing to rebuild when no source context files are staged.
 if git diff --cached --quiet -- .agents; then
   exit 0
 fi
 
-# Generation must only read what is actually staged.
 if ! git diff --quiet -- .agents ||
    [ -n "$(git ls-files --others --exclude-standard -- .agents)" ]; then
   echo "ERROR: .agents/ has unstaged or untracked changes." >&2
@@ -19,7 +17,6 @@ fi
 
 echo "Rebuilding agent context files..."
 
-# --list-affected-files prints every created/modified/deleted managed path.
 ./build-agent-context.sh --list-affected-files |
   git add -A --pathspec-from-file=- --pathspec-file-nul
 
