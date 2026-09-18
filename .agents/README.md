@@ -24,10 +24,29 @@ The following directories and files are **fully owned by the generator** and are
 - `.cursor/skills/`
 - `.github/skills/`
 
-**Never manually create or edit files in those locations.**
+> **Never manually create or edit files in those locations.**
 Any manual changes will be overwritten or deleted on the next generator run.
+
+## Writing rules
+
+> **Important:** Different AI providers (Claude, Cursor, Copilot) use different frontmatter keys to evaluate applicable paths. When creating or editing `rules/`, duplicate file patterns across `globs`, `paths`, and `applyTo` to ensure cross-provider compatibility:
+>
+> ```yaml
+> ---
+> description: Rule description
+> globs: "**/*.dart"
+> paths:
+>   - "lib/src/*.dart"
+>   - "test/src/*.dart"
+> applyTo: "lib/src/*.dart,test/src/*.dart"
+> alwaysApply: false
+> ---
+> ```
 
 ## Updating context
 
+To update the agent context without committing any changes, just run the script directly:
+
 ```bash
 ./build-agent-context.sh
+```
