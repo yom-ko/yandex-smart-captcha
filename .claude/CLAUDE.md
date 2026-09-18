@@ -6,6 +6,8 @@ This repository is a Flutter package that wraps the Yandex SmartCaptcha Web widg
 
 The package is not a full app; it is a reusable library consumed by apps via `package:yandex_smart_captcha`. Most implementation work happens inside the `lib/` tree, while `example/` provides a sample app and integration tests.
 
+For any questions regarding Yandex SmartCaptcha (API, JS methods, configuration, events, or integration), consult the official documentation at [https://yandex.cloud/ru/docs/smartcaptcha/](https://yandex.cloud/ru/docs/smartcaptcha/) as the primary source of truth before relying on internal memory or running external web searches.
+
 ## Architecture
 
 - `lib/yandex_smart_captcha.dart`
