@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "args": [
+        "--dart-define-from-file=.env"
+      ],
+      "cwd": "example",
+      "name": "Example",
+      "program": "lib/main.dart",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "args": [
+        "--dart-define-from-file=.env"
+      ],
+      "cwd": "example",
+      "flutterMode": "release",
+      "name": "Example (release mode)",
+      "program": "lib/main.dart",
+      "request": "launch",
+      "type": "dart"
+    }
+  ]
+}
