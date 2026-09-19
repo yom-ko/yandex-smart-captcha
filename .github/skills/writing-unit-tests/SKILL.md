@@ -148,8 +148,7 @@ When fixing a bug, add a regression test that reproduces the failure, fails befo
 
 ## Assertions and test hygiene
 
-* Import `package:flutter_test/flutter_test.dart` for Flutter tests.
-* Import `package:test/test.dart` only for tests that do not use Flutter APIs.
+* Import `package:flutter_test/flutter_test.dart` for unit and widget tests.
 * Use matcher-based assertions: `equals`, `same`, `isNull`, `isNotNull`,
   `isEmpty`, `contains`, `orderedEquals`, and `throwsA` as applicable.
 * Use `expect(actual, equals(expected))` rather than passing raw values as
