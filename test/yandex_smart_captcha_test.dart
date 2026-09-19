@@ -136,7 +136,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        contains('window.smartCaptcha.execute(window.$widgetIdProp)'),
+        equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
       );
     });
 
@@ -152,7 +152,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        contains('window.smartCaptcha.reset(window.$widgetIdProp)'),
+        equals(['window.smartCaptcha.reset(window.$widgetIdProp)']),
       );
     });
 
@@ -168,7 +168,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        contains('window.smartCaptcha.destroy(window.$widgetIdProp)'),
+        equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
       );
     });
 
@@ -272,7 +272,7 @@ void main() {
       expect(widget.onJavaScriptError, same(onJavaScriptError));
       expect(widget.onNavigationRequest, same(onNavigationRequest));
       expect(widget.loadingIndicator, same(loadingIndicator));
-      expect(widget.baseUrl, baseUrl);
+      expect(widget.baseUrl, equals(baseUrl));
     });
 
     test('creates a state for the widget', () {
@@ -398,7 +398,7 @@ void main() {
           request,
         );
 
-        expect(response?.action, PermissionResponseAction.GRANT);
+        expect(response?.action, equals(PermissionResponseAction.GRANT));
         expect(response?.resources, same(request.resources));
       });
 
@@ -415,7 +415,7 @@ void main() {
           ),
         );
 
-        expect(policy, NavigationActionPolicy.ALLOW);
+        expect(policy, equals(NavigationActionPolicy.ALLOW));
       });
 
       testWidgets('uses the navigation callback decision and URL',
@@ -439,8 +439,8 @@ void main() {
           ),
         );
 
-        expect(requestedUrl, 'https://captcha.example/path');
-        expect(policy, NavigationActionPolicy.CANCEL);
+        expect(requestedUrl, equals('https://captcha.example/path'));
+        expect(policy, equals(NavigationActionPolicy.CANCEL));
       });
 
       testWidgets('accepts JavaScript console messages', (tester) async {
@@ -562,17 +562,17 @@ void main() {
       });
 
       testWidgets('calls onTokenExpired when tokenExpired fires',
-         (tester) async {
-       var calls = 0;
-       final webViewController = await pumpCaptcha(
-         tester,
-         config: createConfig(),
-         onTokenExpired: () => calls++,
-       );
+          (tester) async {
+        var calls = 0;
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          onTokenExpired: () => calls++,
+        );
 
-       webViewController.emit(CaptchaEvent.tokenExpired.name);
+        webViewController.emit(CaptchaEvent.tokenExpired.name);
 
-       expect(calls, equals(1));
+        expect(calls, equals(1));
       });
 
       testWidgets('calls onNetworkError when networkError fires',
@@ -601,6 +601,22 @@ void main() {
         webViewController.emit(CaptchaEvent.javaScriptError.name);
 
         expect(calls, equals(1));
+      });
+
+      testWidgets('ignores optional event callbacks when they are omitted',
+          (tester) async {
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+        );
+
+        webViewController.emit(CaptchaEvent.challengeShown.name);
+        webViewController.emit(CaptchaEvent.challengeHidden.name);
+        webViewController.emit(CaptchaEvent.tokenExpired.name);
+        webViewController.emit(CaptchaEvent.networkError.name);
+        webViewController.emit(CaptchaEvent.javaScriptError.name);
+
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets(
@@ -660,7 +676,7 @@ void main() {
 
         webViewController.emit(CaptchaEvent.challengeSolved.name, [42]);
 
-        expect(receivedToken, '42');
+        expect(receivedToken, equals('42'));
       });
     });
 

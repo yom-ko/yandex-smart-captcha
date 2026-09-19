@@ -6,15 +6,15 @@ void main() {
     test('uses documented defaults', () {
       const config = CaptchaConfig(clientKey: 'client-key');
 
-      expect(config.clientKey, 'client-key');
-      expect(config.language, CaptchaLanguage.ru);
+      expect(config.clientKey, equals('client-key'));
+      expect(config.language, equals(CaptchaLanguage.ru));
       expect(config.alwaysShowChallenge, isFalse);
       expect(config.useInvisibleMode, isFalse);
-      expect(config.badgePosition, DPNBadgePosition.bottomRight);
+      expect(config.badgePosition, equals(DPNBadgePosition.bottomRight));
       expect(config.hideBadge, isFalse);
-      expect(config.initialScale, 1.0);
+      expect(config.initialScale, equals(1.0));
       expect(config.allowUserScaling, isFalse);
-      expect(config.maximumScale, 3.0);
+      expect(config.maximumScale, equals(3.0));
       expect(config.useWebViewMode, isTrue);
     });
 
@@ -32,15 +32,15 @@ void main() {
         useWebViewMode: false,
       );
 
-      expect(config.clientKey, 'another-key');
-      expect(config.language, CaptchaLanguage.tr);
+      expect(config.clientKey, equals('another-key'));
+      expect(config.language, equals(CaptchaLanguage.tr));
       expect(config.alwaysShowChallenge, isTrue);
       expect(config.useInvisibleMode, isTrue);
-      expect(config.badgePosition, DPNBadgePosition.topLeft);
+      expect(config.badgePosition, equals(DPNBadgePosition.topLeft));
       expect(config.hideBadge, isTrue);
-      expect(config.initialScale, 1.5);
+      expect(config.initialScale, equals(1.5));
       expect(config.allowUserScaling, isTrue);
-      expect(config.maximumScale, 4.0);
+      expect(config.maximumScale, equals(4.0));
       expect(config.useWebViewMode, isFalse);
     });
   });
