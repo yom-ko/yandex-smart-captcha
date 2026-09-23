@@ -43,5 +43,36 @@ void main() {
       expect(config.maximumScale, equals(4.0));
       expect(config.useWebViewMode, isFalse);
     });
+
+    test('considers configurations equal when all values match', () {
+      const first = CaptchaConfig(clientKey: 'client-key');
+      const second = CaptchaConfig(clientKey: 'client-key');
+
+      expect(first, equals(second));
+      expect(first.hashCode, equals(second.hashCode));
+    });
+
+    test('considers configurations different when any value differs', () {
+      const config = CaptchaConfig(clientKey: 'client-key');
+      const configurationsWithDifferentValues = <CaptchaConfig>[
+        CaptchaConfig(clientKey: 'another-key'),
+        CaptchaConfig(clientKey: 'client-key', language: CaptchaLanguage.en),
+        CaptchaConfig(clientKey: 'client-key', alwaysShowChallenge: true),
+        CaptchaConfig(clientKey: 'client-key', useInvisibleMode: true),
+        CaptchaConfig(
+          clientKey: 'client-key',
+          badgePosition: DPNBadgePosition.topLeft,
+        ),
+        CaptchaConfig(clientKey: 'client-key', hideBadge: true),
+        CaptchaConfig(clientKey: 'client-key', initialScale: 1.5),
+        CaptchaConfig(clientKey: 'client-key', allowUserScaling: true),
+        CaptchaConfig(clientKey: 'client-key', maximumScale: 4),
+        CaptchaConfig(clientKey: 'client-key', useWebViewMode: false),
+      ];
+
+      for (final differentConfig in configurationsWithDifferentValues) {
+        expect(config, isNot(equals(differentConfig)));
+      }
+    });
   });
 }

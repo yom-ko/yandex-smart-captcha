@@ -86,4 +86,35 @@ final class CaptchaConfig {
     this.allowUserScaling = false,
     this.maximumScale = 3.0,
   });
+
+  @override
+  bool operator ==(Object other) {
+    return identical(other, this) ||
+        other is CaptchaConfig &&
+            other.runtimeType == runtimeType &&
+            other.clientKey == clientKey &&
+            other.language == language &&
+            other.alwaysShowChallenge == alwaysShowChallenge &&
+            other.useInvisibleMode == useInvisibleMode &&
+            other.badgePosition == badgePosition &&
+            other.hideBadge == hideBadge &&
+            other.useWebViewMode == useWebViewMode &&
+            other.initialScale == initialScale &&
+            other.allowUserScaling == allowUserScaling &&
+            other.maximumScale == maximumScale;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        clientKey,
+        language,
+        alwaysShowChallenge,
+        useInvisibleMode,
+        badgePosition,
+        hideBadge,
+        useWebViewMode,
+        initialScale,
+        allowUserScaling,
+        maximumScale,
+      );
 }

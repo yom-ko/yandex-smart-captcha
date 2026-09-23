@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'captcha_event.dart';
+import '../captcha_event.dart';
 
 const widgetIdProp = 'wscWidgetId';
 
-final class WebSmartCaptcha {
+final class SmartCaptchaHTML {
   final String _clientKey;
   final String _language;
   final bool _alwaysShowChallenge;
@@ -16,9 +16,9 @@ final class WebSmartCaptcha {
   final double _maximumScale;
   final bool _useWebViewMode;
 
-  late final String html;
+  late final String data;
 
-  WebSmartCaptcha({
+  SmartCaptchaHTML({
     required String clientKey,
     required String language,
     required bool alwaysShowChallenge,
@@ -50,7 +50,7 @@ final class WebSmartCaptcha {
           .toList(),
     );
 
-    html = '''
+    data = '''
 <!doctype html>
 <html lang="$_language">
   <head>

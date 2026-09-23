@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
-import 'package:yandex_smart_captcha/src/web_smart_captcha.dart';
+import 'package:yandex_smart_captcha/src/native/smart_captcha_html.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
 import 'mocks/in_app_webview_platform_fake.dart';
@@ -207,6 +207,86 @@ void main() {
         equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
       );
     });
+
+    testWidgets('updates callbacks when widget properties change',
+        (tester) async {
+      final config = createConfig();
+      var initialReadyCalls = 0;
+      var updatedReadyCalls = 0;
+      final webViewController = await pumpCaptcha(
+        tester,
+        config: config,
+        onCaptchaReady: () => initialReadyCalls++,
+      );
+      await tester.pump();
+
+      webViewController.emit(CaptchaEvent.captchaReady.name);
+      expect(initialReadyCalls, equals(1));
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: captchaWidget(
+            config: config,
+            onCaptchaReady: () => updatedReadyCalls++,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      webViewController.emit(CaptchaEvent.captchaReady.name);
+
+      expect(initialReadyCalls, equals(1));
+      expect(updatedReadyCalls, equals(1));
+    });
+
+    testWidgets(
+      'recreates the adapter when configuration or base URL changes',
+      (tester) async {
+        final captchaController = CaptchaController();
+        final oldWebViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(language: CaptchaLanguage.ru),
+          controller: captchaController,
+          baseUrl: 'https://old.example.com',
+        );
+        await tester.pump();
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: captchaWidget(
+              config: createConfig(language: CaptchaLanguage.en),
+              controller: captchaController,
+              baseUrl: 'https://new.example.com',
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final replacementWebView =
+            tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final replacementWebViewController =
+            (replacementWebView.platform as PlatformInAppWebViewWidgetFake)
+                .controller;
+        final replacementHtml =
+            replacementWebView.platform.params.initialData?.data ?? '';
+
+        expect(replacementHtml, contains('hl: "en"'));
+        expect(
+          replacementWebView.platform.params.initialData?.baseUrl,
+          WebUri('https://new.example.com'),
+        );
+
+        await captchaController.execute();
+
+        expect(oldWebViewController.evaluatedJavascriptSources, isEmpty);
+        expect(
+          replacementWebViewController.evaluatedJavascriptSources,
+          equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
+        );
+      },
+    );
 
     testWidgets(
       'detaches its WebView controller when disposed',

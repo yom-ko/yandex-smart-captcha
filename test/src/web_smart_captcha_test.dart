@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
-import 'package:yandex_smart_captcha/src/web_smart_captcha.dart';
+import 'package:yandex_smart_captcha/src/native/smart_captcha_html.dart';
 
 void main() {
-  WebSmartCaptcha createCaptcha({
+  SmartCaptchaHTML createCaptcha({
     String clientKey = 'client-key',
     String language = 'en',
     bool alwaysShowChallenge = false,
@@ -17,7 +17,7 @@ void main() {
     double maximumScale = 3,
     bool useWebViewMode = true,
   }) {
-    return WebSmartCaptcha(
+    return SmartCaptchaHTML(
       clientKey: clientKey,
       language: language,
       alwaysShowChallenge: alwaysShowChallenge,
@@ -39,10 +39,10 @@ void main() {
         .cast<Map<String, dynamic>>();
   }
 
-  group('$WebSmartCaptcha', () {
+  group('$SmartCaptchaHTML', () {
     group('HTML structure', () {
       test('contains the document structure and captcha container', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(html, contains('<!doctype html>'));
         expect(html, contains('<html lang="en">'));
@@ -58,13 +58,13 @@ void main() {
       });
 
       test('contains charset, viewport, and SmartCaptcha script tags', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(html, contains('<meta charset="utf-8" />'));
         expect(html, contains('width=device-width'));
-        expect(html, contains('initial-scale=1.0'));
+        expect(html, contains(RegExp(r'initial-scale=1(?:\.0)?')));
         expect(html, contains('user-scalable=no'));
-        expect(html, contains('maximum-scale=3.0'));
+        expect(html, contains(RegExp(r'maximum-scale=3(?:\.0)?')));
         expect(
           html,
           contains(
@@ -88,7 +88,7 @@ void main() {
           allowUserScaling: 'yes',
           maximumScale: 4,
           useWebViewMode: false,
-        ).html;
+        ).data;
 
         expect(html, contains('<html lang="ru">'));
         expect(html, contains('sitekey: "test-key"'));
@@ -99,14 +99,14 @@ void main() {
         expect(html, contains('hideShield: true'));
         expect(html, contains('initial-scale=1.5'));
         expect(html, contains('user-scalable=yes'));
-        expect(html, contains('maximum-scale=4.0'));
+        expect(html, contains(RegExp(r'maximum-scale=4(?:\.0)?')));
         expect(html, contains('webview: false'));
       });
     });
 
     group('event wiring', () {
       test('reports a missing SmartCaptcha script before rendering', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(html, contains('if (!window.smartCaptcha)'));
         expect(html, contains('"${CaptchaEvent.networkError.name}"'));
@@ -120,7 +120,7 @@ void main() {
       });
 
       test('contains challengeSolved event handler', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(html, contains('function resultCallback(token)'));
         expect(html, contains('"${CaptchaEvent.challengeSolved.name}"'));
@@ -128,14 +128,14 @@ void main() {
       });
 
       test('contains captchaReady event handler', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(html, contains('window.flutter_inappwebview.callHandler('));
         expect(html, contains('"${CaptchaEvent.captchaReady.name}"'));
       });
 
       test('subscribes to exactly the native SmartCaptcha events', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(
           subscribedEventsFrom(html),
@@ -149,7 +149,7 @@ void main() {
       });
 
       test('renders and subscribes widget using configured container', () {
-        final html = createCaptcha().html;
+        final html = createCaptcha().data;
 
         expect(
           html,

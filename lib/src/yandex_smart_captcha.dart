@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'captcha_config.dart';
-import 'captcha_event.dart';
-import 'web_smart_captcha.dart';
+import 'captcha_platform_controller.dart';
+import 'native/captcha_adapter_controller.dart'
+    if (dart.library.js_interop) 'web/captcha_adapter_controller_web.dart';
+import 'native/captcha_adapter_widget.dart'
+    if (dart.library.js_interop) 'web/captcha_adapter_widget_web.dart';
 
 /// A controller for [YandexSmartCaptcha].
 ///
 /// Provides programmatic control over the underlying Web SmartCaptcha instance
 /// by exposing its imperative methods.
 final class CaptchaController {
-  InAppWebViewController? _webViewController;
+  CaptchaPlatformController? _platformController;
 
   /// Creates a controller for [YandexSmartCaptcha].
   CaptchaController();
@@ -21,9 +23,7 @@ final class CaptchaController {
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#execute
   Future<void> execute() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
-    );
+    await _platformController?.execute();
   }
 
   /// Resets the Web SmartCaptcha widget to its initial state.
@@ -32,9 +32,7 @@ final class CaptchaController {
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#reset
   Future<void> reset() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
-    );
+    await _platformController?.reset();
   }
 
   /// Removes the Web SmartCaptcha widget and its associated event listeners.
@@ -45,24 +43,25 @@ final class CaptchaController {
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#destroy
   Future<void> destroy() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
-    );
+    await _platformController?.destroy();
   }
 
-  // ignore: use_setters_to_change_properties
-  void _attachWebViewController(InAppWebViewController controller) {
-    _webViewController = controller;
+  void _attach(CaptchaPlatformController controller) {
+    _platformController = controller;
   }
 
-  void _detachWebViewController() {
-    _webViewController = null;
+  void _detach(CaptchaPlatformController controller) {
+    if (identical(_platformController, controller)) {
+      _platformController = null;
+    }
   }
 }
 
 /// A Flutter widget that configures and displays Yandex SmartCaptcha.
 ///
-/// Wraps an internal WebView executing the Web SmartCaptcha script.
+/// On Android and iOS, it hosts SmartCaptcha in a native WebView. On Flutter
+/// Web, it renders SmartCaptcha directly into a browser DOM container at this
+/// widget's location. The challenge UI / overlay are fully controlled by Yandex.
 class YandexSmartCaptcha extends StatefulWidget {
   /// The configuration for this CAPTCHA instance.
   final CaptchaConfig config;
@@ -93,22 +92,22 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when a network error occurs while loading or executing the CAPTCHA.
   final VoidCallback? onNetworkError;
 
-  /// Called when an uncaught JavaScript error occurs inside the CAPTCHA WebView.
+  /// Called when an uncaught JavaScript error occurs inside SmartCaptcha.
   final VoidCallback? onJavaScriptError;
 
-  /// Intercepts navigation requests inside the WebView.
+  /// Intercepts navigation requests inside the native WebView.
   ///
+  /// Navigation interception is not available on Flutter Web.
   /// Return `true` to allow navigation, or `false` to block it.
   final bool Function(String url)? onNavigationRequest;
 
   /// An optional controller to programmatically interact with the CAPTCHA.
   final CaptchaController? controller;
 
-  /// The HTTP(S) URL used to load SmartCaptcha content in the WebView.
+  /// The HTTP(S) URL used as the SmartCaptcha document origin on native
+  /// platforms.
   ///
-  /// Required for Same-Origin Policy compliance. Usually, the URL's host
-  /// should match an allowed host in the Yandex Cloud console.
-  /// Defaults to `about:blank`.
+  /// On Flutter Web, the browser application's current origin is used.
   final String? baseUrl;
 
   /// Creates a Yandex SmartCaptcha widget.
@@ -134,155 +133,81 @@ class YandexSmartCaptcha extends StatefulWidget {
 }
 
 class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
-  final _webCaptchaReady = ValueNotifier<bool>(false);
-
-  final _webViewSettings = InAppWebViewSettings(
-    transparentBackground: true,
-    useShouldOverrideUrlLoading: true,
-    mediaPlaybackRequiresUserGesture: false,
-    allowsInlineMediaPlayback: true,
-  );
-
-  late final InAppWebViewInitialData _webViewData;
-
-  InAppWebViewController? _webViewController;
+  late final CaptchaAdapterCallbacks _callbacks;
+  late CaptchaAdapterController _adapterController;
 
   @override
   void initState() {
     super.initState();
 
-    final CaptchaConfig(
-      :clientKey,
-      :alwaysShowChallenge,
-      :language,
-      :useInvisibleMode,
-      :hideBadge,
-      :badgePosition,
-      :useWebViewMode,
-      :initialScale,
-      :allowUserScaling,
-      :maximumScale,
-    ) = widget.config;
-
-    final webCaptcha = WebSmartCaptcha(
-      clientKey: clientKey,
-      alwaysShowChallenge: alwaysShowChallenge,
-      language: language.name,
-      useInvisibleMode: useInvisibleMode,
-      hideBadge: hideBadge,
-      badgePosition: badgePosition.id,
-      useWebViewMode: useWebViewMode,
-      initialScale: initialScale.clamp(0.1, 10),
-      allowUserScaling: allowUserScaling ? 'yes' : 'no',
-      maximumScale: maximumScale.clamp(0.1, 10),
+    _callbacks = CaptchaAdapterCallbacks(
+      onChallengeSolved: widget.onChallengeSolved,
+      onCaptchaReady: widget.onCaptchaReady,
+      onChallengeShown: widget.onChallengeShown,
+      onChallengeHidden: widget.onChallengeHidden,
+      onTokenExpired: widget.onTokenExpired,
+      onNetworkError: widget.onNetworkError,
+      onJavaScriptError: widget.onJavaScriptError,
+      onNavigationRequest: widget.onNavigationRequest,
     );
-
-    _webViewData = InAppWebViewInitialData(
-      data: webCaptcha.html,
-      baseUrl: widget.baseUrl != null ? WebUri(widget.baseUrl!) : null,
-    );
+    _adapterController = _createAdapterController();
+    widget.controller?._attach(_adapterController);
   }
 
   @override
   void didUpdateWidget(YandexSmartCaptcha oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller?._detachWebViewController();
-      if (_webViewController != null) {
-        widget.controller?._attachWebViewController(_webViewController!);
-      }
+    _callbacks.update(
+      onChallengeSolved: widget.onChallengeSolved,
+      onCaptchaReady: widget.onCaptchaReady,
+      onChallengeShown: widget.onChallengeShown,
+      onChallengeHidden: widget.onChallengeHidden,
+      onTokenExpired: widget.onTokenExpired,
+      onNetworkError: widget.onNetworkError,
+      onJavaScriptError: widget.onJavaScriptError,
+      onNavigationRequest: widget.onNavigationRequest,
+    );
+
+    final adapterConfigChanged = oldWidget.config != widget.config ||
+        oldWidget.baseUrl != widget.baseUrl;
+    final controllerChanged = oldWidget.controller != widget.controller;
+
+    if (adapterConfigChanged) {
+      final oldAdapterController = _adapterController;
+
+      oldWidget.controller?._detach(oldAdapterController);
+      oldAdapterController.dispose();
+
+      _adapterController = _createAdapterController();
+      widget.controller?._attach(_adapterController);
+    } else if (controllerChanged) {
+      oldWidget.controller?._detach(_adapterController);
+      widget.controller?._attach(_adapterController);
     }
   }
 
   @override
   void dispose() {
-    widget.controller?._detachWebViewController();
-    _webCaptchaReady.dispose();
+    widget.controller?._detach(_adapterController);
+    _adapterController.dispose();
 
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (widget.backgroundColor != null)
-          ColoredBox(color: widget.backgroundColor!),
-        InAppWebView(
-          initialData: _webViewData,
-          initialSettings: _webViewSettings,
-          onPermissionRequest: (_, request) async {
-            return PermissionResponse(
-              resources: request.resources,
-              action: PermissionResponseAction.GRANT,
-            );
-          },
-          shouldOverrideUrlLoading: (_, navigationAction) async {
-            final url = navigationAction.request.url.toString();
-            final result = widget.onNavigationRequest?.call(url) ?? true;
-            return result
-                ? NavigationActionPolicy.ALLOW
-                : NavigationActionPolicy.CANCEL;
-          },
-          onConsoleMessage: (_, message) {
-            debugPrint('YandexSmartCaptcha JS console message: $message');
-          },
-          onWebViewCreated: (controller) {
-            _webCaptchaReady.value = false;
-            _webViewController = controller;
-            widget.controller?._attachWebViewController(controller);
+  CaptchaAdapterController _createAdapterController() =>
+      CaptchaAdapterController(
+        config: widget.config,
+        baseUrl: widget.baseUrl,
+        callbacks: _callbacks,
+      );
 
-            controller
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.captchaReady.name,
-                  callback: (args) {
-                    _webCaptchaReady.value = true;
-                    widget.onCaptchaReady?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.challengeShown.name,
-                  callback: (args) {
-                    widget.onChallengeShown?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.challengeHidden.name,
-                  callback: (args) {
-                    widget.onChallengeHidden?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.challengeSolved.name,
-                  callback: (args) {
-                    var token = args.firstOrNull?.toString();
-                    token = token == 'null' ? null : token;
-                    widget.onChallengeSolved(token);
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.tokenExpired.name,
-                  callback: (args) {
-                    widget.onTokenExpired?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.networkError.name,
-                  callback: (args) {
-                    widget.onNetworkError?.call();
-                  })
-              ..addJavaScriptHandler(
-                  handlerName: CaptchaEvent.javaScriptError.name,
-                  callback: (args) {
-                    widget.onJavaScriptError?.call();
-                  });
-          },
-        ),
-        if (widget.loadingIndicator != null)
-          ValueListenableBuilder<bool>(
-            valueListenable: _webCaptchaReady,
-            child: widget.loadingIndicator,
-            builder: (_, ready, child) =>
-                ready ? const SizedBox.shrink() : child!,
-          ),
-      ],
-    );
-  }
+  @override
+  Widget build(BuildContext context) => CaptchaAdapterWidget(
+        key: ObjectKey(_adapterController),
+        controller: _adapterController,
+        callbacks: _callbacks,
+        backgroundColor: widget.backgroundColor,
+        loadingIndicator: widget.loadingIndicator,
+      );
 }

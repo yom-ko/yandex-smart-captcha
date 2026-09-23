@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                 onNavigationRequest: (url) {
                   debugPrint('called: onNavigationRequest: $url');
                   // Block navigation when clicking Yandex Cloud links,
-                  return !url.contains('cloud.yandex');
+                  return !url.contains('yandex.cloud');
                   // ...or simply block any web navigation.
                   // return false;
                 },
