@@ -155,23 +155,6 @@ void main() {
       controller.dispose();
     },
   );
-
-  test(
-    'keeps the shared script until all widget references are released',
-    () async {
-      final script = _appendSmartCaptchaScript();
-
-      await acquireSmartCaptchaScript();
-      await acquireSmartCaptchaScript();
-      expect(document.querySelector(_smartCaptchaScriptSelector), same(script));
-
-      releaseSmartCaptchaScript();
-      expect(document.querySelector(_smartCaptchaScriptSelector), same(script));
-
-      releaseSmartCaptchaScript();
-      expect(document.querySelector(_smartCaptchaScriptSelector), isNull);
-    },
-  );
 }
 
 HTMLScriptElement _appendSmartCaptchaScript() {

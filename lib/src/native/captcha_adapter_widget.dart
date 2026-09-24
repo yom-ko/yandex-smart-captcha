@@ -2,18 +2,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../captcha_event.dart';
-import '../captcha_platform_controller.dart';
 import 'captcha_adapter_controller.dart';
 
 final class CaptchaAdapterWidget extends StatelessWidget {
   final CaptchaAdapterController controller;
-  final CaptchaAdapterCallbacks callbacks;
   final Color? backgroundColor;
   final Widget? loadingIndicator;
 
   const CaptchaAdapterWidget({
     required this.controller,
-    required this.callbacks,
     this.backgroundColor,
     this.loadingIndicator,
     super.key,
@@ -41,7 +38,8 @@ final class CaptchaAdapterWidget extends StatelessWidget {
           },
           shouldOverrideUrlLoading: (_, navigationAction) async {
             final url = navigationAction.request.url.toString();
-            final result = callbacks.onNavigationRequest?.call(url) ?? true;
+            final result =
+                controller.callbacks.onNavigationRequest?.call(url) ?? true;
             return result
                 ? NavigationActionPolicy.ALLOW
                 : NavigationActionPolicy.CANCEL;

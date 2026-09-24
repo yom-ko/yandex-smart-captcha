@@ -15,7 +15,6 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   final CaptchaConfig config;
   final CaptchaAdapterCallbacks callbacks;
-  final String? baseUrl;
 
   @override
   final isReady = ValueNotifier<bool>(false);
@@ -29,7 +28,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   CaptchaAdapterController({
     required this.config,
     required this.callbacks,
-    this.baseUrl,
+    String? baseUrl,
   });
 
   void attachContainer(HTMLDivElement container) {
@@ -128,6 +127,12 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
+  void _releaseScriptReference() {
+    if (!_scriptAcquired) return;
+    _scriptAcquired = false;
+    releaseSmartCaptchaScript();
+  }
+
   @override
   Future<void> execute() async {
     if (_isDisposed || _widgetId == null) return;
@@ -163,11 +168,5 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
     _releaseScriptReference();
     isReady.dispose();
-  }
-
-  void _releaseScriptReference() {
-    if (!_scriptAcquired) return;
-    _scriptAcquired = false;
-    releaseSmartCaptchaScript();
   }
 }

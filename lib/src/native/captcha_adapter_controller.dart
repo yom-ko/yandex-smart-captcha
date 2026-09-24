@@ -8,8 +8,8 @@ import 'smart_captcha_html.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
   final CaptchaConfig config;
-  final String? baseUrl;
   final CaptchaAdapterCallbacks callbacks;
+  final String? baseUrl;
 
   @override
   final isReady = ValueNotifier<bool>(false);
@@ -19,10 +19,10 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   CaptchaAdapterController({
     required this.config,
-    required this.baseUrl,
     required this.callbacks,
+    required this.baseUrl,
   }) {
-    final captchaHtml = SmartCaptchaHTML(
+    final captchaHTML = SmartCaptchaHTML(
       clientKey: config.clientKey,
       alwaysShowChallenge: config.alwaysShowChallenge,
       language: config.language.name,
@@ -36,29 +36,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     );
 
     initialData = InAppWebViewInitialData(
-      data: captchaHtml.data,
+      data: captchaHTML.data,
       baseUrl: baseUrl != null ? WebUri(baseUrl!) : null,
-    );
-  }
-
-  @override
-  Future<void> execute() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
-    );
-  }
-
-  @override
-  Future<void> reset() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
-    );
-  }
-
-  @override
-  Future<void> destroy() async {
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
     );
   }
 
@@ -86,6 +65,27 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       case CaptchaEvent.javaScriptError:
         callbacks.onJavaScriptError?.call();
     }
+  }
+
+  @override
+  Future<void> execute() async {
+    await _webViewController?.evaluateJavascript(
+      source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
+    );
+  }
+
+  @override
+  Future<void> reset() async {
+    await _webViewController?.evaluateJavascript(
+      source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
+    );
+  }
+
+  @override
+  Future<void> destroy() async {
+    await _webViewController?.evaluateJavascript(
+      source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
+    );
   }
 
   @override

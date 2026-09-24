@@ -201,15 +201,14 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
   CaptchaAdapterController _createAdapterController() =>
       CaptchaAdapterController(
         config: widget.config,
-        baseUrl: widget.baseUrl,
         callbacks: _callbacks,
+        baseUrl: widget.baseUrl,
       );
 
   @override
   Widget build(BuildContext context) => CaptchaAdapterWidget(
         key: ObjectKey(_adapterController),
         controller: _adapterController,
-        callbacks: _callbacks,
         backgroundColor: widget.backgroundColor,
         loadingIndicator: widget.loadingIndicator,
       );
