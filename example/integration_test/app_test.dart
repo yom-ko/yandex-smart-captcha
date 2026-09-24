@@ -12,7 +12,7 @@ void main() {
     expect($(HomePage), findsOne);
     expect($(YandexSmartCaptcha), findsOne);
 
-    // Test the basic user flow for Web SmartCaptcha.
+    // Test the basic SmartCaptcha user flow.
     await $.platform.mobile.tap(Selector(textContains: 'robot'));
 
     await $.pump(const Duration(seconds: 2));

@@ -15,16 +15,19 @@ Use this skill when creating or editing tests for the `yandex_smart_captcha` Flu
 
 Mirror `lib/` under `test/` using the `_test.dart` suffix:
 
-| Production code                                   | Test file                                           |
-| ------------------------------------------------- | --------------------------------------------------- |
-| `lib/src/captcha_config.dart`                     | `test/src/captcha_config_test.dart`                 |
-| `lib/src/captcha_event.dart`                      | `test/src/captcha_event_test.dart`                  |
-| `lib/src/captcha_language.dart`                   | `test/src/captcha_language_test.dart`               |
-| `lib/src/dpn_badge_position.dart`                 | `test/src/dpn_badge_position_test.dart`             |
-| `lib/src/native/smart_captcha_html.dart`          | `test/src/web_smart_captcha_test.dart`              |
-| `lib/src/yandex_smart_captcha.dart`               | `test/yandex_smart_captcha_test.dart`               |
-| `lib/src/web/captcha_adapter_controller_web.dart` | `test/src/captcha_adapter_controller_web_test.dart` |
-| `lib/src/web/captcha_script_loader_web.dart`      | `test/src/captcha_adapter_controller_web_test.dart` |
+| Production code                                   | Test file                                               |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| `lib/src/captcha_config.dart`                     | `test/src/captcha_config_test.dart`                     |
+| `lib/src/captcha_event.dart`                      | `test/src/captcha_event_test.dart`                      |
+| `lib/src/captcha_language.dart`                   | `test/src/captcha_language_test.dart`                   |
+| `lib/src/dpn_badge_position.dart`                 | `test/src/dpn_badge_position_test.dart`                 |
+| `lib/src/native/smart_captcha_html.dart`          | `test/src/native/smart_captcha_html_test.dart`          |
+| `lib/src/yandex_smart_captcha.dart`               | `test/yandex_smart_captcha_test.dart`                   |
+| `lib/src/native/captcha_adapter_controller.dart`  | `test/src/native/captcha_adapter_controller_test.dart`  |
+| `lib/src/native/captcha_adapter_widget.dart`      | `test/src/native/captcha_adapter_widget_test.dart`      |
+| `lib/src/web/captcha_adapter_controller_web.dart` | `test/src/web/captcha_adapter_controller_web_test.dart` |
+| `lib/src/web/captcha_script_loader_web.dart`      | `test/src/web/captcha_script_loader_web_test.dart`      |
+| `lib/src/captcha_platform_controller.dart`        | `test/src/captcha_platform_controller_test.dart`        |
 
 Put reusable WebView test infrastructure in `test/mocks/`, especially [`in_app_webview_platform_fake.dart`](../../../test/mocks/in_app_webview_platform_fake.dart).
 
@@ -52,6 +55,8 @@ Use `test()` when the behavior does not require Flutter bindings, widget lifecyc
 
 Use `testWidgets()` when the behavior requires Flutter bindings, widget lifecycle, `BuildContext`, `InAppWebView`, controller attachment, DOM setup, or JavaScript-triggered callbacks.
 
+The Web adapter's `captcha_adapter_web.dart` contains only external JavaScript interop declarations, so test its observable use through the browser controller contract rather than adding a declaration-only test. The Web `captcha_adapter_widget_web.dart` wrapper delegates to Flutter's `HtmlElementView` – its platform-view lifecycle is covered by Flutter's framework and is not deterministic in the headless package test harness.
+
 Import `package:flutter_test/flutter_test.dart` for both pure Dart and widget tests.
 
 Register the fake WebView platform once per test file that exercises the platform layer:
@@ -62,9 +67,7 @@ setUpAll(() {
 });
 ```
 
-Run the native/unit suite with `flutter test`. Run browser adapter tests explicitly
-with `flutter test --platform chrome`; the default VM runner skips files marked
-`@TestOn('browser')`.
+Run the native/unit suite with `flutter test`. Run browser adapter tests explicitly with `flutter test --platform chrome`; the default VM runner skips files marked `@TestOn('browser')`.
 
 ## Testing contracts
 
@@ -166,7 +169,7 @@ Run commands from the package root.
 During iteration, run the smallest affected test file first:
 
 ```bash
-flutter test test/src/web_smart_captcha_test.dart
+flutter test test/src/native/smart_captcha_html_test.dart
 flutter test test/yandex_smart_captcha_test.dart
 ```
 

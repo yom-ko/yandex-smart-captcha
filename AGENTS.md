@@ -38,9 +38,10 @@ On native platforms, `baseUrl` becomes the initial document origin through `InAp
 
 - Follow the existing Flutter, Dart, and platform-adapter patterns rather than introducing browser-only APIs into shared code or another native WebView abstraction.
 - Prefer immutable configuration objects, typed enums, named parameters, and nullable optional callbacks.
-- Keep real SmartCaptcha client keys out of source, tests, documentation, and generated artifacts. Local example credentials belong in `example/.env`.
+- Keep real SmartCaptcha client keys out of source, tests, documentation, and generated artifacts. Local example credentials belong in `example/.env`; whenever testing the example app, load that real key with `--dart-define-from-file=.env`, but leave it git-ignored and never commit.
 - When public API or user-visible behavior changes, keep the README, Dartdoc, example usage, tests, and changelog aligned.
 - Run native/unit coverage with `flutter test`; run browser adapter coverage with `flutter test --platform chrome`. Do not confuse the browser-only suite being skipped by the default VM runner with a passing browser test.
+- Run the example app and its integration tests from `example/` with `--dart-define-from-file=.env`, using a real local `CLIENT_KEY`.
 
 ## Testing boundaries
 

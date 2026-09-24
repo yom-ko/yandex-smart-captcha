@@ -4,16 +4,16 @@ import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
 
 /// Configuration for [YandexSmartCaptcha].
 ///
-/// Most options are passed directly to the underlying Web SmartCaptcha instance.
+/// Most options are passed directly to the underlying SmartCaptcha instance.
 /// See the [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#methods)
 /// for details.
 final class CaptchaConfig {
-  /// The client-side key passed to the underlying Web SmartCaptcha.
+  /// The client-side key passed to the underlying SmartCaptcha widget.
   ///
   /// Corresponding JavaScript parameter: `sitekey`.
   final String clientKey;
 
-  /// The language for the Web SmartCaptcha UI.
+  /// The language for the SmartCaptcha UI.
   ///
   /// For languages other than Russian, this option also affects
   /// the CAPTCHA challenge language (typically switching it to English).
@@ -56,13 +56,13 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `webview`.
   final bool useWebViewMode;
 
-  /// The initial scale factor for the Web SmartCaptcha content.
+  /// The initial scale factor for the WebView content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
   /// On Flutter Web, the browser document controls viewport behavior.
   final double initialScale;
 
-  /// Whether the user can scale the Web SmartCaptcha content using gestures.
+  /// Whether the user can scale the WebView content using gestures.
   ///
   /// Sets the `user-scalable` attribute of the viewport meta tag.
   /// On Flutter Web, the browser document controls viewport behavior.
@@ -74,7 +74,7 @@ final class CaptchaConfig {
   /// On Flutter Web, the browser document controls viewport behavior.
   final double maximumScale;
 
-  /// Creates configuration for Web SmartCaptcha.
+  /// Creates SmartCaptcha configuration.
   const CaptchaConfig({
     required this.clientKey,
     this.language = CaptchaLanguage.ru,

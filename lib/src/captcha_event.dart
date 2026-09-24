@@ -28,14 +28,14 @@ enum CaptchaEvent {
 
   const CaptchaEvent(this.id, {this.subscribable = true});
 
-  /// The event identifier passed to SmartCaptcha's native `subscribe` method.
+  /// The event identifier passed to SmartCaptcha's `subscribe` method.
   ///
   /// If [subscribable] is `false`, this identifier is not passed to `subscribe`.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   final String id;
 
-  /// Whether this event is registered via SmartCaptcha's native `subscribe` method.
+  /// Whether this event is registered via SmartCaptcha's `subscribe` method.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   final bool subscribable;

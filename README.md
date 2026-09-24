@@ -27,15 +27,22 @@ YandexSmartCaptcha(
 
 In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it is useful if you need to trigger validation, reset the widget, or destroy it programmatically.
 
+NOTES:
+
+* On mobile, ensure that the `YandexSmartCaptcha` ancestor widget provides enough vertical space to accommodate both the main "I'm not a robot" block and the challenge popup, as both are rendered inside a WebView.
+* On Web, the vertical space only needs to accommodate the normal "I'm not a robot" block (with a fixed height of around 100px). The challenge popup is fully managed by Yandex, so the ancestor widget does not need to reserve additional space.
+
 ### Web support
 
-On Web, `YandexSmartCaptcha` is a lightweight host for the regular Yandex SmartCaptcha browser widget. Place it with standard Flutter layout widgets such as `Center`, `Align`, `Padding`, or `SizedBox` to choose where the "I'm not a robot" block appears. Yandex owns the challenge popup content, position, animation, and overlay behavior, just as it does on a non-Flutter website. You can still use `onChallengeShown` and `onChallengeHidden` to react to that provider-owned UI. All `CaptchaController` methods are also available.
+On Web, `YandexSmartCaptcha` is a lightweight host for the regular Yandex SmartCaptcha browser widget. Place it with standard Flutter layout widgets such as `Center`, `Align`, `Padding`, or `SizedBox` to choose where the "I'm not a robot" block appears. Yandex owns the challenge popup content, position, animation, and overlay behavior, just as it does on a regular (non-Flutter) website. You can still use `onChallengeShown` and `onChallengeHidden` to react to that provider-owned UI. All the `CaptchaController` methods are also available.
+
+The Web implementation is compatible with [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
 
 ### CaptchaConfig parameters
 
 This is an immutable configuration for Web SmartCaptcha.
 
-> The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget. It is relevant only for mobile platforms, since on Web the widget runs in the browser directly.
+> The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget. The term is relevant only for mobile platforms, since on Web the widget runs in the browser directly.
 >
 > Ignored on Web (*): `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
 
@@ -48,8 +55,8 @@ This is an immutable configuration for Web SmartCaptcha.
 | `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`. |
 | `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                          |
 | `useWebViewMode` *    |          | `true`        | Whether to enable specialized mobile WebView optimization mode.                           |
-| `initialScale` *      |          | `1.0`         | The initial scale factor for the Web SmartCaptcha content.                                |
-| `allowUserScaling` *  |          | `false`       | Whether the user can scale the Web SmartCaptcha content using gestures.                   |
+| `initialScale` *      |          | `1.0`         | The initial scale factor for the WebView content.                                         |
+| `allowUserScaling` *  |          | `false`       | Whether the user can scale the WebView content using gestures.                            |
 | `maximumScale` *      |          | `3.0`         | The maximum scale factor when `allowUserScaling` is `true`.                               |
 
 ### YandexSmartCaptcha parameters
@@ -62,8 +69,8 @@ Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, a
 | :---------------------- | :------: | :------ | :------------------------------------------------------------------------------------- |
 | `config`                |    ✔     |         | The configuration for this CAPTCHA instance.                                           |
 | `onChallengeSolved`     |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.                          |
-| `backgroundColor` *     |          | `null`  | The background color of the native widget container. Has no effect on Web.             |
-| `loadingIndicator` *    |          | `null`  | A custom loading widget for native platforms. Has no effect on Web.                    |
+| `backgroundColor` *     |          | `null`  | The background color of the widget container. Has no effect on Web.                    |
+| `loadingIndicator` *    |          | `null`  | A custom loading widget for platforms. Has no effect on Web.                           |
 | `onCaptchaReady`        |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.                        |
 | `onChallengeShown`      |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                               |
 | `onChallengeHidden`     |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                                     |
@@ -76,16 +83,15 @@ Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, a
 
 ### CaptchaController methods
 
-Provide access to the Web SmartCaptcha's imperative methods.
+Provide access to SmartCaptcha's imperative methods.
 
-| Method      | Description                                                             |
-| :---------- | :---------------------------------------------------------------------- |
-| `execute()` | Starts user validation.                                                 |
-| `reset()`   | Resets the Web SmartCaptcha widget to its initial state.                |
-| `destroy()` | Removes the Web SmartCaptcha widget and its associated event listeners. |
+| Method      | Description                                                         |
+| :---------- | :------------------------------------------------------------------ |
+| `execute()` | Starts user validation.                                             |
+| `reset()`   | Resets the SmartCaptcha widget to its initial state.                |
+| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners. |
 
-The controller has the same `execute`, `reset`, and `destroy` API on native
-and Web platforms. Call these methods after `onCaptchaReady`.
+The controller has the same API on native and Web platforms. Call these methods after `onCaptchaReady`.
 
 ## Testing
 

@@ -2,10 +2,13 @@
 
 This is a simple app demonstrating the usage of the Yandex SmartCaptcha package.
 
+Create `.env` from `.env.example` and set a real Yandex SmartCaptcha
+`CLIENT_KEY`. Keep `.env` local and never commit it.
+
 Run the example on Flutter Web with:
 
 ```bash
-flutter run -d chrome
+flutter run -d chrome --dart-define-from-file=.env
 ```
 
 To run integration tests on Android:

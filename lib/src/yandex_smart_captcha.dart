@@ -9,7 +9,7 @@ import 'native/captcha_adapter_widget.dart'
 
 /// A controller for [YandexSmartCaptcha].
 ///
-/// Provides programmatic control over the underlying Web SmartCaptcha instance
+/// Provides programmatic control over the underlying SmartCaptcha instance
 /// by exposing its imperative methods.
 final class CaptchaController {
   CaptchaPlatformController? _platformController;
@@ -26,7 +26,7 @@ final class CaptchaController {
     await _platformController?.execute();
   }
 
-  /// Resets the Web SmartCaptcha widget to its initial state.
+  /// Resets the SmartCaptcha widget to its initial state.
   ///
   /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
   ///
@@ -35,7 +35,7 @@ final class CaptchaController {
     await _platformController?.reset();
   }
 
-  /// Removes the Web SmartCaptcha widget and its associated event listeners.
+  /// Removes the SmartCaptcha widget and its associated event listeners.
   ///
   /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
   /// Calling [execute] or otherwise interacting with the controller after calling this method
