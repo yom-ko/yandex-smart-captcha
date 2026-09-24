@@ -101,8 +101,9 @@ class YandexSmartCaptcha extends StatefulWidget {
 
   /// Intercepts navigation requests inside the native WebView.
   ///
-  /// Navigation interception is not available on Flutter Web.
   /// Return `true` to allow navigation, or `false` to block it.
+  ///
+  /// Ignored on Flutter Web, where navigation is browser-controlled.
   final bool Function(String url)? onNavigationRequest;
 
   /// An optional controller to programmatically interact with the CAPTCHA.
