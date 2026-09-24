@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.3.1
+- Improve README.
+
 ## 7.3.0
 - Add web support using a DOM element and JavaScript interop. The public API of `YandexSmartCaptcha`, `CaptchaConfig`, and `CaptchaController` remains intact and is shared across native and web platforms.
 - Improve and expand Dartdoc coverage.
