@@ -4,7 +4,7 @@
 
 [![Pub Version](https://img.shields.io/pub/v/yandex_smart_captcha.svg?color=e97436)](https://pub.dev/packages/yandex_smart_captcha) [![Pub Points](https://img.shields.io/pub/points/yandex_smart_captcha.svg?color=53ab36)](https://pub.dev/packages/yandex_smart_captcha/score) [![Dart Package Docs](https://img.shields.io/badge/documentation-latest-blue.svg)](https://pub.dev/documentation/yandex_smart_captcha/latest) [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-This package makes it easy to integrate Yandex SmartCaptcha into Flutter-based Android, iOS, and Web apps. On Android and iOS it uses a native WebView; on Web it uses a DOM element and JavaScript interop. To learn more about the Yandex SmartCaptcha service, visit its [official page](https://yandex.cloud/en/services/smartcaptcha).
+This package makes it easy to integrate Yandex SmartCaptcha into Flutter-based Android, iOS, and web apps. On Android and iOS it uses a native WebView; on web it uses a DOM element and JavaScript interop. To learn more about the Yandex SmartCaptcha service, visit its [official page](https://yandex.cloud/en/services/smartcaptcha).
 
 ## Motivation
 
@@ -27,22 +27,22 @@ YandexSmartCaptcha(
 
 In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is entirely optional – it is useful if you need to trigger validation, reset the widget, or destroy it programmatically.
 
-* On mobile, ensure that the `YandexSmartCaptcha` ancestor widget provides enough vertical space to accommodate both the main "I'm not a robot" block and the challenge popup, as both are rendered inside a single WebView.
-* On Web, the vertical space only needs to accommodate the normal "I'm not a robot" block (with a fixed height of around 100px). The challenge popup is fully managed by Yandex, so the ancestor widget does not need to reserve additional space.
+* On mobile, ensure that the `YandexSmartCaptcha`'s ancestor widget provides enough vertical space to accommodate both the main "I'm not a robot" block and the challenge popup, as both are rendered inside a single WebView.
+* On web, the vertical space only needs to accommodate the "I'm not a robot" block (fixed height of around 100px). The challenge popup is fully controlled by Yandex, so the ancestor widget does not need to reserve additional space.
 
 ### Web support
 
-On Web, `YandexSmartCaptcha` is a lightweight host for the regular Yandex SmartCaptcha browser widget. Place it with standard Flutter layout widgets such as `Center`, `Align`, `Padding`, or `SizedBox` to choose where the "I'm not a robot" block appears. Yandex owns the challenge popup content, position, animation, and overlay behavior, just as it does on a regular (non-Flutter) website. You can still use `onChallengeShown` and `onChallengeHidden` to react to that provider-owned UI. All the `CaptchaController` methods are also available.
+On web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha browser widget. Position it using standard widgets such as `Center`, `Padding`, or `SizedBox` to control where the "I'm not a robot" block appears. The challenge popup's UI and behavior, on the other hand, are controlled by Yandex (just like on a regular website), but the `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
 
-The Web implementation supports [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
+The web implementation supports [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
 
 ### CaptchaConfig parameters
 
 This is an immutable configuration for Web SmartCaptcha.
 
-> The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget. The term is relevant only for mobile platforms, since on Web the widget runs directly in the browser.
+> The term "Web SmartCaptcha" refers to the underlying HTML page hosted inside the WebView that instantiates and executes the Yandex SmartCaptcha JavaScript widget on mobile platforms.
 >
-> Ignored on Web (*): `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
+> Ignored on web: `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
 
 | Parameter             | Required | Default       | Description                                                                               |
 | :-------------------- | :------: | :------------ | :---------------------------------------------------------------------------------------- |
@@ -61,7 +61,7 @@ This is an immutable configuration for Web SmartCaptcha.
 
 Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, and callback registration.
 
-> Ignored on Web (*): `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
+> Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
 | Parameter              | Required | Default | Description                                                                            |
 | :--------------------- | :------: | :------ | :------------------------------------------------------------------------------------- |
@@ -89,7 +89,7 @@ Provide access to SmartCaptcha's imperative methods.
 | `reset()`   | Resets the SmartCaptcha widget to its initial state.                |
 | `destroy()` | Removes the SmartCaptcha widget and its associated event listeners. |
 
-The controller has the same API on native and Web platforms. Call these methods after `onCaptchaReady`.
+The controller has the same API on native and web platforms. Call these methods after `onCaptchaReady`.
 
 ## Screenshots
 
