@@ -71,10 +71,14 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Provides the verification token string. May be `null` if token extraction fails.
   final void Function(String? token) onChallengeSolved;
 
-  /// The background color of the widget container.
+  /// The background color of the widget container on native platforms.
+  ///
+  /// Ignored on Flutter Web, where the browser owns the DOM element presentation.
   final Color? backgroundColor;
 
-  /// A custom widget displayed while the Web SmartCaptcha content is loading.
+  /// A custom widget displayed while SmartCaptcha is loading on native platforms.
+  ///
+  /// Ignored on Flutter Web, where the browser owns the DOM element presentation.
   final Widget? loadingIndicator;
 
   /// Called when the CAPTCHA script is fully loaded and initialized.
@@ -104,10 +108,9 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// An optional controller to programmatically interact with the CAPTCHA.
   final CaptchaController? controller;
 
-  /// The HTTP(S) URL used as the SmartCaptcha document origin on native
-  /// platforms.
+  /// The HTTP(S) URL used as the SmartCaptcha document origin on native platforms.
   ///
-  /// On Flutter Web, the browser application's current origin is used.
+  /// Ignored on Flutter Web, where the browser application's current origin is used.
   final String? baseUrl;
 
   /// Creates a Yandex SmartCaptcha widget.

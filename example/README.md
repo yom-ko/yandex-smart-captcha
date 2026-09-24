@@ -2,6 +2,12 @@
 
 This is a simple app demonstrating the usage of the Yandex SmartCaptcha package.
 
+Run the example on Flutter Web with:
+
+```bash
+flutter run -d chrome
+```
+
 To run integration tests on Android:
 
 1. Install [Patrol CLI](https://pub.dev/packages/patrol_cli) globally: `dart pub global activate patrol_cli`.

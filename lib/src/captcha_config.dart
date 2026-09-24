@@ -50,7 +50,8 @@ final class CaptchaConfig {
 
   /// Whether to enable specialized mobile WebView optimization mode.
   ///
-  /// Improves challenge accuracy and rendering on mobile devices.
+  /// Improves challenge accuracy and rendering on mobile devices. This option
+  /// is ignored on Flutter Web, where the widget runs directly in the browser.
   ///
   /// Corresponding JavaScript parameter: `webview`.
   final bool useWebViewMode;
@@ -58,19 +59,19 @@ final class CaptchaConfig {
   /// The initial scale factor for the Web SmartCaptcha content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
-  /// Actual behavior may vary depending on the underlying platform.
+  /// On Flutter Web, the browser document controls viewport behavior.
   final double initialScale;
 
   /// Whether the user can scale the Web SmartCaptcha content using gestures.
   ///
   /// Sets the `user-scalable` attribute of the viewport meta tag.
-  /// Actual behavior may vary depending on the underlying platform.
+  /// On Flutter Web, the browser document controls viewport behavior.
   final bool allowUserScaling;
 
   /// The maximum scale factor when [allowUserScaling] is `true`.
   ///
   /// Sets the `maximum-scale` attribute of the viewport meta tag.
-  /// Actual behavior may vary depending on the underlying platform.
+  /// On Flutter Web, the browser document controls viewport behavior.
   final double maximumScale;
 
   /// Creates configuration for Web SmartCaptcha.

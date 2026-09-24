@@ -2,8 +2,8 @@
 name: writing-unit-widget-tests
 description: >
   Write and maintain focused Dart and Flutter tests for this Yandex SmartCaptcha
-  package. Use for plain unit tests, generated HTML/JavaScript assertions, and
-  widget tests around the WebView bridge. Do not use as the primary guide for
+  package. Use for plain unit tests, generated HTML/JavaScript assertions,
+  native WebView bridge tests, and browser adapter tests. Do not use as the primary guide for
   golden tests, native integration tests, or end-to-end tests.
 ---
 
@@ -15,14 +15,16 @@ Use this skill when creating or editing tests for the `yandex_smart_captcha` Flu
 
 Mirror `lib/` under `test/` using the `_test.dart` suffix:
 
-| Production code                     | Test file                               |
-| ----------------------------------- | --------------------------------------- |
-| `lib/src/captcha_config.dart`       | `test/src/captcha_config_test.dart`     |
-| `lib/src/captcha_event.dart`        | `test/src/captcha_event_test.dart`      |
-| `lib/src/captcha_language.dart`     | `test/src/captcha_language_test.dart`   |
-| `lib/src/dpn_badge_position.dart`   | `test/src/dpn_badge_position_test.dart` |
-| `lib/src/web_smart_captcha.dart`    | `test/src/web_smart_captcha_test.dart`  |
-| `lib/src/yandex_smart_captcha.dart` | `test/yandex_smart_captcha_test.dart`   |
+| Production code                                   | Test file                                           |
+| ------------------------------------------------- | --------------------------------------------------- |
+| `lib/src/captcha_config.dart`                     | `test/src/captcha_config_test.dart`                 |
+| `lib/src/captcha_event.dart`                      | `test/src/captcha_event_test.dart`                  |
+| `lib/src/captcha_language.dart`                   | `test/src/captcha_language_test.dart`               |
+| `lib/src/dpn_badge_position.dart`                 | `test/src/dpn_badge_position_test.dart`             |
+| `lib/src/native/smart_captcha_html.dart`          | `test/src/web_smart_captcha_test.dart`              |
+| `lib/src/yandex_smart_captcha.dart`               | `test/yandex_smart_captcha_test.dart`               |
+| `lib/src/web/captcha_adapter_controller_web.dart` | `test/src/captcha_adapter_controller_web_test.dart` |
+| `lib/src/web/captcha_script_loader_web.dart`      | `test/src/captcha_adapter_controller_web_test.dart` |
 
 Put reusable WebView test infrastructure in `test/mocks/`, especially [`in_app_webview_platform_fake.dart`](../../../test/mocks/in_app_webview_platform_fake.dart).
 
@@ -36,19 +38,19 @@ The file mapping above describes the current repository layout; follow the actua
 2. Read the relevant implementation, `CaptchaEvent` definitions, and the fake WebView platform before writing assertions.
 3. Choose unit and/or widget tests based on the behavior being exercised (see below).
 4. Add the smallest test that demonstrates the required behavior or regression.
-5. Use the fake WebView platform for bridge handlers and evaluated JavaScript.
+5. Use the fake WebView platform for native bridge handlers and evaluated JavaScript. Use typed JavaScript interop fakes and DOM elements for browser adapter tests.
 6. Run the smallest affected test file while iterating.
 7. Run `dart format` on changed Dart files only.
 8. Before finishing a change that affects the public API, WebView bridge, or generated HTML/JavaScript, run the full `flutter test` suite and `flutter analyze`.
 9. Review the diff and remove brittle snapshots, duplicated expectations, timing assumptions, debug code, and unrelated changes.
 
-Do not replace the global platform instance inside individual tests unless the test explicitly needs to do so and restores the previous instance afterward. Reuse or extend the existing `pumpCaptcha()` helper in [`test/yandex_smart_captcha_test.dart`](../../../test/yandex_smart_captcha_test.dart) instead of duplicating `pumpWidget` setup.
+Do not replace the global platform instance inside individual tests unless the test explicitly needs to do so and restores the previous instance afterward. Reuse or extend the existing `pumpCaptcha()` helper in [`test/yandex_smart_captcha_test.dart`](../../../test/yandex_smart_captcha_test.dart) instead of duplicating `pumpWidget` setup. Browser-only test files should use `@TestOn('browser')` and native WebView suites should use `@TestOn('vm')` at the library level.
 
 ## Choosing the test type
 
-Use `test()` when the behavior does not require Flutter bindings, widget lifecycle, `BuildContext`, or platform APIs. Examples include enum names and IDs, `CaptchaConfig` defaults and value preservation, `WebSmartCaptcha` serialization, and other pure transformations.
+Use `test()` when the behavior does not require Flutter bindings, widget lifecycle, `BuildContext`, or platform APIs. Examples include enum names and IDs, `CaptchaConfig` defaults and value preservation, `SmartCaptchaHTML` serialization, and other pure transformations.
 
-Use `testWidgets()` when the behavior requires Flutter bindings, widget lifecycle, `BuildContext`, `InAppWebView`, controller attachment, or JavaScript-triggered callbacks.
+Use `testWidgets()` when the behavior requires Flutter bindings, widget lifecycle, `BuildContext`, `InAppWebView`, controller attachment, DOM setup, or JavaScript-triggered callbacks.
 
 Import `package:flutter_test/flutter_test.dart` for both pure Dart and widget tests.
 
@@ -60,13 +62,17 @@ setUpAll(() {
 });
 ```
 
+Run the native/unit suite with `flutter test`. Run browser adapter tests explicitly
+with `flutter test --platform chrome`; the default VM runner skips files marked
+`@TestOn('browser')`.
+
 ## Testing contracts
 
 Focus assertions on externally observable behavior and stable contracts rather than incidental implementation structure.
 
 ### Generated HTML and JavaScript
 
-Test generated output through the package's supported rendering or serialization API, such as `WebSmartCaptcha.html`. Do not duplicate production HTML or JavaScript in test-only APIs, and never execute remote Yandex JavaScript in tests.
+Test generated output through the package's supported rendering or serialization API, such as `SmartCaptchaHTML.data`. Do not duplicate production HTML or JavaScript in test-only APIs, and never execute remote Yandex JavaScript in tests.
 
 When generated HTML/JavaScript changes, add or update focused assertions for the affected contract. Depending on the change, this may include:
 
@@ -114,6 +120,15 @@ For `CaptchaController`, cover the behavior relevant to the change:
 Inspect `evaluatedJavascriptSources` on `PlatformInAppWebViewControllerFake` instead of relying on sleeps, arbitrary delays, logs, or timing.
 
 Assert the semantic JavaScript operation and its arguments rather than incidental formatting or wrapper syntax, unless the exact generated source is itself part of the contract.
+
+### Browser adapter
+
+For browser adapter tests:
+
+* Do not load the real Yandex script or make network requests.
+* Pre-install a script element with `smartCaptchaScriptUrl` and provide a typed JavaScript fake for `smartCaptcha`.
+* Verify DOM container sizing, rendered widget options, callback payload conversion, subscribed event dispatch, controller delegation, missing-API errors, and shared script reference cleanup.
+* Keep browser tests deterministic and independent of the browser's actual navigation or remote challenge UI.
 
 ## Public API and configuration changes
 

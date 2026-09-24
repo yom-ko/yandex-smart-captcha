@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## Unreleased
+- Add Flutter Web support using a browser DOM element and JavaScript interop.
+- Keep the shared `YandexSmartCaptcha`, `CaptchaConfig`, and `CaptchaController` API available across native and Web platforms.
+- Add browser-targeted unit and widget coverage for the Web adapter and script loader.
+
 ## 7.2.4
 - Improve example app.
 
