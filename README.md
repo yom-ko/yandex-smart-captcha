@@ -32,9 +32,9 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 
 ### Web support
 
-> You don't have to manually add the Yandex SmartCaptcha script to your app's `index.html`, as the `YandexSmartCaptcha` widget loads the script automatically when inserted into the widget tree.
+> You don't need to manually add the Yandex SmartCaptcha script to your `index.html`, as the `YandexSmartCaptcha` widget loads it automatically when mounted into the widget tree.
 
-On web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha browser widget. Use standard widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. The challenge popup's UI and behavior, however, are controlled by Yandex (just like on a regular website).
+On web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. The challenge popup's UI and behavior, however, are controlled by Yandex (just like on a regular website).
 
 The `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
 
