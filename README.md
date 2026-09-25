@@ -97,7 +97,7 @@ The controller has the same API on native and web platforms. Call these methods 
 
 ## Screenshots
 
-1. SmartCaptcha in a simple test screen:
+1. SmartCaptcha on a test screen (Android):
 
 <div>
   <img
@@ -114,7 +114,7 @@ The controller has the same API on native and web platforms. Call these methods 
     width="250">
 </div><br/>
 
-2. SmartCaptcha in a real-world application:
+2. SmartCaptcha in a real-world application (Android):
 
 <div>
   <img
@@ -124,5 +124,14 @@ The controller has the same API on native and web platforms. Call these methods 
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_2.webp"
     alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve in a real-world application."
+    width="250">
+</div><br/>
+
+3. SmartCaptcha on a test screen (Chrome):
+
+<div>
+  <img
+    src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_web.webp"
+    alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve. Chrome browser."
     width="250">
 </div>
