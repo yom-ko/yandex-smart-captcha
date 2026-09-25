@@ -32,7 +32,7 @@ void main() {
   }
 
   List<Map<String, dynamic>> subscribedEventsFrom(String html) {
-    final match = RegExp(r'const events = (\[.*\]);').firstMatch(html);
+    final match = RegExp(r'const events = (\[[\s\S]*?\]);').firstMatch(html);
 
     expect(match, isNotNull);
     return (jsonDecode(match!.group(1)!) as List<dynamic>)
@@ -101,6 +101,22 @@ void main() {
         expect(html, contains('user-scalable=yes'));
         expect(html, contains(RegExp(r'maximum-scale=4(?:\.0)?')));
         expect(html, contains('webview: false'));
+      });
+
+      test('escapes JavaScript string configuration values', () {
+        final html = createCaptcha(
+          clientKey: 'key"\\</script><script>\u2028\u2029',
+        ).data;
+
+        expect(
+          html,
+          contains(
+            r'sitekey: "key\"\\\u003C/script\u003E\u003Cscript\u003E\u2028\u2029"',
+          ),
+        );
+        expect(html, isNot(contains(r'sitekey: "key"\')));
+        expect(html, contains(r'hl: "en"'));
+        expect(html, contains(r'shieldPosition: "bottom-right"'));
       });
     });
 

@@ -113,5 +113,27 @@ void main() {
 
       controller.dispose();
     });
+
+    test('dispose is idempotent and ignores late WebView events', () async {
+      var readyCalls = 0;
+      final controller = createController(
+        callbacks: CaptchaAdapterCallbacks(
+          onChallengeSolved: (_) {},
+          onCaptchaReady: () => readyCalls++,
+        ),
+      );
+      final platformController = PlatformInAppWebViewControllerFake();
+
+      controller.dispose();
+      controller.dispose();
+      controller.attachWebViewController(
+        InAppWebViewController.fromPlatform(platform: platformController),
+      );
+      controller.handleEvent(CaptchaEvent.captchaReady, const []);
+      await controller.execute();
+
+      expect(readyCalls, isZero);
+      expect(platformController.evaluatedJavascriptSources, isEmpty);
+    });
   });
 }

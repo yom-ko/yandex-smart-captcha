@@ -40,6 +40,9 @@ final class SmartCaptcha {
         _maximumScale = maximumScale,
         _useWebViewMode = useWebViewMode {
     const containerId = 'smart-captcha-container';
+    final language = _encodeJsStringLiteral(_language);
+    final clientKey = _encodeJsStringLiteral(_clientKey);
+    final badgePosition = _encodeJsStringLiteral(_badgePosition);
     final eventsJson = jsonEncode(
       CaptchaEvent.values
           .where((e) => e.subscribable)
@@ -81,11 +84,11 @@ final class SmartCaptcha {
         }
 
         const widgetId = window.smartCaptcha.render("$containerId", {
-          sitekey: "$_clientKey",
-          hl: "$_language",
+          sitekey: $clientKey,
+          hl: $language,
           test: $_alwaysShowChallenge,
           invisible: $_useInvisibleMode,
-          shieldPosition: "$_badgePosition",
+          shieldPosition: $badgePosition,
           hideShield: $_hideBadge,
           webview: $_useWebViewMode,
           callback: resultCallback,
@@ -115,4 +118,11 @@ final class SmartCaptcha {
 </html>
 ''';
   }
+
+  static String _encodeJsStringLiteral(String value) => jsonEncode(value)
+      .replaceAll('<', r'\u003C')
+      .replaceAll('>', r'\u003E')
+      .replaceAll('&', r'\u0026')
+      .replaceAll('\u2028', r'\u2028')
+      .replaceAll('\u2029', r'\u2029');
 }

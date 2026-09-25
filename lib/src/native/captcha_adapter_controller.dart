@@ -17,6 +17,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   late final InAppWebViewInitialData initialData;
   InAppWebViewController? _webViewController;
 
+  bool _isDisposed = false;
+
   CaptchaAdapterController({
     required this.config,
     required this.callbacks,
@@ -42,10 +44,13 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   }
 
   void attachWebViewController(InAppWebViewController controller) {
+    if (_isDisposed) return;
     _webViewController = controller;
   }
 
   void handleEvent(CaptchaEvent event, List<dynamic> args) {
+    if (_isDisposed) return;
+
     switch (event) {
       case CaptchaEvent.captchaReady:
         isReady.value = true;
@@ -90,6 +95,9 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   @override
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
     _webViewController = null;
     isReady.dispose();
   }
