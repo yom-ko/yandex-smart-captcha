@@ -32,11 +32,13 @@ In most cases, you’ll only need the `YandexSmartCaptcha` and `CaptchaConfig` c
 
 ### Web support
 
-On web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha browser widget. Position it using standard widgets such as `Center`, `Padding`, or `SizedBox` to control where the "I'm not a robot" block appears. The challenge popup's UI and behavior, on the other hand, are controlled by Yandex (just like on a regular website), but the `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
+> You don't have to manually add the Yandex SmartCaptcha script to your app's `index.html`, as the `YandexSmartCaptcha` widget loads the script automatically when inserted into the widget tree.
 
-> You don't have to add the Yandex SmartCaptcha script to your app's `index.html`, as the `YandexSmartCaptcha` widget loads the script automatically on the relevant screens.
+On web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha browser widget. Use standard widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. The challenge popup's UI and behavior, however, are controlled by Yandex (just like on a regular website).
 
-The web implementation supports [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
+The `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
+
+The web implementation is compatible with [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
 
 ### CaptchaConfig parameters
 
