@@ -11,7 +11,7 @@ import 'captcha_script_loader_web.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
   static var _nextId = 0;
-  static final _containerId = 'smart-captcha-${_nextId++}';
+  final _containerId = 'smart-captcha-${_nextId++}';
 
   final CaptchaConfig config;
   final CaptchaAdapterCallbacks callbacks;
@@ -40,7 +40,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       ..style.height = '100px'
       ..style.display = 'block';
 
-    final styleId = 'hide-native-spinner';
+    final styleId = 'hide-native-captcha-spinner';
     if (document.getElementById(styleId) == null) {
       final styleElement = document.createElement('style') as HTMLStyleElement;
       styleElement.id = styleId;
@@ -51,7 +51,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
         opacity: 0 !important;
       }
     ''';
-      document.head?.appendChild(styleElement);
+      document.head!.appendChild(styleElement);
     }
 
     _initialize();
@@ -61,14 +61,10 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     try {
       await acquireSmartCaptchaScript();
       _scriptAcquired = true;
-      if (_isDisposed) {
-        _releaseScriptReference();
-        return;
-      }
+      if (_isDisposed) return _releaseScriptReference();
 
       final captcha = smartCaptcha;
-      final container = _container;
-      if (captcha == null || container == null) {
+      if (captcha == null || _container == null) {
         callbacks.onNetworkError?.call();
         _releaseScriptReference();
         return;

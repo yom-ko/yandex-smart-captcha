@@ -3,6 +3,8 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart';
 
+import 'captcha_adapter_web.dart' show deleteCaptchaObject;
+
 const smartCaptchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
 const _smartCaptchaScriptSelector = 'script[src="$smartCaptchaScriptUrl"]';
 
@@ -27,6 +29,11 @@ void releaseSmartCaptchaScript() {
   if (--_activeScriptUsers > 0) return;
 
   _scriptFuture = null;
+  _deleteSmartCaptchaFromPage();
+}
+
+void _deleteSmartCaptchaFromPage() {
+  deleteCaptchaObject();
   document.querySelector(_smartCaptchaScriptSelector)?.remove();
 }
 

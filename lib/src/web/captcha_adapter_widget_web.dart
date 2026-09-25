@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:web/web.dart';
+import 'package:web/web.dart' show HTMLDivElement;
 
 import 'captcha_adapter_controller_web.dart';
 

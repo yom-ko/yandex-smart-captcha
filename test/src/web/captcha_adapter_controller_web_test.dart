@@ -43,13 +43,13 @@ void main() {
           ((JSNumber _, String event, JSFunction callback) {
         subscriptions[event] = callback;
       }).toJS;
-      smartCaptcha.execute = ((JSNumber _) {
+      smartCaptcha.execute = (([JSNumber? _]) {
         executeCalls++;
       }).toJS;
-      smartCaptcha.reset = ((JSNumber _) {
+      smartCaptcha.reset = (([JSNumber? _]) {
         resetCalls++;
       }).toJS;
-      smartCaptcha.destroy = ((JSNumber _) {
+      smartCaptcha.destroy = (([JSNumber? _]) {
         destroyCalls++;
       }).toJS;
       _setSmartCaptcha(smartCaptcha._);
@@ -129,6 +129,36 @@ void main() {
       expect(controller.isReady.value, isFalse);
 
       controller.dispose();
+    },
+  );
+
+  testWidgets(
+    'assigns a unique container ID to each controller instance',
+    (tester) async {
+      _appendSmartCaptchaScript();
+
+      final firstController = CaptchaAdapterController(
+        config: const CaptchaConfig(clientKey: 'client-key'),
+        callbacks: CaptchaAdapterCallbacks(onChallengeSolved: (_) {}),
+      );
+      final secondController = CaptchaAdapterController(
+        config: const CaptchaConfig(clientKey: 'client-key'),
+        callbacks: CaptchaAdapterCallbacks(onChallengeSolved: (_) {}),
+      );
+
+      final firstContainer = document.createElement('div') as HTMLDivElement;
+      final secondContainer = document.createElement('div') as HTMLDivElement;
+
+      firstController.attachContainer(firstContainer);
+      secondController.attachContainer(secondContainer);
+      await tester.pump();
+
+      expect(firstContainer.id, startsWith('smart-captcha-'));
+      expect(secondContainer.id, startsWith('smart-captcha-'));
+      expect(firstContainer.id, isNot(equals(secondContainer.id)));
+
+      firstController.dispose();
+      secondController.dispose();
     },
   );
 
