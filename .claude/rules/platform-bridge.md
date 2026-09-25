@@ -16,13 +16,13 @@ Preserve the shared contract carefully.
 
 ## Rules
 
-- Keep generated native HTML in [lib/src/native/smart_captcha_html.dart](../../lib/src/native/smart_captcha_html.dart), native WebView behavior in [lib/src/native/captcha_adapter_controller.dart](../../lib/src/native/captcha_adapter_controller.dart), and browser interop in [lib/src/web/captcha_adapter_web.dart](../../lib/src/web/captcha_adapter_web.dart) and [lib/src/web/captcha_adapter_controller_web.dart](../../lib/src/web/captcha_adapter_controller_web.dart). Do not scatter JavaScript snippets across unrelated files.
+- Keep generated native HTML in [lib/src/native/captcha_adapter.dart](../../lib/src/native/captcha_adapter.dart), native WebView behavior in [lib/src/native/captcha_adapter_controller.dart](../../lib/src/native/captcha_adapter_controller.dart), and browser interop in [lib/src/web/captcha_adapter_web.dart](../../lib/src/web/captcha_adapter_web.dart) and [lib/src/web/captcha_adapter_controller_web.dart](../../lib/src/web/captcha_adapter_controller_web.dart). Do not scatter JavaScript snippets across unrelated files.
 - Preserve the event contract between JS and Dart: `captchaReady`, `challengeSolved`, `networkError`, and other event names in [lib/src/captcha_event.dart](../../lib/src/captcha_event.dart).
 - Preserve controller actions (`execute`, `reset`, and `destroy`) across the native and browser platform adapters.
 - Keep native-only behavior (`backgroundColor`, `loadingIndicator`, and `onNavigationRequest`) out of the browser adapter.
 - Keep `baseUrl` native-only; browser origin behavior must remain tied to the hosting document.
 - Do not change public widget APIs or configuration semantics unless the change is explicitly required.
-- If you modify generated HTML, JS callback payloads, event names, or widget configuration, update the assertions in [test/src/native/smart_captcha_html_test.dart](../../test/src/native/smart_captcha_html_test.dart) and the relevant browser adapter contract tests in [test/src/web/captcha_adapter_controller_web_test.dart](../../test/src/web/captcha_adapter_controller_web_test.dart).
+- If you modify generated HTML, JS callback payloads, event names, or widget configuration, update the assertions in [test/src/native/captcha_adapter_test.dart](../../test/src/native/captcha_adapter_test.dart) and the relevant browser adapter contract tests in [test/src/web/captcha_adapter_controller_web_test.dart](../../test/src/web/captcha_adapter_controller_web_test.dart).
 
 ## Avoid
 

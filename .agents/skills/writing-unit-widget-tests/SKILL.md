@@ -21,7 +21,7 @@ Mirror `lib/` under `test/` using the `_test.dart` suffix:
 | `lib/src/captcha_event.dart`                      | `test/src/captcha_event_test.dart`                      |
 | `lib/src/captcha_language.dart`                   | `test/src/captcha_language_test.dart`                   |
 | `lib/src/dpn_badge_position.dart`                 | `test/src/dpn_badge_position_test.dart`                 |
-| `lib/src/native/smart_captcha_html.dart`          | `test/src/native/smart_captcha_html_test.dart`          |
+| `lib/src/native/captcha_adapter.dart`          | `test/src/native/captcha_adapter_test.dart`          |
 | `lib/src/yandex_smart_captcha.dart`               | `test/yandex_smart_captcha_test.dart`                   |
 | `lib/src/native/captcha_adapter_controller.dart`  | `test/src/native/captcha_adapter_controller_test.dart`  |
 | `lib/src/native/captcha_adapter_widget.dart`      | `test/src/native/captcha_adapter_widget_test.dart`      |
@@ -51,7 +51,7 @@ Do not replace the global platform instance inside individual tests unless the t
 
 ## Choosing the test type
 
-Use `test()` when the behavior does not require Flutter bindings, widget lifecycle, `BuildContext`, or platform APIs. Examples include enum names and IDs, `CaptchaConfig` defaults and value preservation, `SmartCaptchaHTML` serialization, and other pure transformations.
+Use `test()` when the behavior does not require Flutter bindings, widget lifecycle, `BuildContext`, or platform APIs. Examples include enum names and IDs, `CaptchaConfig` defaults and value preservation, `SmartCaptcha` serialization, and other pure transformations.
 
 Use `testWidgets()` when the behavior requires Flutter bindings, widget lifecycle, `BuildContext`, `InAppWebView`, controller attachment, DOM setup, or JavaScript-triggered callbacks.
 
@@ -75,7 +75,7 @@ Focus assertions on externally observable behavior and stable contracts rather t
 
 ### Generated HTML and JavaScript
 
-Test generated output through the package's supported rendering or serialization API, such as `SmartCaptchaHTML.data`. Do not duplicate production HTML or JavaScript in test-only APIs, and never execute remote Yandex JavaScript in tests.
+Test generated output through the package's supported rendering or serialization API, such as `SmartCaptcha.data`. Do not duplicate production HTML or JavaScript in test-only APIs, and never execute remote Yandex JavaScript in tests.
 
 When generated HTML/JavaScript changes, add or update focused assertions for the affected contract. Depending on the change, this may include:
 
@@ -169,7 +169,7 @@ Run commands from the package root.
 During iteration, run the smallest affected test file first:
 
 ```bash
-flutter test test/src/native/smart_captcha_html_test.dart
+flutter test test/src/native/captcha_adapter_test.dart
 flutter test test/yandex_smart_captcha_test.dart
 ```
 

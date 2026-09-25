@@ -4,7 +4,7 @@ import '../captcha_event.dart';
 
 const widgetIdProp = 'wscWidgetId';
 
-final class SmartCaptchaHTML {
+final class SmartCaptcha {
   final String _clientKey;
   final String _language;
   final bool _alwaysShowChallenge;
@@ -18,7 +18,7 @@ final class SmartCaptchaHTML {
 
   late final String data;
 
-  SmartCaptchaHTML({
+  SmartCaptcha({
     required String clientKey,
     required String language,
     required bool alwaysShowChallenge,

@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
-import 'package:yandex_smart_captcha/src/native/smart_captcha_html.dart';
+import 'package:yandex_smart_captcha/src/native/captcha_adapter.dart';
 
 void main() {
-  SmartCaptchaHTML createCaptcha({
+  SmartCaptcha createCaptcha({
     String clientKey = 'client-key',
     String language = 'en',
     bool alwaysShowChallenge = false,
@@ -17,7 +17,7 @@ void main() {
     double maximumScale = 3,
     bool useWebViewMode = true,
   }) {
-    return SmartCaptchaHTML(
+    return SmartCaptcha(
       clientKey: clientKey,
       language: language,
       alwaysShowChallenge: alwaysShowChallenge,
@@ -39,7 +39,7 @@ void main() {
         .cast<Map<String, dynamic>>();
   }
 
-  group('$SmartCaptchaHTML', () {
+  group('$SmartCaptcha', () {
     group('HTML structure', () {
       test('contains the document structure and captcha container', () {
         final html = createCaptcha().data;

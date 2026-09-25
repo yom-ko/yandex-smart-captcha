@@ -5,8 +5,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
 import 'package:yandex_smart_captcha/src/captcha_platform_controller.dart';
+import 'package:yandex_smart_captcha/src/native/captcha_adapter.dart';
 import 'package:yandex_smart_captcha/src/native/captcha_adapter_controller.dart';
-import 'package:yandex_smart_captcha/src/native/smart_captcha_html.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
 import '../../mocks/in_app_webview_platform_fake.dart';

@@ -4,7 +4,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../captcha_config.dart';
 import '../captcha_event.dart';
 import '../captcha_platform_controller.dart';
-import 'smart_captcha_html.dart';
+import 'captcha_adapter.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
   final CaptchaConfig config;
@@ -22,7 +22,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.callbacks,
     required this.baseUrl,
   }) {
-    final captchaHTML = SmartCaptchaHTML(
+    final captchaHTML = SmartCaptcha(
       clientKey: config.clientKey,
       alwaysShowChallenge: config.alwaysShowChallenge,
       language: config.language.name,
