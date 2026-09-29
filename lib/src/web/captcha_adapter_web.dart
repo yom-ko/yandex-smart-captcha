@@ -7,24 +7,24 @@ const _smartCaptchaObjectName = 'smartCaptcha';
 external SmartCaptcha? get smartCaptcha;
 
 extension type SmartCaptcha._(JSObject _) implements JSObject {
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#render
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#render
   external JSNumber render(String containerId, SmartCaptchaOptions options);
 
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#subscribe
   external void subscribe(JSNumber widgetId, String event, JSFunction callback);
 
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#execute
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#execute
   external void execute([JSNumber? widgetId]);
 
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#reset
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#reset
   external void reset([JSNumber? widgetId]);
 
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#destroy
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#destroy
   external void destroy([JSNumber? widgetId]);
 }
 
 extension type SmartCaptchaOptions._(JSObject _) implements JSObject {
-  /// See: https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#render
+  /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#render
   external factory SmartCaptchaOptions({
     String sitekey,
     String hl,

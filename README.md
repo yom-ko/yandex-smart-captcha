@@ -67,21 +67,21 @@ Control the SmartCaptcha's runtime lifecycle, Flutter-level UI customizations, a
 
 > Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
-| Parameter              | Required | Default | Description                                                                            |
-| :--------------------- | :------: | :------ | :------------------------------------------------------------------------------------- |
-| `config`               |    ✔     |         | The configuration for this CAPTCHA instance.                                           |
-| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.                          |
-| `backgroundColor`*     |          | `null`  | The background color of the widget container.                                          |
-| `loadingIndicator`*    |          | `null`  | A custom loading widget for platforms.                                                 |
-| `onCaptchaReady`       |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.                        |
-| `onChallengeShown`     |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                               |
-| `onChallengeHidden`    |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                                     |
-| `onTokenExpired`       |          | `null`  | Called when the CAPTCHA token expires or is invalidated.                               |
-| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA.             |
-| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside SmartCaptcha.                   |
-| `onNavigationRequest`* |          | `null`  | Called when a navigation request is made inside the native WebView.                    |
-| `controller`           |          | `null`  | A controller to programmatically interact with the CAPTCHA.                            |
-| `baseUrl`*             |          | `null`  | Native-only HTTP(S) base URL for domain validation and resolving origin policy issues. |
+| Parameter              | Required | Default | Description                                                                |
+| :--------------------- | :------: | :------ | :------------------------------------------------------------------------- |
+| `config`               |    ✔     |         | The configuration for this CAPTCHA instance.                               |
+| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a CAPTCHA challenge.              |
+| `backgroundColor`*     |          | `null`  | The background color of the widget container.                              |
+| `loadingIndicator`*    |          | `null`  | A custom loading widget for platforms.                                     |
+| `onCaptchaReady`       |          | `null`  | Called when the CAPTCHA script is fully loaded and initialized.            |
+| `onChallengeShown`     |          | `null`  | Called when the CAPTCHA challenge popup becomes visible.                   |
+| `onChallengeHidden`    |          | `null`  | Called when the CAPTCHA challenge popup is hidden.                         |
+| `onTokenExpired`       |          | `null`  | Called when the CAPTCHA token expires or is invalidated.                   |
+| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the CAPTCHA. |
+| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside SmartCaptcha.       |
+| `onNavigationRequest`* |          | `null`  | Called when a navigation request is made inside the WebView.               |
+| `controller`           |          | `null`  | A controller to programmatically interact with the CAPTCHA.                |
+| `baseUrl`*             |          | `null`  | HTTP(S) base URL for domain validation and resolving origin policy issues. |
 
 ### CaptchaController methods
 
