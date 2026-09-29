@@ -146,14 +146,9 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
 
     _callbacks = CaptchaAdapterCallbacks(
       onChallengeSolved: widget.onChallengeSolved,
-      onCaptchaReady: widget.onCaptchaReady,
-      onChallengeShown: widget.onChallengeShown,
-      onChallengeHidden: widget.onChallengeHidden,
-      onTokenExpired: widget.onTokenExpired,
-      onNetworkError: widget.onNetworkError,
-      onJavaScriptError: widget.onJavaScriptError,
-      onNavigationRequest: widget.onNavigationRequest,
     );
+    _syncCallbacks();
+
     _adapterController = _createAdapterController();
     widget.controller?._attach(_adapterController);
   }
@@ -162,28 +157,20 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
   void didUpdateWidget(YandexSmartCaptcha oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    _callbacks.update(
-      onChallengeSolved: widget.onChallengeSolved,
-      onCaptchaReady: widget.onCaptchaReady,
-      onChallengeShown: widget.onChallengeShown,
-      onChallengeHidden: widget.onChallengeHidden,
-      onTokenExpired: widget.onTokenExpired,
-      onNetworkError: widget.onNetworkError,
-      onJavaScriptError: widget.onJavaScriptError,
-      onNavigationRequest: widget.onNavigationRequest,
-    );
+    _syncCallbacks();
 
-    final adapterConfigChanged = oldWidget.config != widget.config ||
+    final configChanged = oldWidget.config != widget.config ||
         oldWidget.baseUrl != widget.baseUrl;
     final controllerChanged = oldWidget.controller != widget.controller;
 
-    if (adapterConfigChanged) {
+    if (configChanged) {
+      final newAdapterController = _createAdapterController();
       final oldAdapterController = _adapterController;
 
       oldWidget.controller?._detach(oldAdapterController);
       oldAdapterController.dispose();
 
-      _adapterController = _createAdapterController();
+      _adapterController = newAdapterController;
       widget.controller?._attach(_adapterController);
     } else if (controllerChanged) {
       oldWidget.controller?._detach(_adapterController);
@@ -197,6 +184,19 @@ class _YandexSmartCaptchaState extends State<YandexSmartCaptcha> {
     _adapterController.dispose();
 
     super.dispose();
+  }
+
+  void _syncCallbacks() {
+    _callbacks.update(
+      onChallengeSolved: widget.onChallengeSolved,
+      onCaptchaReady: widget.onCaptchaReady,
+      onChallengeShown: widget.onChallengeShown,
+      onChallengeHidden: widget.onChallengeHidden,
+      onTokenExpired: widget.onTokenExpired,
+      onNetworkError: widget.onNetworkError,
+      onJavaScriptError: widget.onJavaScriptError,
+      onNavigationRequest: widget.onNavigationRequest,
+    );
   }
 
   CaptchaAdapterController _createAdapterController() =>
