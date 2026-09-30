@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.3.4
+- Improve core lifecycle logic.
+- Improve README.
+- Improve docs.
+
 ## 7.3.3
 - Update screenshots.
 - Improve README.
