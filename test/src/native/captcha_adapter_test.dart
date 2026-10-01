@@ -135,6 +135,52 @@ void main() {
         );
       });
 
+      test(
+        'reports a SmartCaptcha script load failure through the ready bridge',
+        () {
+          final html = createCaptcha().htmlData;
+
+          expect(html, contains('let isNetworkErrorReported = false;'));
+          expect(html, contains('if (isNetworkErrorReported) return;'));
+          expect(
+            html,
+            contains(
+              "if (typeof window.flutter_inappwebview?.callHandler === 'function')",
+            ),
+          );
+          expect(html, contains('isNetworkErrorReported = true;'));
+          expect(
+            html,
+            contains(
+              'window.flutter_inappwebview.callHandler('
+              '"${CaptchaEvent.networkError.name}");',
+            ),
+          );
+          expect(html, contains('setTimeout(reportNetworkError, 50);'));
+          expect(html, contains('onerror="reportNetworkError()"'));
+        },
+      );
+
+      test('waits for the native bridge before initializing the widget', () {
+        final html = createCaptcha().htmlData;
+
+        expect(html, contains('function initializeCaptcha()'));
+        expect(
+          html,
+          contains(
+            "if (typeof window.flutter_inappwebview?.callHandler === 'function')",
+          ),
+        );
+        expect(html, contains('initializeCaptcha();'));
+        expect(
+          html,
+          contains(
+            'window.addEventListener("flutterInAppWebViewPlatformReady", '
+            'initializeCaptcha, { once: true });',
+          ),
+        );
+      });
+
       test('contains challengeSolved event handler', () {
         final html = createCaptcha().htmlData;
 

@@ -58,21 +58,29 @@ final class SmartCaptcha {
 <html lang="$_language">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="
-  width=device-width,
-  initial-scale=$_initialScale,
-  user-scalable=$_allowUserScaling,
-  maximum-scale=$_maximumScale"
-    />
+    <meta name="viewport" content="
+      width=device-width,
+      initial-scale=$_initialScale,
+      user-scalable=$_allowUserScaling,
+      maximum-scale=$_maximumScale" />
     <title></title>
     <script>
-      function onLoadFunction() {
+      let isNetworkErrorReported = false;
+
+      function reportNetworkError() {
+        if (isNetworkErrorReported) return;
+
+        if (typeof window.flutter_inappwebview?.callHandler === "function") {
+          isNetworkErrorReported = true;
+          window.flutter_inappwebview.callHandler("${CaptchaEvent.networkError.name}");
+        } else {
+          setTimeout(reportNetworkError, 50);
+        }
+      }
+
+      function initializeCaptcha() {
         if (!window.smartCaptcha) {
-          window.flutter_inappwebview.callHandler(
-            "${CaptchaEvent.networkError.name}",
-          );
+          reportNetworkError();
           return;
         }
 
@@ -102,13 +110,20 @@ final class SmartCaptcha {
           });
         });
 
-        window.flutter_inappwebview.callHandler(
-          "${CaptchaEvent.captchaReady.name}",
-        );
+        window.flutter_inappwebview.callHandler("${CaptchaEvent.captchaReady.name}");
+      }
+
+      function onLoadFunction() {
+        if (typeof window.flutter_inappwebview?.callHandler === "function") {
+          initializeCaptcha();
+        } else {
+          window.addEventListener("flutterInAppWebViewPlatformReady", initializeCaptcha, { once: true });
+        }
       }
     </script>
     <script
       src="https://smartcaptcha.cloud.yandex.ru/captcha.js?render=onload&onload=onLoadFunction"
+      onerror="reportNetworkError()"
       defer
     ></script>
   </head>
