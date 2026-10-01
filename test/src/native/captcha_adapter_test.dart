@@ -42,7 +42,7 @@ void main() {
   group('$SmartCaptcha', () {
     group('HTML structure', () {
       test('contains the document structure and captcha container', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(html, contains('<!doctype html>'));
         expect(html, contains('<html lang="en">'));
@@ -58,7 +58,7 @@ void main() {
       });
 
       test('contains charset, viewport, and SmartCaptcha script tags', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(html, contains('<meta charset="utf-8" />'));
         expect(html, contains('width=device-width'));
@@ -88,7 +88,7 @@ void main() {
           allowUserScaling: 'yes',
           maximumScale: 4,
           useWebViewMode: false,
-        ).data;
+        ).htmlData;
 
         expect(html, contains('<html lang="ru">'));
         expect(html, contains('sitekey: "test-key"'));
@@ -106,7 +106,7 @@ void main() {
       test('escapes JavaScript string configuration values', () {
         final html = createCaptcha(
           clientKey: 'key"\\</script><script>\u2028\u2029',
-        ).data;
+        ).htmlData;
 
         expect(
           html,
@@ -122,7 +122,7 @@ void main() {
 
     group('event wiring', () {
       test('reports a missing SmartCaptcha script before rendering', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(html, contains('if (!window.smartCaptcha)'));
         expect(html, contains('"${CaptchaEvent.networkError.name}"'));
@@ -136,7 +136,7 @@ void main() {
       });
 
       test('contains challengeSolved event handler', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(html, contains('function resultCallback(token)'));
         expect(html, contains('"${CaptchaEvent.challengeSolved.name}"'));
@@ -144,14 +144,14 @@ void main() {
       });
 
       test('contains captchaReady event handler', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(html, contains('window.flutter_inappwebview.callHandler('));
         expect(html, contains('"${CaptchaEvent.captchaReady.name}"'));
       });
 
       test('subscribes to exactly the native SmartCaptcha events', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(
           subscribedEventsFrom(html),
@@ -165,7 +165,7 @@ void main() {
       });
 
       test('renders and subscribes widget using configured container', () {
-        final html = createCaptcha().data;
+        final html = createCaptcha().htmlData;
 
         expect(
           html,

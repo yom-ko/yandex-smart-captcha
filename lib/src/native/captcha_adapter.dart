@@ -16,7 +16,7 @@ final class SmartCaptcha {
   final double _maximumScale;
   final bool _useWebViewMode;
 
-  late final String data;
+  late final String htmlData;
 
   SmartCaptcha({
     required String clientKey,
@@ -53,7 +53,7 @@ final class SmartCaptcha {
           .toList(),
     );
 
-    data = '''
+    htmlData = '''
 <!doctype html>
 <html lang="$_language">
   <head>

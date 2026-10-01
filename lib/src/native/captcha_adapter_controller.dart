@@ -24,7 +24,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.callbacks,
     required this.baseUrl,
   }) {
-    final captchaHTML = SmartCaptcha(
+    final smartCaptcha = SmartCaptcha(
       clientKey: config.clientKey,
       alwaysShowChallenge: config.alwaysShowChallenge,
       language: config.language.name,
@@ -38,7 +38,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     );
 
     initialData = InAppWebViewInitialData(
-      data: captchaHTML.data,
+      data: smartCaptcha.htmlData,
       baseUrl: baseUrl != null ? WebUri(baseUrl!) : null,
     );
   }
