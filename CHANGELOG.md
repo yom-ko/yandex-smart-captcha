@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.3.5
+- Improve error handling in native implementation.
+- Improve README.
+
 ## 7.3.4
 - Improve core lifecycle logic.
 - Improve README.
