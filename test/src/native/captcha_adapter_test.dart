@@ -145,15 +145,20 @@ void main() {
           expect(
             html,
             contains(
-              "if (typeof window.flutter_inappwebview?.callHandler === 'function')",
+              RegExp(
+                r'if \(typeof window\.flutter_inappwebview\??\.callHandler === "function"\)',
+              ),
             ),
           );
           expect(html, contains('isNetworkErrorReported = true;'));
           expect(
             html,
             contains(
-              'window.flutter_inappwebview.callHandler('
-              '"${CaptchaEvent.networkError.name}");',
+              RegExp(
+                r'window\.flutter_inappwebview(?:\?\.)?\.callHandler\(\s*"'
+                '${CaptchaEvent.networkError.name}'
+                r'"\s*\);',
+              ),
             ),
           );
           expect(html, contains('setTimeout(reportNetworkError, 50);'));
@@ -168,7 +173,9 @@ void main() {
         expect(
           html,
           contains(
-            "if (typeof window.flutter_inappwebview?.callHandler === 'function')",
+            RegExp(
+              r'if \(typeof window\.flutter_inappwebview\??\.callHandler === "function"\)',
+            ),
           ),
         );
         expect(html, contains('initializeCaptcha();'));
