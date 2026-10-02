@@ -25,14 +25,14 @@ YandexSmartCaptcha(
 )
 ```
 
-In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. The `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
+In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
-* On mobile, ensure that the `YandexSmartCaptcha`'s ancestor widget provides enough vertical space to accommodate both the main "I'm not a robot" block and the challenge popup, as both are rendered inside a single WebView.
+* On mobile, ensure that the `YandexSmartCaptcha`'s ancestor widget provides enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered inside a single WebView.
 * On the web, the ancestor widget only needs to provide enough vertical space for the "I'm not a robot" block (with a fixed height of around 100px), because Yandex fully controls the challenge popup.
 
 ### Web support
 
-> You do not need to manually add the Yandex SmartCaptcha script to your `index.html`, as the `YandexSmartCaptcha` widget loads it automatically when mounted in the widget tree.
+> You don't need to manually add the Yandex SmartCaptcha script to your `index.html`, as the `YandexSmartCaptcha` widget loads it automatically when mounted in the widget tree.
 
 On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
 
@@ -44,7 +44,7 @@ The web implementation is compatible with [WebAssembly (Wasm)](https://docs.flut
 
 This is an immutable configuration for Yandex SmartCaptcha JavaScript widget.
 
-> Ignored on the web: `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
+> Ignored on web: `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
 
 | Parameter             | Required | Default       | Description                                                                                            |
 | :-------------------- | :------: | :------------ | :----------------------------------------------------------------------------------------------------- |
@@ -63,7 +63,7 @@ This is an immutable configuration for Yandex SmartCaptcha JavaScript widget.
 
 Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and callback registration.
 
-> Ignored on the web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
+> Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
 | Parameter              | Required | Default | Description                                                                            |
 | :--------------------- | :------: | :------ | :------------------------------------------------------------------------------------- |
