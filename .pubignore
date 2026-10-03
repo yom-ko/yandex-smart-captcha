@@ -1,4 +1,4 @@
-# Exclude native platform folders and local build artifacts in example/
+# Exclude native platform folders and local build artifacts in example/.
 example/ios/
 example/android/
 example/web/

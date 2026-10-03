@@ -25,7 +25,7 @@ pubspec.lock
 **/android/key.properties
 **/android/local.properties
 
-# iOS/XCode related
+# iOS/Xcode related
 **/ios/.generated/
 **/ios/**/.sconsign.dblite
 **/ios/**/.symlinks/

@@ -1,4 +1,4 @@
-# Flutter/Dart/Pub related
+# Flutter/Dart/Pub
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -14,7 +14,7 @@ build/
 coverage/
 pubspec.lock
 
-# Android related
+# Android
 .gradle/
 *.jks
 **/android/**/GeneratedPluginRegistrant.java
@@ -25,7 +25,7 @@ pubspec.lock
 **/android/key.properties
 **/android/local.properties
 
-# iOS/XCode related
+# iOS/Xcode
 **/ios/.generated/
 **/ios/**/.sconsign.dblite
 **/ios/**/.symlinks/
@@ -55,7 +55,7 @@ pubspec.lock
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/ServiceDefinitions.json
 
-# Exceptions to above rules.
+# Exceptions to above rules
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
@@ -64,13 +64,13 @@ pubspec.lock
 # packages file containing multi-root paths
 .packages.generated
 
-# IntelliJ related
+# IntelliJ
 .idea/
 *.iml
 *.ipr
 *.iws
 
-# Visual Studio Code related
+# Visual Studio Code
 .ccls-cache
 .classpath
 .project
@@ -79,7 +79,7 @@ pubspec.lock
 !.vscode/settings.json
 !.vscode/launch.json
 
-# Miscellaneous
+# Misc
 .atom/
 .buildlog/
 .DS_Store

@@ -1,8 +1,8 @@
 {
   "cSpell.words": [
-    "inappwebview",
     "recaptcha",
     "webp"
   ],
-  "dart.lineLength": 80
+  "dart.lineLength": 80,
+  "cSpell.enabled": true
 }
