@@ -27,14 +27,16 @@ YandexSmartCaptcha(
 
 In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
-* On mobile, ensure that the `YandexSmartCaptcha`'s ancestor widget provides enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered inside a single WebView.
-* On the web, the ancestor widget only needs to provide enough vertical space for the "I'm not a robot" block (with a fixed height of around 100px), because Yandex fully controls the challenge popup.
+* On mobile, ensure that the `YandexSmartCaptcha`'s parent widget provides enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered inside a single WebView.
+* On the web, the parent widget only needs to provide enough vertical space for the "I'm not a robot" block (with a fixed height of around 100px), because Yandex fully controls the challenge popup.
 
 ### Web support
 
 > You don't need to manually add the Yandex SmartCaptcha script to your `index.html`, as the `YandexSmartCaptcha` widget loads it automatically when mounted in the widget tree.
 
 On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
+
+Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked in the tables below) have no effect on the web.
 
 The `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
 
@@ -50,7 +52,7 @@ This is an immutable configuration for Yandex SmartCaptcha JavaScript widget.
 | :-------------------- | :------: | :------------ | :----------------------------------------------------------------------------------------------------- |
 | `clientKey`           |    ✔     |               | The client-side key passed to the SmartCaptcha widget.                                                 |
 | `language`            |          | `ru`          | The language used by the SmartCaptcha UI.                                                              |
-| `alwaysShowChallenge` |          | `false`       | Whether the SmartCaptcha widget should always display a challenge. Useful for testing.                 |
+| `alwaysShowChallenge` |          | `false`       | Whether the SmartCaptcha widget should always display a challenge (useful for testing).                |
 | `useInvisibleMode`    |          | `false`       | Whether the SmartCaptcha widget should run in invisible mode – without the "I'm not a robot" checkbox. |
 | `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`.              |
 | `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                                       |
@@ -75,23 +77,23 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `onChallengeShown`     |          | `null`  | Called when the SmartCaptcha challenge popup becomes visible.                          |
 | `onChallengeHidden`    |          | `null`  | Called when the SmartCaptcha challenge popup is hidden.                                |
 | `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires or is invalidated.                          |
-| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha widget. |
-| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside the SmartCaptcha widget.        |
+| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script. |
+| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.        |
 | `onNavigationRequest`* |          | `null`  | Called when a navigation request is made inside the WebView.                           |
 | `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.          |
 | `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.     |
 
 ### CaptchaController methods
 
-Provide access to the SmartCaptcha widget's imperative methods.
+Provide access to the SmartCaptcha JavaScript widget's imperative methods.
 
-| Method      | Description                                                         |
-| :---------- | :------------------------------------------------------------------ |
-| `execute()` | Starts user validation.                                             |
-| `reset()`   | Resets the SmartCaptcha widget to its initial state.                |
-| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners. |
+| Method      | Description                                                                                   |
+| :---------- | :-------------------------------------------------------------------------------------------- |
+| `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode.            |
+| `reset()`   | Resets the SmartCaptcha to its initial state. Only works after the challenge has been solved. |
+| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners.                           |
 
-The controller exposes the same API on native and web platforms. Call these methods after `onCaptchaReady` has fired.
+The controller exposes the same API on native and web platforms. Call these methods after `onCaptchaReady` fires.
 
 ## Screenshots
 
