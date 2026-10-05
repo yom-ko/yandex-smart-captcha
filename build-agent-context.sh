@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Generates AI-agent instruction/rule/skill files for Claude, Cursor, and
+# Generates AI agent instruction/rule/skill files for Claude, Cursor, and
 # GitHub Copilot from the single source of truth in .agents/.
 #
 # .agents/project.md   -> AGENTS.md, .claude/CLAUDE.md, .github/copilot-instructions.md

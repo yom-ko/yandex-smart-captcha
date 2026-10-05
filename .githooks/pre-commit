@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Keeps generated AI-agent context files in sync with their sources before each commit.
+# Keeps AI agent context files in sync with their sources before relevant commits.
 #
 # .agents/ + build-agent-context.sh -> generated targets
 #
-# - Skip commits that do not touch agent-context sources or generated targets.
 # - Use the staged generator version to determine the managed target set.
+# - Skip commits that do not touch agent-context sources or generated targets.
 # - Require all agent context source changes to be staged before regeneration.
 # - Reject ignored files under .agents/ that could affect generated outputs;
 #   allow only .DS_Store.
@@ -100,4 +100,4 @@ done
 
 git add -A -- "${paths[@]}"
 
-echo "AI-agent context files rebuilt and staged."
+echo "AI agent context files rebuilt and staged."

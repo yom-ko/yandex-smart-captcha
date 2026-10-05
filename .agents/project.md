@@ -1,51 +1,100 @@
 # Project: Yandex SmartCaptcha for Flutter
 
-## Overview
+## Introduction
 
-This project is a reusable Flutter package that embeds the Yandex SmartCaptcha widget on Android, iOS, and Web. It is a library consumed through `package:yandex_smart_captcha`, not a standalone application.
+This repository contains a reusable Flutter package that embeds the Yandex SmartCaptcha widget on Android, iOS, and web.
 
-The `example/` directory is a separate Flutter app demonstrating package usage and providing widget and device integration tests.
+The package is consumed through `package:yandex_smart_captcha`; it is not a standalone application.
 
-For SmartCaptcha API names, methods, events, configuration semantics and origin requirements, use the official documentation as the primary source of truth: <https://yandex.cloud/en/docs/smartcaptcha/>.
+The `example/` directory contains a separate Flutter application used for usage examples, widget tests, and device integration tests.
+
+For SmartCaptcha API names, methods, events, configuration semantics, and origin requirements, use the official Yandex documentation as the primary source of truth: <https://yandex.cloud/en/docs/smartcaptcha/>
 
 ## Public API
 
-The public entrypoint is [`lib/yandex_smart_captcha.dart`](../lib/yandex_smart_captcha.dart). It exports:
+The public entrypoint [`lib/yandex_smart_captcha.dart`](../lib/yandex_smart_captcha.dart) exposes the main package API:
 
-- `YandexSmartCaptcha` – the stateful widget that hosts SmartCaptcha in a native WebView or browser DOM element, exposes presentation options and callbacks, and optionally accepts a `CaptchaController`.
-- `CaptchaController` – an optional interface for `execute`, `reset`, and `destroy` imperative methods.
-- `CaptchaConfig` – an immutable configuration object for SmartCaptcha options such as language, visibility mode, and badge position.
+* `YandexSmartCaptcha` — stateful widget that hosts SmartCaptcha and exposes presentation options and callbacks.
+* `CaptchaConfig` — immutable configuration for SmartCaptcha widget options such as language, visibility mode, and badge position.
+* `CaptchaController` — optional interface for imperative `execute`, `reset`, and `destroy` operations.
 
-Keep callback and Flutter-level presentation concerns on `YandexSmartCaptcha`, and SmartCaptcha widget options – on `CaptchaConfig`. The package targets Android and iOS through `flutter_inappwebview` and Web – through browser DOM/JavaScript interop.
+Keep SmartCaptcha widget options on `CaptchaConfig`. Keep Flutter-level presentation concerns and callbacks on `YandexSmartCaptcha`.
 
 ## Architecture
 
-The package has a shared Dart API with conditional platform adapters:
+The package exposes one shared Dart API with conditional platform adapters:
 
-1. The shared `YandexSmartCaptcha` widget translates `CaptchaConfig` into platform-specific setup and exposes the same callbacks and controller operations on every supported platform.
-2. Native adapters host generated HTML and JavaScript in `flutter_inappwebview`; Web creates a DOM host element and uses JavaScript interop to load and render SmartCaptcha.
-3. `CaptchaEvent` provides the event vocabulary shared by the platform adapters and Dart.
+1. `YandexSmartCaptcha` translates the shared configuration into platform-specific setup and exposes consistent callbacks and controller operations.
+2. Native adapters host generated HTML and JavaScript in `flutter_inappwebview`.
+3. The web adapters creates a DOM host element and uses JavaScript interop to load and render SmartCaptcha.
+4. `CaptchaEvent` defines the shared event vocabulary used by the platform adapters and Dart.
 
-On native platforms, `baseUrl` becomes the initial document origin through `InAppWebViewInitialData`, allowing applications to meet SmartCaptcha domain requirements. On Web, the browser application's current origin is used and `baseUrl` is ignored. Native-only presentation options include `backgroundColor`, `loadingIndicator`, and `onNavigationRequest`; the Web adapter leaves these options to the browser DOM and normal browser navigation. Files under `lib/src/` are implementation details; tests may import them to inspect generated content and platform behavior.
+Keep platform-specific APIs and implementation details inside the appropriate adapters rather than introducing platform-only dependencies into shared code.
+
+## Platform differences
+
+On native platforms, `baseUrl` is passed to `InAppWebViewInitialData` and therefore becomes the initial document origin. This allows applications to satisfy SmartCaptcha domain requirements. On web, the browser application's current origin is used and `baseUrl` is ignored.
+
+In addition, the following options are native-only:
+
+* `backgroundColor`
+* `loadingIndicator`
+* `onNavigationRequest`
+
+The web adapter leaves these concerns to the browser DOM and normal browser behavior.
 
 ## Folder structure
 
-- `lib/` – package implementation; `lib/src/` contains configuration models, enums, shared widget/controller logic, platform adapters, event definitions, and generated WebView content.
-- `assets/` – screenshots and other package artwork.
-- `example/` – sample Flutter app, widget tests, and Patrol-based integration tests.
-- `test/` – package unit and widget tests, including fake native WebView support and browser-targeted Web adapter tests.
-- `.agents/` – canonical context for AI-agents that includes this high-level project overview, path-scoped rules, and reusable skills.
+* `lib/` — package implementation.
+* `lib/src/` — internal configuration models, enums, shared widget/controller logic, platform adapters, event definitions, and generated WebView content.
+* `test/` — package unit and widget tests, including fake native WebView support and browser-targeted web adapter tests.
+* `example/` — example Flutter application, widget tests, and Patrol-based integration tests.
+* `assets/` — screenshots and other package artwork.
+* `.agents/` — canonical agent context, including this project overview, path-scoped rules, and reusable skills.
 
-## Conventions
+## Engineering conventions
 
-- Prefer immutable configuration objects, typed enums, named parameters, and nullable optional callbacks.
-- Follow the existing Flutter, Dart, and platform-adapter patterns rather than introducing browser-only APIs into shared code.
-- When public API or user-visible behavior changes, keep the README, Dartdoc, example usage, tests, and changelog aligned.
-- Run native/unit coverage with `flutter test`; run browser adapter coverage with `flutter test --platform chrome`. Do not confuse the browser-only suite being skipped by the default VM runner with a passing browser test.
-- Keep real SmartCaptcha client keys out of source code, tests, documentation, and generated artifacts. Local example credentials belong in `example/.env`. Whenever running or testing the example app, load that real client key with `--dart-define-from-file=.env`, but keep it git-ignored and never commit it.
+* Follow existing Flutter, Dart, and platform-adapter patterns.
+* Prefer immutable configuration objects, typed enums, named parameters, and nullable optional callbacks.
+* Keep the shared code platform-neutral. Use platform-specific APIs only inside their corresponding adapters.
+* When public API or user-visible behavior changes, update the relevant README, Dartdoc, example usage, tests, and changelog entries as applicable.
+
+## Testing
+
+Run package unit and native widget tests with:
+
+```bash
+flutter test
+```
+
+Run browser adapter tests explicitly with:
+
+```bash
+flutter test --platform chrome
+```
+
+Do not treat a browser-only suite skipped by the default VM runner as passing browser coverage.
+
+## Security policy
+
+Never commit or embed real SmartCaptcha client keys in source code, tests, documentation, or generated artifacts.
+
+For local example-app runs and tests, load the real key from `example/.env` using `--dart-define-from-file=.env`.
+
+Keep `example/.env` git-ignored.
 
 ## Agent context
 
-`.agents/` is the canonical source for agent context. Edit `.agents/project.md` for this overview, `.agents/rules/` for path-scoped instructions, and `.agents/skills/` for reusable workflows.
+`.agents/` is the canonical source of truth for agent context:
 
-`AGENTS.md`, `.claude/CLAUDE.md`, `.github/copilot-instructions.md`, and provider-specific rule and skill directories are generated outputs. See [`.agents/README.md`](README.md) for the mapping and run `./build-agent-context.sh` after changing canonical context.
+* `.agents/project.md` — general project-wide context.
+* `.agents/rules/` — path-scoped rules/instructions.
+* `.agents/skills/` — reusable workflows.
+
+See [`.agents/README.md`](README.md) for the complete mapping and explanations.
+
+After changing any canonical agent context files, regenerate the outputs with:
+
+```bash
+./build-agent-context.sh
+```

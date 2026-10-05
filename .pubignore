@@ -29,7 +29,7 @@ integration_test/
 .flutter-plugins-dependencies
 devtools_options.yaml
 
-# Exclude AI-agent context.
+# Exclude AI agent context.
 .agents/
 .claude/
 .cursor/
