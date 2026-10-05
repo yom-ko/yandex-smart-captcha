@@ -1,23 +1,103 @@
 #!/usr/bin/env bash
+#
+# Keeps generated AI-agent context files in sync with their sources before each commit.
+#
+# .agents/ + build-agent-context.sh -> generated targets
+#
+# - Skip commits that do not touch agent-context sources or generated targets.
+# - Use the staged generator version to determine the managed target set.
+# - Require all agent context source changes to be staged before regeneration.
+# - Reject ignored files under .agents/ that could affect generated outputs;
+#   allow only .DS_Store.
+# - Rebuild generated files from the clean source state, then stage the results.
+# - Stage deletions along with any created or modified generated files.
+# - Keep temporary files isolated and always clean them up.
+
 set -euo pipefail
+export LC_ALL=C
 
-ROOT_DIR="$(git rev-parse --show-toplevel)"
-cd "$ROOT_DIR"
+cd "$(git rev-parse --show-toplevel)"
 
-if git diff --cached --quiet -- .agents; then
+die() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+has_diff() {
+  local status=0
+  git diff --quiet "$@" || status=$?
+  case "$status" in
+    0) return 1 ;;
+    1) return 0 ;;
+    *) die "could not inspect changes (git diff $*)." ;;
+  esac
+}
+
+inputs=(.agents build-agent-context.sh)
+
+workdir="$(mktemp -d "${TMPDIR:-/tmp}/agent-context-hook.XXXXXX")"
+cleanup() {
+  rm -rf "$workdir" || true
+}
+trap cleanup EXIT
+
+git show :build-agent-context.sh >"$workdir/build-agent-context.sh" ||
+  die "build-agent-context.sh is not available in the index."
+
+targets="$(bash "$workdir/build-agent-context.sh" --print-managed-targets --quiet)" ||
+  die "could not list managed targets."
+[[ -n "$targets" ]] || die "generator returned no managed targets."
+
+target_args=()
+while IFS= read -r target; do
+  [[ -n "$target" ]] || die "generator returned an empty managed target."
+  target_args+=("$target")
+done <<<"$targets"
+
+if ! has_diff --cached -- "${inputs[@]}" &&
+   ! has_diff --cached -- "${target_args[@]}"; then
   exit 0
 fi
 
-if ! git diff --quiet -- .agents ||
-   [ -n "$(git ls-files --others --exclude-standard -- .agents)" ]; then
-  echo "ERROR: .agents/ has unstaged or untracked changes." >&2
-  echo "Stage all .agents/ changes before committing." >&2
+untracked="$(git ls-files --others --exclude-standard -- "${inputs[@]}")" ||
+  die "could not list untracked source files."
+
+if has_diff -- "${inputs[@]}" || [[ -n "$untracked" ]]; then
+  echo "ERROR: .agents/ or build-agent-context.sh has unstaged or untracked changes." >&2
+  echo "Stage all of their changes before committing." >&2
+  exit 1
+fi
+
+git ls-files --others --ignored --exclude-standard -z -- .agents >"$workdir/ignored" ||
+  die "could not list ignored source files."
+
+ignored_sources=()
+while IFS= read -r -d '' source; do
+  [[ "${source##*/}" == ".DS_Store" ]] || ignored_sources+=("$source")
+done <"$workdir/ignored"
+
+if ((${#ignored_sources[@]})); then
+  echo "ERROR: ignored, untracked files under .agents/ may affect generated outputs:" >&2
+  printf '  %q\n' "${ignored_sources[@]}" >&2
+  echo "Remove them or add them to the repository before committing." >&2
   exit 1
 fi
 
 echo "Rebuilding agent context files..."
+./build-agent-context.sh --quiet
 
-./build-agent-context.sh --list-affected-files |
-  git add -A --pathspec-from-file=- --pathspec-file-nul
+paths=()
+for target in "${target_args[@]}"; do
+  tracked="$(git ls-files -- "$target")" ||
+    die "could not inspect tracked state of $target."
+
+  if [[ -e "$target" || -L "$target" || -n "$tracked" ]]; then
+    paths+=("$target")
+  fi
+done
+
+((${#paths[@]})) || die "no managed targets to stage."
+
+git add -A -- "${paths[@]}"
 
 echo "AI-agent context files rebuilt and staged."
