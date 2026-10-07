@@ -1,5 +1,5 @@
-/// Supported positions for the DPN (Data Processing Notice)
-/// badge when invisible mode is enabled.
+/// Supported positions for the DPN (Data Processing Notice) badge
+/// when invisible mode is enabled.
 enum DPNBadgePosition {
   /// Top-left corner
   topLeft('top-left'),
@@ -22,7 +22,7 @@ enum DPNBadgePosition {
   /// Creates a DPN badge position with its SmartCaptcha identifier.
   const DPNBadgePosition(this.id);
 
-  /// The identifier passed to SmartCaptcha's native `shieldPosition` parameter.
+  /// The identifier passed to SmartCaptcha's `shieldPosition` parameter.
   ///
   /// See https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#render
   final String id;

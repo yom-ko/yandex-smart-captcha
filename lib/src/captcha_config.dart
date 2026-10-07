@@ -13,34 +13,34 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `sitekey`.
   final String clientKey;
 
-  /// The language for the SmartCaptcha UI.
+  /// The language used by the SmartCaptcha UI.
   ///
   /// For languages other than Russian, this option also affects
-  /// the CAPTCHA challenge language (typically switching it to English).
+  /// the SmartCaptcha challenge language (typically switching it to English).
   ///
   /// Corresponding JavaScript parameter: `hl`.
   final CaptchaLanguage language;
 
-  /// Whether the CAPTCHA should always display a challenge.
+  /// Whether SmartCaptcha should always display a challenge (useful for testing).
   ///
   /// Use this option only for debugging or automated testing.
   ///
   /// Corresponding JavaScript parameter: `test`.
   final bool alwaysShowChallenge;
 
-  /// Whether to run CAPTCHA in invisible mode – without the "I'm not a robot" checkbox.
+  /// Whether SmartCaptcha should run in invisible mode – without the "I'm not a robot" checkbox.
   ///
   /// When enabled, only users whose requests are flagged as suspicious will be shown a challenge.
   ///
   /// Corresponding JavaScript parameter: `invisible`.
   final bool useInvisibleMode;
 
-  /// The position of the Data Processing Notice badge when [useInvisibleMode] is `true`.
+  /// The position of the Data Processing Notice (DPN) badge when [useInvisibleMode] is `true`.
   ///
   /// Corresponding JavaScript parameter: `shieldPosition`.
   final DPNBadgePosition badgePosition;
 
-  /// Whether to hide the Data Processing Notice badge when [useInvisibleMode] is `true`.
+  /// Whether to hide the Data Processing Notice (DPN) badge when [useInvisibleMode] is `true`.
   ///
   /// Note: Hiding the badge requires you to inform users about data processing
   /// through an alternative method in your app.
@@ -48,10 +48,10 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `hideShield`.
   final bool hideBadge;
 
-  /// Whether to enable specialized mobile WebView optimization mode.
+  /// Whether to enable a specialized mobile WebView optimization mode.
   ///
   /// Improves challenge accuracy and rendering on mobile devices. This option
-  /// is ignored on Flutter Web, where the widget runs directly in the browser.
+  /// is ignored on the web, where the widget runs directly in the browser.
   ///
   /// Corresponding JavaScript parameter: `webview`.
   final bool useWebViewMode;
@@ -59,19 +59,19 @@ final class CaptchaConfig {
   /// The initial scale factor for the WebView content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
-  /// On Flutter Web, the browser document controls viewport behavior.
+  /// Ignored on the web, where the browser document controls viewport behavior.
   final double initialScale;
 
   /// Whether the user can scale the WebView content using gestures.
   ///
   /// Sets the `user-scalable` attribute of the viewport meta tag.
-  /// On Flutter Web, the browser document controls viewport behavior.
+  /// Ignored on the web, where the browser document controls viewport behavior.
   final bool allowUserScaling;
 
   /// The maximum scale factor when [allowUserScaling] is `true`.
   ///
   /// Sets the `maximum-scale` attribute of the viewport meta tag.
-  /// On Flutter Web, the browser document controls viewport behavior.
+  /// Ignored on the web, where the browser document controls viewport behavior.
   final double maximumScale;
 
   /// Creates SmartCaptcha configuration.

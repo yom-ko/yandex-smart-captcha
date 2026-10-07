@@ -48,18 +48,18 @@ This is an immutable configuration for Yandex SmartCaptcha JavaScript widget.
 
 > Ignored on web: `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
 
-| Parameter             | Required | Default       | Description                                                                                            |
-| :-------------------- | :------: | :------------ | :----------------------------------------------------------------------------------------------------- |
-| `clientKey`           |    ✔     |               | The client-side key passed to the SmartCaptcha widget.                                                 |
-| `language`            |          | `ru`          | The language used by the SmartCaptcha UI.                                                              |
-| `alwaysShowChallenge` |          | `false`       | Whether the SmartCaptcha widget should always display a challenge (useful for testing).                |
-| `useInvisibleMode`    |          | `false`       | Whether the SmartCaptcha widget should run in invisible mode – without the "I'm not a robot" checkbox. |
-| `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`.              |
-| `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                                       |
-| `useWebViewMode`*     |          | `true`        | Whether to enable a specialized mobile WebView optimization mode.                                      |
-| `initialScale`*       |          | `1.0`         | The initial scale factor for the WebView content.                                                      |
-| `allowUserScaling`*   |          | `false`       | Whether the user can scale the WebView content using gestures.                                         |
-| `maximumScale`*       |          | `3.0`         | The maximum scale factor when `allowUserScaling` is `true`.                                            |
+| Parameter             | Required | Default       | Description                                                                                 |
+| :-------------------- | :------: | :------------ | :------------------------------------------------------------------------------------------ |
+| `clientKey`           |    ✔     |               | The client-side key passed to the SmartCaptcha widget.                                      |
+| `language`            |          | `ru`          | The language used by the SmartCaptcha UI.                                                   |
+| `alwaysShowChallenge` |          | `false`       | Whether SmartCaptcha should always display a challenge (useful for testing).                |
+| `useInvisibleMode`    |          | `false`       | Whether SmartCaptcha should run in invisible mode – without the "I'm not a robot" checkbox. |
+| `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`.   |
+| `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                            |
+| `useWebViewMode`*     |          | `true`        | Whether to enable a specialized mobile WebView optimization mode.                           |
+| `initialScale`*       |          | `1.0`         | The initial scale factor for the WebView content.                                           |
+| `allowUserScaling`*   |          | `false`       | Whether the user can scale the WebView content using gestures.                              |
+| `maximumScale`*       |          | `3.0`         | The maximum scale factor when `allowUserScaling` is `true`.                                 |
 
 ### YandexSmartCaptcha parameters
 
@@ -72,11 +72,11 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                      |
 | `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                  |
 | `backgroundColor`*     |          | `null`  | The background color of the widget container.                                          |
-| `loadingIndicator`*    |          | `null`  | A custom widget displayed while SmartCaptcha script is loading.                        |
+| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                    |
 | `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script has fully loaded and initialized.                  |
-| `onChallengeShown`     |          | `null`  | Called when the SmartCaptcha challenge popup becomes visible.                          |
-| `onChallengeHidden`    |          | `null`  | Called when the SmartCaptcha challenge popup is hidden.                                |
-| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires or is invalidated.                          |
+| `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                       |
+| `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                |
+| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved. |
 | `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script. |
 | `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.        |
 | `onNavigationRequest`* |          | `null`  | Called when a navigation request is made inside the WebView.                           |

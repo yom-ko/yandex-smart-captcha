@@ -9,7 +9,7 @@ import 'native/captcha_adapter_widget.dart'
 
 /// A controller for [YandexSmartCaptcha].
 ///
-/// Provides programmatic control over the underlying SmartCaptcha instance
+/// Provides programmatic control over the SmartCaptcha JavaScript widget
 /// by exposing its imperative methods.
 final class CaptchaController {
   CaptchaPlatformController? _platformController;
@@ -59,59 +59,60 @@ final class CaptchaController {
 
 /// A Flutter widget that configures and displays Yandex SmartCaptcha.
 ///
-/// On Android and iOS, it hosts SmartCaptcha in a native WebView. On Flutter
-/// Web, it renders SmartCaptcha directly into a browser DOM container at this
-/// widget's location. The challenge UI / overlay are fully controlled by Yandex.
+/// On Android and iOS, it hosts SmartCaptcha in a native WebView. On the web,
+/// it renders SmartCaptcha into a browser DOM element at this widget's location.
+/// The challenge UI / overlay are fully controlled by Yandex.
 class YandexSmartCaptcha extends StatefulWidget {
-  /// The configuration for this CAPTCHA instance.
+  /// The configuration for this SmartCaptcha instance.
   final CaptchaConfig config;
 
-  /// Called when the user successfully solves a CAPTCHA challenge.
+  /// Called when the user successfully solves a SmartCaptcha challenge.
   ///
   /// Provides the verification token string. May be `null` if token extraction fails.
   final void Function(String? token) onChallengeSolved;
 
   /// The background color of the widget container on native platforms.
   ///
-  /// Ignored on Flutter Web, where the browser owns the DOM element presentation.
+  /// Ignored on the web, where the browser document controls presentation.
   final Color? backgroundColor;
 
   /// A custom widget displayed while SmartCaptcha is loading on native platforms.
   ///
-  /// Ignored on Flutter Web, where the browser owns the DOM element presentation.
+  /// Ignored on the web, where the browser document controls presentation.
   final Widget? loadingIndicator;
 
-  /// Called when the CAPTCHA script is fully loaded and initialized.
+  /// Called when the SmartCaptcha script has fully loaded and initialized.
   final VoidCallback? onCaptchaReady;
 
-  /// Called when the CAPTCHA challenge popup becomes visible.
+  /// Called when the challenge popup becomes visible.
   final VoidCallback? onChallengeShown;
 
-  /// Called when the CAPTCHA challenge popup is hidden.
+  /// Called when the challenge popup is hidden or dismissed.
   final VoidCallback? onChallengeHidden;
 
-  /// Called when the CAPTCHA token expires or is invalidated.
+  /// Called when the SmartCaptcha token expires after the challenge is successfully solved.
   final VoidCallback? onTokenExpired;
 
-  /// Called when a network error occurs while loading or executing the CAPTCHA.
+  /// Called when a network error occurs while loading or executing the SmartCaptcha script.
   final VoidCallback? onNetworkError;
 
-  /// Called when an uncaught JavaScript error occurs inside SmartCaptcha.
+  /// Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.
   final VoidCallback? onJavaScriptError;
 
   /// Intercepts navigation requests inside the native WebView.
   ///
   /// Return `true` to allow navigation, or `false` to block it.
   ///
-  /// Ignored on Flutter Web, where navigation is browser-controlled.
+  /// Ignored on the web, where the browser controls navigation.
   final bool Function(String url)? onNavigationRequest;
 
-  /// An optional controller to programmatically interact with the CAPTCHA.
+  /// An optional controller for programmatically interacting with the SmartCaptcha instance.
   final CaptchaController? controller;
 
-  /// The HTTP(S) URL used as the SmartCaptcha document origin on native platforms.
+  /// An HTTP(S) base URL used as the SmartCaptcha document origin on native platforms.
   ///
-  /// Ignored on Flutter Web, where the browser application's current origin is used.
+  /// Commonly used for domain validation and resolving origin policy issues.
+  /// Ignored on the web, where the browser's current origin is always used.
   final String? baseUrl;
 
   /// Creates a Yandex SmartCaptcha widget.
