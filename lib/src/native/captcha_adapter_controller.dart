@@ -11,13 +11,14 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   final CaptchaAdapterCallbacks callbacks;
   final String? baseUrl;
 
-  @override
-  final isReady = ValueNotifier<bool>(false);
-
   late final InAppWebViewInitialData initialData;
   InAppWebViewController? _webViewController;
 
   bool _isDisposed = false;
+
+  @override
+  final isReady = ValueNotifier<bool>(false);
+  final isLoaded = ValueNotifier<bool>(false);
 
   CaptchaAdapterController({
     required this.config,
@@ -54,6 +55,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     switch (event) {
       case CaptchaEvent.captchaReady:
         isReady.value = true;
+        isLoaded.value = true;
         callbacks.onCaptchaReady?.call();
       case CaptchaEvent.challengeShown:
         callbacks.onChallengeShown?.call();
@@ -74,6 +76,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   @override
   Future<void> execute() async {
+    if (_isDisposed || _webViewController == null || !isReady.value) return;
     await _webViewController?.evaluateJavascript(
       source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
     );
@@ -81,6 +84,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   @override
   Future<void> reset() async {
+    if (_isDisposed || _webViewController == null || !isReady.value) return;
     await _webViewController?.evaluateJavascript(
       source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
     );
@@ -88,9 +92,11 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   @override
   Future<void> destroy() async {
+    if (_isDisposed || _webViewController == null || !isReady.value) return;
     await _webViewController?.evaluateJavascript(
       source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
     );
+    isReady.value = false;
   }
 
   @override
@@ -99,6 +105,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     _isDisposed = true;
 
     _webViewController = null;
+    isLoaded.dispose();
     isReady.dispose();
   }
 }

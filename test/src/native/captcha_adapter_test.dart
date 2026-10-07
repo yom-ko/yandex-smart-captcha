@@ -118,6 +118,23 @@ void main() {
         expect(html, contains(r'hl: "en"'));
         expect(html, contains(r'shieldPosition: "bottom-right"'));
       });
+
+      test('escapes HTML attribute configuration values', () {
+        final html = createCaptcha(
+          language: 'en" onload="alert(1)',
+          allowUserScaling: 'yes" onload="alert(1)',
+        ).htmlData;
+
+        expect(
+          html,
+          contains('<html lang="en&quot; onload=&quot;alert(1)">'),
+        );
+        expect(
+          html,
+          contains('user-scalable=yes&quot; onload=&quot;alert(1)'),
+        );
+        expect(html, isNot(contains('lang="en" onload="alert(1)"')));
+      });
     });
 
     group('event wiring', () {
@@ -142,27 +159,42 @@ void main() {
 
           expect(html, contains('let isNetworkErrorReported = false;'));
           expect(html, contains('if (isNetworkErrorReported) return;'));
+          expect(html, contains('function isHandlerReady()'));
+          expect(
+            html,
+            contains('typeof window.flutter_inappwebview !== "undefined"'),
+          );
           expect(
             html,
             contains(
-              RegExp(
-                r'if \(typeof window\.flutter_inappwebview\??\.callHandler === "function"\)',
-              ),
-            ),
+                'typeof window.flutter_inappwebview.callHandler === "function"'),
           );
           expect(html, contains('isNetworkErrorReported = true;'));
           expect(
             html,
             contains(
-              RegExp(
-                r'window\.flutter_inappwebview(?:\?\.)?\.callHandler\(\s*"'
-                '${CaptchaEvent.networkError.name}'
-                r'"\s*\);',
-              ),
+              'window.flutter_inappwebview.callHandler'
+              '("${CaptchaEvent.networkError.name}");',
             ),
           );
-          expect(html, contains('setTimeout(reportNetworkError, 50);'));
-          expect(html, contains('onerror="reportNetworkError()"'));
+          expect(
+            html,
+            contains(
+              'window.addEventListener('
+              '"flutterInAppWebViewPlatformReady", '
+              'reportNetworkError, { once: true });',
+            ),
+          );
+          expect(
+            html,
+            isNot(contains('setTimeout(reportNetworkError')),
+          );
+          expect(
+            html,
+            contains(
+              'onerror="reportNetworkError()"',
+            ),
+          );
         },
       );
 
@@ -170,14 +202,7 @@ void main() {
         final html = createCaptcha().htmlData;
 
         expect(html, contains('function initializeCaptcha()'));
-        expect(
-          html,
-          contains(
-            RegExp(
-              r'if \(typeof window\.flutter_inappwebview\??\.callHandler === "function"\)',
-            ),
-          ),
-        );
+        expect(html, contains('if (isHandlerReady())'));
         expect(html, contains('initializeCaptcha();'));
         expect(
           html,
@@ -188,12 +213,34 @@ void main() {
         );
       });
 
-      test('contains challengeSolved event handler', () {
+      test(
+        'reports initialization exceptions through the JavaScript error event',
+        () {
+          final html = createCaptcha().htmlData;
+
+          expect(html, contains('try {'));
+          expect(html, contains('} catch (e) {'));
+          expect(
+            html,
+            contains(
+              'window.flutter_inappwebview.callHandler'
+              '("${CaptchaEvent.javaScriptError.name}");',
+            ),
+          );
+        },
+      );
+
+      test('forwards the solved token as the bridge event payload', () {
         final html = createCaptcha().htmlData;
 
         expect(html, contains('function resultCallback(token)'));
-        expect(html, contains('"${CaptchaEvent.challengeSolved.name}"'));
-        expect(html, contains('token,'));
+        expect(
+          html,
+          contains(
+            'window.flutter_inappwebview.callHandler'
+            '("${CaptchaEvent.challengeSolved.name}", token);',
+          ),
+        );
       });
 
       test('contains captchaReady event handler', () {

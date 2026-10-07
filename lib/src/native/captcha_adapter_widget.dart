@@ -49,6 +49,7 @@ final class CaptchaAdapterWidget extends StatelessWidget {
           },
           onWebViewCreated: (webViewController) {
             controller.isReady.value = false;
+            controller.isLoaded.value = false;
             controller.attachWebViewController(webViewController);
 
             for (final event in CaptchaEvent.values) {
@@ -63,10 +64,10 @@ final class CaptchaAdapterWidget extends StatelessWidget {
         ),
         if (loadingIndicator != null)
           ValueListenableBuilder<bool>(
-            valueListenable: controller.isReady,
+            valueListenable: controller.isLoaded,
             child: loadingIndicator,
-            builder: (_, ready, child) =>
-                ready ? const SizedBox.shrink() : child!,
+            builder: (_, isLoaded, child) =>
+                isLoaded ? const SizedBox.shrink() : child!,
           ),
       ],
     );

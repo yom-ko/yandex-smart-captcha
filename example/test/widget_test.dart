@@ -50,7 +50,7 @@ void main() {
 
     expect(
       webViewController.evaluatedJavascriptSources,
-      contains('window.smartCaptcha.reset(window.wscWidgetId)'),
+      contains('window.smartCaptcha.reset(window.yscWidgetId)'),
     );
     expect(tester.widget<ElevatedButton>(buttonReset).onPressed, isNull);
 

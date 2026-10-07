@@ -2,20 +2,9 @@ import 'dart:convert';
 
 import '../captcha_event.dart';
 
-const widgetIdProp = 'wscWidgetId';
+const widgetIdProp = 'yscWidgetId';
 
 final class SmartCaptcha {
-  final String _clientKey;
-  final String _language;
-  final bool _alwaysShowChallenge;
-  final bool _useInvisibleMode;
-  final String _badgePosition;
-  final bool _hideBadge;
-  final double _initialScale;
-  final String _allowUserScaling;
-  final double _maximumScale;
-  final bool _useWebViewMode;
-
   late final String htmlData;
 
   SmartCaptcha({
@@ -29,20 +18,17 @@ final class SmartCaptcha {
     required String allowUserScaling,
     required double maximumScale,
     required bool useWebViewMode,
-  })  : _clientKey = clientKey,
-        _language = language,
-        _alwaysShowChallenge = alwaysShowChallenge,
-        _useInvisibleMode = useInvisibleMode,
-        _badgePosition = badgePosition,
-        _hideBadge = hideBadge,
-        _initialScale = initialScale,
-        _allowUserScaling = allowUserScaling,
-        _maximumScale = maximumScale,
-        _useWebViewMode = useWebViewMode {
+  }) {
     const containerId = 'smart-captcha-container';
-    final language = _encodeJsStringLiteral(_language);
-    final clientKey = _encodeJsStringLiteral(_clientKey);
-    final badgePosition = _encodeJsStringLiteral(_badgePosition);
+
+    final safeLang =
+        const HtmlEscape(HtmlEscapeMode.attribute).convert(language);
+    final safeAllowUserScaling =
+        const HtmlEscape(HtmlEscapeMode.attribute).convert(allowUserScaling);
+
+    final safeLanguage = _encodeJsStringLiteral(language);
+    final safeClientKey = _encodeJsStringLiteral(clientKey);
+    final safeBadgePosition = _encodeJsStringLiteral(badgePosition);
     final eventsJson = jsonEncode(
       CaptchaEvent.values
           .where((e) => e.subscribable)
@@ -55,26 +41,29 @@ final class SmartCaptcha {
 
     htmlData = '''
 <!doctype html>
-<html lang="$_language">
+<html lang="$safeLang">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="
-      width=device-width,
-      initial-scale=$_initialScale,
-      user-scalable=$_allowUserScaling,
-      maximum-scale=$_maximumScale" />
+    <meta name="viewport" content="width=device-width, initial-scale=$initialScale, user-scalable=$safeAllowUserScaling, maximum-scale=$maximumScale" />
     <title></title>
     <script>
       let isNetworkErrorReported = false;
 
+      function isHandlerReady() {
+        return (
+          typeof window.flutter_inappwebview !== "undefined" &&
+          typeof window.flutter_inappwebview.callHandler === "function"
+        );
+      }
+
       function reportNetworkError() {
         if (isNetworkErrorReported) return;
 
-        if (typeof window.flutter_inappwebview?.callHandler === "function") {
+        if (isHandlerReady()) {
           isNetworkErrorReported = true;
           window.flutter_inappwebview.callHandler("${CaptchaEvent.networkError.name}");
         } else {
-          setTimeout(reportNetworkError, 50);
+          window.addEventListener("flutterInAppWebViewPlatformReady", reportNetworkError, { once: true });
         }
       }
 
@@ -85,36 +74,38 @@ final class SmartCaptcha {
         }
 
         function resultCallback(token) {
-          window.flutter_inappwebview.callHandler(
-            "${CaptchaEvent.challengeSolved.name}",
-            token,
-          );
+          window.flutter_inappwebview.callHandler("${CaptchaEvent.challengeSolved.name}", token);
         }
 
-        const widgetId = window.smartCaptcha.render("$containerId", {
-          sitekey: $clientKey,
-          hl: $language,
-          test: $_alwaysShowChallenge,
-          invisible: $_useInvisibleMode,
-          shieldPosition: $badgePosition,
-          hideShield: $_hideBadge,
-          webview: $_useWebViewMode,
-          callback: resultCallback,
-        });
-
-        window.$widgetIdProp = widgetId;
-        const events = $eventsJson;
-        events.forEach(function (e) {
-          window.smartCaptcha.subscribe(widgetId, e.id, function () {
-            window.flutter_inappwebview.callHandler(e.name);
+        try {
+          const widgetId = window.smartCaptcha.render("$containerId", {
+            sitekey: $safeClientKey,
+            hl: $safeLanguage,
+            test: $alwaysShowChallenge,
+            invisible: $useInvisibleMode,
+            shieldPosition: $safeBadgePosition,
+            hideShield: $hideBadge,
+            webview: $useWebViewMode,
+            callback: resultCallback,
           });
-        });
 
-        window.flutter_inappwebview.callHandler("${CaptchaEvent.captchaReady.name}");
+          window.$widgetIdProp = widgetId;
+          const events = $eventsJson;
+          events.forEach(function (e) {
+            window.smartCaptcha.subscribe(widgetId, e.id, function () {
+              window.flutter_inappwebview.callHandler(e.name);
+            });
+          });
+
+          window.flutter_inappwebview.callHandler("${CaptchaEvent.captchaReady.name}");
+        } catch (e) {
+          window.flutter_inappwebview.callHandler("${CaptchaEvent.javaScriptError.name}");
+          return;
+        }
       }
 
       function onLoadFunction() {
-        if (typeof window.flutter_inappwebview?.callHandler === "function") {
+        if (isHandlerReady()) {
           initializeCaptcha();
         } else {
           window.addEventListener("flutterInAppWebViewPlatformReady", initializeCaptcha, { once: true });

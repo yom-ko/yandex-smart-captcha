@@ -18,7 +18,7 @@ void main() {
   });
 
   testWidgets(
-    'registers bridge handlers and hides loading after ready',
+    'tracks initialization separately from readiness',
     (tester) async {
       var readyCalls = 0;
       final controller = CaptchaAdapterController(
@@ -34,6 +34,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: CaptchaAdapterWidget(
+            key: const ValueKey('first-web-view'),
             controller: controller,
             loadingIndicator: const Text('Loading'),
           ),
@@ -41,6 +42,8 @@ void main() {
       );
       await tester.pump();
 
+      expect(controller.isReady.value, isFalse);
+      expect(controller.isLoaded.value, isFalse);
       expect(find.text('Loading'), findsOneWidget);
 
       final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
@@ -50,7 +53,32 @@ void main() {
       await tester.pump();
 
       expect(readyCalls, 1);
+      expect(controller.isReady.value, isTrue);
+      expect(controller.isLoaded.value, isTrue);
       expect(find.text('Loading'), findsNothing);
+
+      await controller.destroy();
+      await tester.pump();
+
+      expect(controller.isReady.value, isFalse);
+      expect(controller.isLoaded.value, isTrue);
+      expect(find.text('Loading'), findsNothing);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CaptchaAdapterWidget(
+            key: const ValueKey('replacement-web-view'),
+            controller: controller,
+            loadingIndicator: const Text('Loading'),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(controller.isReady.value, isFalse);
+      expect(controller.isLoaded.value, isFalse);
+      expect(find.text('Loading'), findsOneWidget);
 
       controller.dispose();
     },

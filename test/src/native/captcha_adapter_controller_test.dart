@@ -44,6 +44,7 @@ void main() {
       controller.attachWebViewController(
         InAppWebViewController.fromPlatform(platform: platformController),
       );
+      controller.handleEvent(CaptchaEvent.captchaReady, const []);
 
       await controller.execute();
       await controller.reset();
@@ -60,6 +61,48 @@ void main() {
 
       controller.dispose();
     });
+
+    test(
+      'does not allow controller operations before ready or after destroy',
+      () async {
+        final controller = createController();
+        final platformController = PlatformInAppWebViewControllerFake();
+        controller.attachWebViewController(
+          InAppWebViewController.fromPlatform(platform: platformController),
+        );
+
+        await controller.execute();
+        await controller.reset();
+        expect(platformController.evaluatedJavascriptSources, isEmpty);
+        expect(controller.isReady.value, isFalse);
+        expect(controller.isLoaded.value, isFalse);
+
+        controller.handleEvent(CaptchaEvent.captchaReady, const []);
+        expect(controller.isReady.value, isTrue);
+        expect(controller.isLoaded.value, isTrue);
+
+        await controller.destroy();
+
+        expect(controller.isReady.value, isFalse);
+        expect(controller.isLoaded.value, isTrue);
+        expect(
+          platformController.evaluatedJavascriptSources,
+          equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
+        );
+
+        await controller.execute();
+        await controller.reset();
+        await controller.destroy();
+
+        expect(controller.isReady.value, isFalse);
+        expect(
+          platformController.evaluatedJavascriptSources,
+          equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
+        );
+
+        controller.dispose();
+      },
+    );
 
     test('dispatches every bridge event and converts challenge tokens', () {
       final solvedTokens = <String?>[];

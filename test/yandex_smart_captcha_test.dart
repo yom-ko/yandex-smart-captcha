@@ -134,6 +134,8 @@ void main() {
         config: createConfig(),
         controller: captchaController,
       );
+      await tester.pump();
+      webViewController.emit(CaptchaEvent.captchaReady.name);
 
       await captchaController.execute();
 
@@ -150,6 +152,8 @@ void main() {
         config: createConfig(),
         controller: captchaController,
       );
+      await tester.pump();
+      webViewController.emit(CaptchaEvent.captchaReady.name);
 
       await captchaController.reset();
 
@@ -166,6 +170,8 @@ void main() {
         config: createConfig(),
         controller: captchaController,
       );
+      await tester.pump();
+      webViewController.emit(CaptchaEvent.captchaReady.name);
 
       await captchaController.destroy();
 
@@ -200,6 +206,7 @@ void main() {
       final replacementWebViewController =
           (replacementWebView.platform as PlatformInAppWebViewWidgetFake)
               .controller;
+      replacementWebViewController.emit(CaptchaEvent.captchaReady.name);
 
       await oldController.execute();
       expect(webViewController.evaluatedJavascriptSources, isEmpty);
@@ -281,6 +288,7 @@ void main() {
           WebUri('https://new.example.com'),
         );
 
+        replacementWebViewController.emit(CaptchaEvent.captchaReady.name);
         await captchaController.execute();
 
         expect(oldWebViewController.evaluatedJavascriptSources, isEmpty);

@@ -128,6 +128,14 @@ void main() {
       expect(destroyCalls, equals(1));
       expect(controller.isReady.value, isFalse);
 
+      await controller.execute();
+      await controller.reset();
+      await controller.destroy();
+
+      expect(executeCalls, equals(1));
+      expect(resetCalls, equals(1));
+      expect(destroyCalls, equals(1));
+
       controller.dispose();
     },
   );
