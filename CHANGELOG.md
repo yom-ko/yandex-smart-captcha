@@ -1,4 +1,14 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 7.3.7
+- Fix web:
+  - Unmounting the widget or changing `config`/`baseUrl` no longer throws from the SmartCaptcha cleanup.
+  - SmartCaptcha is now rendered only after its container is attached to the document, so additional mounts render correctly.
+  - A failed SmartCaptcha script load now calls `onNetworkError` instead of throwing an unhandled error.
+- Fix iOS: `onNavigationRequest` is no longer called for SmartCaptcha's own iframes and the initial document, so blocking navigation no longer prevents the captcha from loading.
+- Improve and expand Dartdoc coverage.
+- Improve and expand test coverage.
+- Improve README.
+
 ## 7.3.6
 - Fix unit tests.
 - Improve README.
