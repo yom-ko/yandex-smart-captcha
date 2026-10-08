@@ -7,7 +7,22 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Run unit and native widget tests
+        run: flutter test
+      - name: Run browser adapter tests
+        run: flutter test --platform chrome
+
   publish:
+    needs: test
     permissions:
       id-token: write
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
