@@ -79,7 +79,7 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved. |
 | `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script. |
 | `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.        |
-| `onNavigationRequest`* |          | `null`  | Called when a navigation request is made inside the WebView.                           |
+| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                |
 | `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.          |
 | `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.     |
 
