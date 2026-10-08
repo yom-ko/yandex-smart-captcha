@@ -2,7 +2,7 @@ import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
 
 /// Lifecycle events emitted by [YandexSmartCaptcha].
 enum CaptchaEvent {
-  /// Emitted when the SmartCaptcha script has fully loaded and initialized.
+  /// Emitted when the SmartCaptcha script is fully loaded and initialized.
   captchaReady('captcha-ready', subscribable: false),
 
   /// Emitted when the challenge popup becomes visible.

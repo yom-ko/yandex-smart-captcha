@@ -81,7 +81,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Ignored on the web, where the browser document controls presentation.
   final Widget? loadingIndicator;
 
-  /// Called when the SmartCaptcha script has fully loaded and initialized.
+  /// Called when the SmartCaptcha script is fully loaded and initialized.
   final VoidCallback? onCaptchaReady;
 
   /// Called when the challenge popup becomes visible.
