@@ -534,6 +534,71 @@ void main() {
         expect(policy, equals(NavigationActionPolicy.CANCEL));
       });
 
+      testWidgets(
+        'always allows subframe and initial document navigations',
+        (tester) async {
+          final requestedUrls = <String>[];
+          final webViewController = await pumpCaptcha(
+            tester,
+            config: createConfig(),
+            baseUrl: 'https://example.com',
+            onNavigationRequest: (url) {
+              requestedUrls.add(url);
+              return false;
+            },
+          );
+
+          final webView =
+              tester.widget<InAppWebView>(find.byType(InAppWebView));
+          final platformController =
+              InAppWebViewController.fromPlatform(platform: webViewController);
+
+          Future<NavigationActionPolicy?> navigate(
+            String url, {
+            required bool isForMainFrame,
+          }) {
+            return webView.platform.params.shouldOverrideUrlLoading!(
+              platformController,
+              NavigationAction(
+                request: URLRequest(url: WebUri(url)),
+                isForMainFrame: isForMainFrame,
+              ),
+            );
+          }
+
+          expect(
+            await navigate('about:blank', isForMainFrame: true),
+            equals(NavigationActionPolicy.ALLOW),
+          );
+          expect(
+            await navigate('about:srcdoc', isForMainFrame: false),
+            equals(NavigationActionPolicy.ALLOW),
+          );
+          expect(
+            await navigate('https://example.com', isForMainFrame: true),
+            equals(NavigationActionPolicy.ALLOW),
+          );
+          expect(
+            await navigate('https://example.com/', isForMainFrame: true),
+            equals(NavigationActionPolicy.ALLOW),
+          );
+          expect(
+            await navigate(
+              'https://smartcaptcha.cloud.yandex.ru/checkbox.html',
+              isForMainFrame: false,
+            ),
+            equals(NavigationActionPolicy.ALLOW),
+          );
+          expect(requestedUrls, isEmpty);
+
+          expect(
+            await navigate('https://example.com/other', isForMainFrame: true),
+            equals(NavigationActionPolicy.CANCEL),
+          );
+          expect(requestedUrls, equals(['https://example.com/other']));
+        },
+      );
+
       testWidgets('accepts JavaScript console messages', (tester) async {
         final webViewController =
             await pumpCaptcha(tester, config: createConfig());

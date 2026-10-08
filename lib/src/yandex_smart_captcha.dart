@@ -103,6 +103,10 @@ class YandexSmartCaptcha extends StatefulWidget {
   ///
   /// Return `true` to allow navigation, or `false` to block it.
   ///
+  /// Called only for main-frame navigations away from the SmartCaptcha document.
+  /// SmartCaptcha's own iframes and the initial `about:blank` or [baseUrl]
+  /// document are always allowed.
+  ///
   /// Ignored on the web, where the browser controls navigation.
   final bool Function(String url)? onNavigationRequest;
 

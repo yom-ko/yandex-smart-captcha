@@ -74,6 +74,29 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
+  NavigationActionPolicy decideNavigation(NavigationAction action) {
+    final url = action.request.url.toString();
+    if (!action.isForMainFrame || _isInitialDocument(url)) {
+      return NavigationActionPolicy.ALLOW;
+    }
+
+    final isAllowed = callbacks.onNavigationRequest?.call(url) ?? true;
+    return isAllowed
+        ? NavigationActionPolicy.ALLOW
+        : NavigationActionPolicy.CANCEL;
+  }
+
+  bool _isInitialDocument(String url) {
+    if (url.startsWith('about:')) return true;
+
+    final baseURL = baseUrl;
+    if (baseURL == null) return false;
+    return _removeSlash(url) == _removeSlash(baseURL);
+  }
+
+  static String _removeSlash(String url) =>
+      url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+
   @override
   Future<void> execute() async {
     if (_isDisposed || _webViewController == null || !isReady.value) return;

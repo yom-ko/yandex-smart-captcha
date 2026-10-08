@@ -36,14 +36,8 @@ final class CaptchaAdapterWidget extends StatelessWidget {
               action: PermissionResponseAction.GRANT,
             );
           },
-          shouldOverrideUrlLoading: (_, navigationAction) async {
-            final url = navigationAction.request.url.toString();
-            final result =
-                controller.callbacks.onNavigationRequest?.call(url) ?? true;
-            return result
-                ? NavigationActionPolicy.ALLOW
-                : NavigationActionPolicy.CANCEL;
-          },
+          shouldOverrideUrlLoading: (_, action) async =>
+              controller.decideNavigation(action),
           onConsoleMessage: (_, message) {
             debugPrint('YandexSmartCaptcha JS console message: $message');
           },
