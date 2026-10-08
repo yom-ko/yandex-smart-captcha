@@ -19,6 +19,7 @@ assets/images/*
 
 # Exclude local environment variables, IDE settings, and build files.
 build/
+coverage/
 integration_test/
 .dart_tool/
 .vscode/
