@@ -14,8 +14,7 @@ int _activeScriptUsers = 0;
 /// Acquires a shared SmartCaptcha script reference for one widget instance.
 ///
 /// The script is loaded only once while one or more widget instances are
-/// active. A failed load clears the cached future so a later instance can
-/// retry.
+/// active. A failed load clears the future so a later instance can retry.
 Future<void> acquireSmartCaptchaScript() async {
   await (_scriptFuture ??= _loadSmartCaptchaScript());
   _activeScriptUsers++;

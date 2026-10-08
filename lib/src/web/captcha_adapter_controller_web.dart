@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:flutter/material.dart';
@@ -10,20 +11,22 @@ import 'captcha_adapter_web.dart';
 import 'captcha_script_loader_web.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
-  static var _nextId = 0;
-  final _containerId = 'smart-captcha-${_nextId++}';
+  static var _cCount = 0;
+  static var _sCount = 0;
+  final _containerId = 'package-ysc-container-${_cCount++}';
+  final _styleId = 'package-ysc-spinner-hider-${_sCount++}';
 
   final CaptchaConfig config;
   final CaptchaAdapterCallbacks callbacks;
-
-  @override
-  final isReady = ValueNotifier<bool>(false);
 
   JSNumber? _widgetId;
   HTMLDivElement? _container;
 
   bool _isDisposed = false;
   bool _scriptAcquired = false;
+
+  @override
+  final isReady = ValueNotifier<bool>(false);
 
   CaptchaAdapterController({
     required this.config,
@@ -40,36 +43,30 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       ..style.height = '100px'
       ..style.display = 'block';
 
-    final styleId = 'hide-native-captcha-spinner';
-    if (document.getElementById(styleId) == null) {
-      final styleElement = document.createElement('style') as HTMLStyleElement;
-      styleElement.id = styleId;
-      styleElement.textContent = '''
-      .SmartCaptcha-Spin, .SmartCaptcha-Spin::after {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-      }
-    ''';
-      document.head!.appendChild(styleElement);
-    }
-
     _initialize();
   }
 
   Future<void> _initialize() async {
     try {
-      await acquireSmartCaptchaScript();
+      await _acquireScriptReference();
       _scriptAcquired = true;
-      if (_isDisposed) return _releaseScriptReference();
+    } catch (_) {
+      if (!_isDisposed) callbacks.onNetworkError?.call();
+      return;
+    }
+    if (_isDisposed) return _releaseScriptReference();
 
-      final captcha = smartCaptcha;
-      if (captcha == null || _container == null) {
-        callbacks.onNetworkError?.call();
-        _releaseScriptReference();
-        return;
-      }
+    await _waitUntilContainerConnected();
+    if (_isDisposed) return _releaseScriptReference();
 
+    final captcha = smartCaptcha;
+    if (captcha == null || _container == null) {
+      callbacks.onNetworkError?.call();
+      _releaseScriptReference();
+      return;
+    }
+
+    try {
       _widgetId = captcha.render(
         _containerId,
         SmartCaptchaOptions(
@@ -95,16 +92,19 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       isReady.value = true;
       callbacks.onCaptchaReady?.call();
     } catch (_) {
-      callbacks.onNetworkError?.call();
+      callbacks.onJavaScriptError?.call();
       _releaseScriptReference();
     }
   }
 
   void _onChallengeSolved(JSString? token) {
+    if (_isDisposed) return;
     callbacks.onChallengeSolved(token?.toDart);
   }
 
   void _handleEvent(CaptchaEvent event) {
+    if (_isDisposed) return;
+
     switch (event) {
       case CaptchaEvent.captchaReady:
         break;
@@ -123,29 +123,53 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
+  Future<void> _waitUntilContainerConnected() async {
+    while (!_isDisposed && _container?.isConnected == false) {
+      final completer = Completer<void>();
+      window.requestAnimationFrame(((JSNumber _) => completer.complete()).toJS);
+      await completer.future;
+    }
+  }
+
+  Future<void> _acquireScriptReference() async {
+    await acquireSmartCaptchaScript();
+    if (document.getElementById(_styleId) == null) {
+      final styleElement = document.createElement('style')
+        ..id = _styleId
+        ..textContent = '''
+.SmartCaptcha-Spin, .SmartCaptcha-Spin::after {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}''';
+      document.head!.appendChild(styleElement);
+    }
+  }
+
   void _releaseScriptReference() {
     if (!_scriptAcquired) return;
     _scriptAcquired = false;
     releaseSmartCaptchaScript();
+    document.getElementById(_styleId)?.remove();
   }
 
   @override
   Future<void> execute() async {
-    if (_isDisposed || _widgetId == null) return;
+    if (_isDisposed || _widgetId == null || !isReady.value) return;
     final captcha = smartCaptcha;
     captcha?.execute(_widgetId!);
   }
 
   @override
   Future<void> reset() async {
-    if (_isDisposed || _widgetId == null) return;
+    if (_isDisposed || _widgetId == null || !isReady.value) return;
     final captcha = smartCaptcha;
     captcha?.reset(_widgetId!);
   }
 
   @override
   Future<void> destroy() async {
-    if (_isDisposed || _widgetId == null) return;
+    if (_isDisposed || _widgetId == null || !isReady.value) return;
     final captcha = smartCaptcha;
     captcha?.destroy(_widgetId!);
     _widgetId = null;
@@ -159,7 +183,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
     if (_widgetId != null) {
       final captcha = smartCaptcha;
-      captcha?.destroy(_widgetId!);
+      captcha?.destroy(_widgetId);
+      _widgetId = null;
     }
 
     _releaseScriptReference();

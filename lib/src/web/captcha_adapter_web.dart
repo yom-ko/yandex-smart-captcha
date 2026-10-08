@@ -38,6 +38,5 @@ extension type SmartCaptchaOptions._(JSObject _) implements JSObject {
 }
 
 void deleteCaptchaObject() {
-  smartCaptcha?.destroy();
   globalContext.delete(_smartCaptchaObjectName.toJS);
 }
