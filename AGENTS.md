@@ -85,18 +85,14 @@ For local example-app runs and tests, load the real key from `example/.env` usin
 
 Keep `example/.env` git-ignored.
 
-## Agent context
+## Agent context policy
 
-`.agents/` is the canonical source of truth for agent context:
+**Context loading:** As an AI agent, use only your provider-specific directory containing this overview (e.g., `.github/` for Copilot, `.claude/` for Claude, etc.) as the sole source of context. Do not inspect other providers’ directories as they contain identical context. This avoids unnecessarily bloating the context window.
 
-* `.agents/project.md` — general project-wide context.
-* `.agents/rules/` — path-scoped rules/instructions.
-* `.agents/skills/` — reusable workflows.
-
-See [`.agents/README.md`](README.md) for the complete mapping and explanations.
-
-After changing any canonical agent context files, regenerate the outputs with:
+**Context updating:** `.agents/` is the canonical source of truth for agent context. Do not read or modify files in that directory unless explicitly asked by the user. After changing any canonical agent context file, regenerate the provider-specific outputs from the repository root with:
 
 ```bash
 ./build-agent-context.sh
 ```
+
+See [`.agents/README.md`](/.agents/README.md) for the mapping and details.
