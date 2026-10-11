@@ -1,4 +1,4 @@
-/// Supported positions for the DPN (Data Processing Notice) badge
+/// Positions supported by the DPN (Data Processing Notice) badge
 /// when invisible mode is enabled.
 enum DPNBadgePosition {
   /// Top-left corner

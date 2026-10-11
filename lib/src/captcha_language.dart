@@ -1,4 +1,4 @@
-/// Supported languages for the SmartCaptcha UI.
+/// Languages supported by the SmartCaptcha's UI.
 enum CaptchaLanguage {
   /// Russian
   ru,

@@ -93,4 +93,4 @@ Keep `example/.env` git-ignored.
 ./build-agent-context.sh
 ```
 
-See [`.agents/README.md`](/.agents/README.md) for the mapping and details.
+If interested, see [`.agents/README.md`](/.agents/README.md) for details.

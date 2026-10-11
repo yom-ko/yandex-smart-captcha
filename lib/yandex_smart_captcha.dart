@@ -1,6 +1,6 @@
 /// Flutter integration for Yandex SmartCaptcha on Android, iOS, and Web.
 ///
-/// Configure the package and display the SmartCaptcha widget
+/// Configure and display the YandexSmartCaptcha widget
 /// to embed Yandex SmartCaptcha into a Flutter application.
 library;
 

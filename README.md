@@ -27,7 +27,7 @@ YandexSmartCaptcha(
 
 In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
-* On mobile, the `YandexSmartCaptcha`'s parent widget should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered inside a single WebView.
+* On mobile, the `YandexSmartCaptcha`'s parent widget should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered within a single WebView.
 * On the web, the parent widget only needs to provide enough vertical space for the "I'm not a robot" block (with a fixed height of around 100px), because Yandex fully controls the challenge popup.
 
 ### Web support
@@ -36,9 +36,9 @@ In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classe
 
 On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
 
-Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked in the tables below) have no effect on the web.
+Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked in the tables) have no effect on the web.
 
-The `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain fully available.
+`onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain available.
 
 The web implementation is compatible with [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
 
@@ -51,14 +51,14 @@ This is an immutable configuration for Yandex SmartCaptcha and WebView content.
 | Parameter             | Required | Default       | Description                                                                               |
 | :-------------------- | :------: | :------------ | :---------------------------------------------------------------------------------------- |
 | `clientKey`           |    ✔     |               | The client-side key passed to SmartCaptcha.                                               |
-| `language`            |          | `ru`          | The language used by the SmartCaptcha UI.                                                 |
-| `alwaysShowChallenge` |          | `false`       | Whether SmartCaptcha should always display a challenge (used for testing).                |
+| `language`            |          | `ru`          | The language used by the SmartCaptcha's UI.                                               |
+| `alwaysShowChallenge` |          | `false`       | Whether SmartCaptcha should always display a challenge (normally used for testing).       |
 | `useInvisibleMode`    |          | `false`       | Whether SmartCaptcha should run in invisible mode – without the "I'm not a robot" block.  |
 | `badgePosition`       |          | `bottomRight` | The position of the Data Processing Notice (DPN) badge when `useInvisibleMode` is `true`. |
 | `hideBadge`           |          | `false`       | Whether to hide the DPN badge when `useInvisibleMode` is `true`.                          |
 | `useWebViewMode`*     |          | `true`        | Whether to enable a special mobile WebView optimization mode.                             |
 | `initialScale`*       |          | `1.0`         | The initial scale factor for the WebView content.                                         |
-| `allowUserScaling`*   |          | `false`       | Whether the user can scale the WebView content using gestures.                            |
+| `allowUserScaling`*   |          | `false`       | Whether the user can scale the WebView content with gestures.                             |
 | `maximumScale`*       |          | `3.0`         | The maximum scale factor when `allowUserScaling` is `true`.                               |
 
 ### YandexSmartCaptcha parameters
@@ -67,21 +67,21 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 
 > Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
-| Parameter              | Required | Default | Description                                                                            |
-| :--------------------- | :------: | :------ | :------------------------------------------------------------------------------------- |
-| `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                      |
-| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                  |
-| `backgroundColor`*     |          | `null`  | The background color of the SmartCaptcha widget container.                             |
-| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                    |
-| `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                   |
-| `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                       |
-| `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                |
-| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved. |
-| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script. |
-| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.        |
-| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                |
-| `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.          |
-| `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.     |
+| Parameter              | Required | Default | Description                                                                              |
+| :--------------------- | :------: | :------ | :--------------------------------------------------------------------------------------- |
+| `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                        |
+| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                    |
+| `backgroundColor`*     |          | `null`  | The background color of the SmartCaptcha container.                                      |
+| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                      |
+| `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                     |
+| `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                         |
+| `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                  |
+| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved.   |
+| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script.   |
+| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs while executing the SmartCaptcha script. |
+| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                  |
+| `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.            |
+| `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.       |
 
 ### CaptchaController methods
 
@@ -93,7 +93,7 @@ Provide access to the SmartCaptcha JavaScript widget's imperative methods.
 | `reset()`   | Resets the SmartCaptcha to its initial state. Only works after the challenge has been solved. |
 | `destroy()` | Removes the SmartCaptcha widget and its associated event listeners.                           |
 
-The controller exposes the same API on native and web platforms. Call these methods after `onCaptchaReady` fires.
+The same methods are exposed on native and web platforms. Call them after `onCaptchaReady` callback fires.
 
 ## Screenshots
 
@@ -102,7 +102,7 @@ The controller exposes the same API on native and web platforms. Call these meth
 <div>
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_1.webp"
-    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' checkbox."
+    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' block."
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_2.webp"
@@ -119,7 +119,7 @@ The controller exposes the same API on native and web platforms. Call these meth
 <div>
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_1.webp"
-    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' checkbox, as seen in a real-world application."
+    alt="The initial state of the Yandex SmartCaptcha container with the 'I'm not a robot' block, as seen in a real-world application."
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_2.webp"

@@ -8,12 +8,12 @@ import 'yandex_smart_captcha.dart' show YandexSmartCaptcha;
 /// See the [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods#methods)
 /// for details.
 final class CaptchaConfig {
-  /// The client-side key passed to the underlying SmartCaptcha widget.
+  /// The client-side key passed to SmartCaptcha.
   ///
   /// Corresponding JavaScript parameter: `sitekey`.
   final String clientKey;
 
-  /// The language used by the SmartCaptcha UI.
+  /// The language used by the SmartCaptcha's UI.
   ///
   /// For languages other than Russian, this option also affects
   /// the SmartCaptcha challenge language (typically switching it to English).
@@ -21,14 +21,14 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `hl`.
   final CaptchaLanguage language;
 
-  /// Whether SmartCaptcha should always display a challenge (useful for testing).
+  /// Whether SmartCaptcha should always display a challenge (normally used for testing).
   ///
   /// Use this option only for debugging or automated testing.
   ///
   /// Corresponding JavaScript parameter: `test`.
   final bool alwaysShowChallenge;
 
-  /// Whether SmartCaptcha should run in invisible mode – without the "I'm not a robot" checkbox.
+  /// Whether SmartCaptcha should run in invisible mode – without the "I'm not a robot" block.
   ///
   /// When enabled, only users whose requests are flagged as suspicious will be shown a challenge.
   ///
@@ -48,7 +48,7 @@ final class CaptchaConfig {
   /// Corresponding JavaScript parameter: `hideShield`.
   final bool hideBadge;
 
-  /// Whether to enable a specialized mobile WebView optimization mode.
+  /// Whether to enable a special mobile WebView optimization mode.
   ///
   /// Improves challenge accuracy and rendering on mobile devices. This option
   /// is ignored on the web, where the widget runs directly in the browser.
@@ -62,7 +62,7 @@ final class CaptchaConfig {
   /// Ignored on the web, where the browser document controls viewport behavior.
   final double initialScale;
 
-  /// Whether the user can scale the WebView content using gestures.
+  /// Whether the user can scale the WebView content with gestures.
   ///
   /// Sets the `user-scalable` attribute of the viewport meta tag.
   /// Ignored on the web, where the browser document controls viewport behavior.

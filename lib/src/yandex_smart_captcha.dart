@@ -66,7 +66,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// The configuration for this SmartCaptcha instance.
   final CaptchaConfig config;
 
-  /// Called when the user successfully solves a SmartCaptcha challenge.
+  /// Called when the user successfully solves a challenge.
   ///
   /// Provides the verification token string. May be `null` if token extraction fails.
   final void Function(String? token) onChallengeSolved;
@@ -96,7 +96,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when a network error occurs while loading or executing the SmartCaptcha script.
   final VoidCallback? onNetworkError;
 
-  /// Called when an uncaught JavaScript error occurs inside the SmartCaptcha script.
+  /// Called when an uncaught JavaScript error occurs while executing the SmartCaptcha script.
   final VoidCallback? onJavaScriptError;
 
   /// Intercepts navigation requests inside the native WebView.
