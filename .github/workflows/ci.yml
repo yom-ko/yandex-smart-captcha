@@ -10,7 +10,14 @@ permissions:
   contents: read
 
 jobs:
+  check-agent-context:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: ./build-agent-context.sh --check
+
   test:
+    needs: check-agent-context
     permissions:
       contents: read
       id-token: write
