@@ -137,10 +137,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       final styleElement = document.createElement('style')
         ..id = _styleId
         ..textContent = '''
-.SmartCaptcha-Spin, .SmartCaptcha-Spin::after {
+.SmartCaptcha-Spin {
   display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
 }''';
       document.head!.appendChild(styleElement);
     }

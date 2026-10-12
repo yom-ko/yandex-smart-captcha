@@ -117,6 +117,11 @@ final class SmartCaptcha {
       onerror="reportNetworkError()"
       defer
     ></script>
+    <style>
+      .SmartCaptcha-Spin {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="$containerId" style="height:100px"></div>

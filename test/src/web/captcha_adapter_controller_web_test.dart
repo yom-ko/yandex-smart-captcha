@@ -166,6 +166,12 @@ void main() {
         _firstSpinnerStyle!.textContent,
         contains('.SmartCaptcha-Spin'),
       );
+      expect(
+        _firstSpinnerStyle!.textContent,
+        contains('display: none !important;'),
+      );
+      expect(_firstSpinnerStyle!.textContent, isNot(contains('visibility:')));
+      expect(_firstSpinnerStyle!.textContent, isNot(contains('opacity:')));
 
       controller.dispose();
 

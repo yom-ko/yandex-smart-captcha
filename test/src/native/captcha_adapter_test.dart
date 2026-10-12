@@ -81,6 +81,16 @@ void main() {
         );
         expect(html, contains('defer'));
       });
+
+      test('hides the SmartCaptcha loading spinner', () {
+        final html = createCaptcha().htmlData;
+
+        expect(html, contains('.SmartCaptcha-Spin'));
+        expect(
+          html,
+          contains('display: none !important;'),
+        );
+      });
     });
 
     group('configuration', () {
