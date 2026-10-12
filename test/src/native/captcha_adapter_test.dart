@@ -1,33 +1,41 @@
+@TestOn('vm')
+library;
+
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yandex_smart_captcha/src/captcha_config.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
+import 'package:yandex_smart_captcha/src/captcha_language.dart';
+import 'package:yandex_smart_captcha/src/dpn_badge_position.dart';
 import 'package:yandex_smart_captcha/src/native/captcha_adapter.dart';
 
 void main() {
   SmartCaptcha createCaptcha({
     String clientKey = 'client-key',
-    String language = 'en',
+    CaptchaLanguage language = CaptchaLanguage.en,
     bool alwaysShowChallenge = false,
     bool useInvisibleMode = false,
-    String badgePosition = 'bottom-right',
+    DPNBadgePosition badgePosition = DPNBadgePosition.bottomRight,
     bool hideBadge = false,
     double initialScale = 1,
-    String allowUserScaling = 'no',
+    bool allowUserScaling = false,
     double maximumScale = 3,
     bool useWebViewMode = true,
   }) {
     return SmartCaptcha(
-      clientKey: clientKey,
-      language: language,
-      alwaysShowChallenge: alwaysShowChallenge,
-      useInvisibleMode: useInvisibleMode,
-      badgePosition: badgePosition,
-      hideBadge: hideBadge,
-      initialScale: initialScale,
-      allowUserScaling: allowUserScaling,
-      maximumScale: maximumScale,
-      useWebViewMode: useWebViewMode,
+      CaptchaConfig(
+        clientKey: clientKey,
+        language: language,
+        alwaysShowChallenge: alwaysShowChallenge,
+        useInvisibleMode: useInvisibleMode,
+        badgePosition: badgePosition,
+        hideBadge: hideBadge,
+        initialScale: initialScale,
+        allowUserScaling: allowUserScaling,
+        maximumScale: maximumScale,
+        useWebViewMode: useWebViewMode,
+      ),
     );
   }
 
@@ -79,13 +87,13 @@ void main() {
       test('serializes all widget configuration', () {
         final html = createCaptcha(
           clientKey: 'test-key',
-          language: 'ru',
+          language: CaptchaLanguage.ru,
           alwaysShowChallenge: true,
           useInvisibleMode: true,
-          badgePosition: 'top-left',
+          badgePosition: DPNBadgePosition.topLeft,
           hideBadge: true,
           initialScale: 1.5,
-          allowUserScaling: 'yes',
+          allowUserScaling: true,
           maximumScale: 4,
           useWebViewMode: false,
         ).htmlData;
@@ -119,21 +127,40 @@ void main() {
         expect(html, contains(r'shieldPosition: "bottom-right"'));
       });
 
-      test('escapes HTML attribute configuration values', () {
+      test('serializes enum configuration into HTML and SmartCaptcha options',
+          () {
         final html = createCaptcha(
-          language: 'en" onload="alert(1)',
-          allowUserScaling: 'yes" onload="alert(1)',
+          language: CaptchaLanguage.tr,
+          badgePosition: DPNBadgePosition.centerLeft,
         ).htmlData;
 
-        expect(
-          html,
-          contains('<html lang="en&quot; onload=&quot;alert(1)">'),
-        );
-        expect(
-          html,
-          contains('user-scalable=yes&quot; onload=&quot;alert(1)'),
-        );
-        expect(html, isNot(contains('lang="en" onload="alert(1)"')));
+        expect(html, contains('<html lang="tr">'));
+        expect(html, contains('hl: "tr"'));
+        expect(html, contains('shieldPosition: "center-left"'));
+      });
+
+      test('serializes user scaling as a safe yes-or-no value', () {
+        final enabledHtml = createCaptcha(allowUserScaling: true).htmlData;
+        final disabledHtml = createCaptcha().htmlData;
+
+        expect(enabledHtml, contains('user-scalable=yes'));
+        expect(disabledHtml, contains('user-scalable=no'));
+      });
+
+      test('clamps viewport scales to the supported range', () {
+        final belowMinimum = createCaptcha(
+          initialScale: 0,
+          maximumScale: -1,
+        ).htmlData;
+        final aboveMaximum = createCaptcha(
+          initialScale: 20,
+          maximumScale: 11,
+        ).htmlData;
+
+        expect(belowMinimum, contains('initial-scale=0.1'));
+        expect(belowMinimum, contains('maximum-scale=0.1'));
+        expect(aboveMaximum, contains('initial-scale=10.0'));
+        expect(aboveMaximum, contains('maximum-scale=10.0'));
       });
     });
 

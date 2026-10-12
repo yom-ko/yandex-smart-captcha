@@ -25,21 +25,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.callbacks,
     required this.baseUrl,
   }) {
-    final smartCaptcha = SmartCaptcha(
-      clientKey: config.clientKey,
-      alwaysShowChallenge: config.alwaysShowChallenge,
-      language: config.language.name,
-      useInvisibleMode: config.useInvisibleMode,
-      hideBadge: config.hideBadge,
-      badgePosition: config.badgePosition.id,
-      useWebViewMode: config.useWebViewMode,
-      initialScale: config.initialScale.clamp(0.1, 10),
-      allowUserScaling: config.allowUserScaling ? 'yes' : 'no',
-      maximumScale: config.maximumScale.clamp(0.1, 10),
-    );
-
     initialData = InAppWebViewInitialData(
-      data: smartCaptcha.htmlData,
+      data: SmartCaptcha(config).htmlData,
       baseUrl: baseUrl != null ? WebUri(baseUrl!) : null,
     );
   }
@@ -47,9 +34,18 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   void attachWebViewController(InAppWebViewController controller) {
     if (_isDisposed) return;
     _webViewController = controller;
+
+    for (final event in CaptchaEvent.values) {
+      _webViewController!.addJavaScriptHandler(
+        handlerName: event.name,
+        callback: (args) {
+          _handleEvent(event, args);
+        },
+      );
+    }
   }
 
-  void handleEvent(CaptchaEvent event, List<dynamic> args) {
+  void _handleEvent(CaptchaEvent event, List<dynamic> args) {
     if (_isDisposed) return;
 
     switch (event) {

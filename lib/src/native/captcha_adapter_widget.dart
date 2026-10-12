@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import '../captcha_event.dart';
 import 'captcha_adapter_controller.dart';
 
 final class CaptchaAdapterWidget extends StatelessWidget {
@@ -36,24 +35,16 @@ final class CaptchaAdapterWidget extends StatelessWidget {
               action: PermissionResponseAction.GRANT,
             );
           },
-          shouldOverrideUrlLoading: (_, action) async =>
-              controller.decideNavigation(action),
+          shouldOverrideUrlLoading: (_, action) async {
+            return controller.decideNavigation(action);
+          },
           onConsoleMessage: (_, message) {
-            debugPrint('YandexSmartCaptcha JS console message: $message');
+            debugPrint('YSM console message: $message');
           },
           onWebViewCreated: (webViewController) {
             controller.isReady.value = false;
             controller.isLoaded.value = false;
             controller.attachWebViewController(webViewController);
-
-            for (final event in CaptchaEvent.values) {
-              webViewController.addJavaScriptHandler(
-                handlerName: event.name,
-                callback: (args) {
-                  controller.handleEvent(event, args);
-                },
-              );
-            }
           },
         ),
         if (loadingIndicator != null)

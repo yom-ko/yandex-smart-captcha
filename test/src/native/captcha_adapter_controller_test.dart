@@ -40,18 +40,18 @@ void main() {
 
     test('delegates controller operations to the attached WebView', () async {
       final controller = createController();
-      final platformController = PlatformInAppWebViewControllerFake();
+      final wvController = PlatformInAppWebViewControllerFake();
       controller.attachWebViewController(
-        InAppWebViewController.fromPlatform(platform: platformController),
+        InAppWebViewController.fromPlatform(platform: wvController),
       );
-      controller.handleEvent(CaptchaEvent.captchaReady, const []);
+      wvController.emit(CaptchaEvent.captchaReady.name);
 
       await controller.execute();
       await controller.reset();
       await controller.destroy();
 
       expect(
-        platformController.evaluatedJavascriptSources,
+        wvController.evaluatedJavascriptSources,
         equals([
           'window.smartCaptcha.execute(window.$widgetIdProp)',
           'window.smartCaptcha.reset(window.$widgetIdProp)',
@@ -66,18 +66,18 @@ void main() {
       'does not allow controller operations before ready or after destroy',
       () async {
         final controller = createController();
-        final platformController = PlatformInAppWebViewControllerFake();
+        final wvController = PlatformInAppWebViewControllerFake();
         controller.attachWebViewController(
-          InAppWebViewController.fromPlatform(platform: platformController),
+          InAppWebViewController.fromPlatform(platform: wvController),
         );
 
         await controller.execute();
         await controller.reset();
-        expect(platformController.evaluatedJavascriptSources, isEmpty);
+        expect(wvController.evaluatedJavascriptSources, isEmpty);
         expect(controller.isReady.value, isFalse);
         expect(controller.isLoaded.value, isFalse);
 
-        controller.handleEvent(CaptchaEvent.captchaReady, const []);
+        wvController.emit(CaptchaEvent.captchaReady.name);
         expect(controller.isReady.value, isTrue);
         expect(controller.isLoaded.value, isTrue);
 
@@ -86,7 +86,7 @@ void main() {
         expect(controller.isReady.value, isFalse);
         expect(controller.isLoaded.value, isTrue);
         expect(
-          platformController.evaluatedJavascriptSources,
+          wvController.evaluatedJavascriptSources,
           equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
         );
 
@@ -96,7 +96,7 @@ void main() {
 
         expect(controller.isReady.value, isFalse);
         expect(
-          platformController.evaluatedJavascriptSources,
+          wvController.evaluatedJavascriptSources,
           equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
         );
 
@@ -124,16 +124,20 @@ void main() {
           onJavaScriptError: () => javaScriptErrorCalls++,
         ),
       );
+      final wvController = PlatformInAppWebViewControllerFake();
+      controller.attachWebViewController(
+        InAppWebViewController.fromPlatform(platform: wvController),
+      );
 
-      controller.handleEvent(CaptchaEvent.captchaReady, const []);
-      controller.handleEvent(CaptchaEvent.challengeShown, const []);
-      controller.handleEvent(CaptchaEvent.challengeHidden, const []);
-      controller.handleEvent(CaptchaEvent.challengeSolved, ['token']);
-      controller.handleEvent(CaptchaEvent.challengeSolved, ['null']);
-      controller.handleEvent(CaptchaEvent.challengeSolved, const []);
-      controller.handleEvent(CaptchaEvent.tokenExpired, const []);
-      controller.handleEvent(CaptchaEvent.networkError, const []);
-      controller.handleEvent(CaptchaEvent.javaScriptError, const []);
+      wvController.emit(CaptchaEvent.captchaReady.name);
+      wvController.emit(CaptchaEvent.challengeShown.name);
+      wvController.emit(CaptchaEvent.challengeHidden.name);
+      wvController.emit(CaptchaEvent.challengeSolved.name, ['token']);
+      wvController.emit(CaptchaEvent.challengeSolved.name, ['null']);
+      wvController.emit(CaptchaEvent.challengeSolved.name);
+      wvController.emit(CaptchaEvent.tokenExpired.name);
+      wvController.emit(CaptchaEvent.networkError.name);
+      wvController.emit(CaptchaEvent.javaScriptError.name);
 
       expect(controller.isReady.value, isTrue);
       expect(readyCalls, 1);
@@ -165,18 +169,18 @@ void main() {
           onCaptchaReady: () => readyCalls++,
         ),
       );
-      final platformController = PlatformInAppWebViewControllerFake();
+      final wvController = PlatformInAppWebViewControllerFake();
 
-      controller.dispose();
-      controller.dispose();
       controller.attachWebViewController(
-        InAppWebViewController.fromPlatform(platform: platformController),
+        InAppWebViewController.fromPlatform(platform: wvController),
       );
-      controller.handleEvent(CaptchaEvent.captchaReady, const []);
+      controller.dispose();
+      controller.dispose();
+      wvController.emit(CaptchaEvent.captchaReady.name);
       await controller.execute();
 
       expect(readyCalls, isZero);
-      expect(platformController.evaluatedJavascriptSources, isEmpty);
+      expect(wvController.evaluatedJavascriptSources, isEmpty);
     });
   });
 }

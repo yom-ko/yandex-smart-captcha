@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../captcha_config.dart';
 import '../captcha_event.dart';
 
 const widgetIdProp = 'yscWidgetId';
@@ -7,44 +8,43 @@ const widgetIdProp = 'yscWidgetId';
 final class SmartCaptcha {
   late final String htmlData;
 
-  SmartCaptcha({
-    required String clientKey,
-    required String language,
-    required bool alwaysShowChallenge,
-    required bool useInvisibleMode,
-    required String badgePosition,
-    required bool hideBadge,
-    required double initialScale,
-    required String allowUserScaling,
-    required double maximumScale,
-    required bool useWebViewMode,
-  }) {
+  SmartCaptcha(CaptchaConfig config) {
     const containerId = 'smart-captcha-container';
 
-    final safeLang =
-        const HtmlEscape(HtmlEscapeMode.attribute).convert(language);
-    final safeAllowUserScaling =
-        const HtmlEscape(HtmlEscapeMode.attribute).convert(allowUserScaling);
+    final CaptchaConfig(
+      :clientKey,
+      :language,
+      :alwaysShowChallenge,
+      :useInvisibleMode,
+      :badgePosition,
+      :hideBadge,
+      :useWebViewMode,
+      :initialScale,
+      :allowUserScaling,
+      :maximumScale,
+    ) = config;
 
-    final safeLanguage = _encodeJsStringLiteral(language);
-    final safeClientKey = _encodeJsStringLiteral(clientKey);
-    final safeBadgePosition = _encodeJsStringLiteral(badgePosition);
+    final safeInitialScale = initialScale.clamp(0.1, 10.0);
+    final safeAllowUserScaling = allowUserScaling ? 'yes' : 'no';
+    final safeMaximumScale = maximumScale.clamp(0.1, 10.0);
+
+    final safeClientKey = _encodeJsString(clientKey);
+    final safeLanguage = _encodeJsString(language.name);
+    final safeBadgePosition = _encodeJsString(badgePosition.id);
+
     final eventsJson = jsonEncode(
       CaptchaEvent.values
           .where((e) => e.subscribable)
-          .map((e) => {
-                'id': e.id,
-                'name': e.name,
-              })
+          .map((e) => {'id': e.id, 'name': e.name})
           .toList(),
     );
 
     htmlData = '''
 <!doctype html>
-<html lang="$safeLang">
+<html lang="${language.name}">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=$initialScale, user-scalable=$safeAllowUserScaling, maximum-scale=$maximumScale" />
+    <meta name="viewport" content="width=device-width, initial-scale=$safeInitialScale, user-scalable=$safeAllowUserScaling, maximum-scale=$safeMaximumScale" />
     <title></title>
     <script>
       let isNetworkErrorReported = false;
@@ -125,7 +125,7 @@ final class SmartCaptcha {
 ''';
   }
 
-  static String _encodeJsStringLiteral(String value) => jsonEncode(value)
+  static String _encodeJsString(String value) => jsonEncode(value)
       .replaceAll('<', r'\u003C')
       .replaceAll('>', r'\u003E')
       .replaceAll('&', r'\u0026')
