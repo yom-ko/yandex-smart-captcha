@@ -1,9 +1,6 @@
 import 'dart:js_interop';
-import 'dart:js_interop_unsafe' show JSObjectUnsafeUtilExtension;
 
-const _smartCaptchaObjectName = 'smartCaptcha';
-
-@JS(_smartCaptchaObjectName)
+@JS('smartCaptcha')
 external SmartCaptcha? get smartCaptcha;
 
 extension type SmartCaptcha._(JSObject _) implements JSObject {
@@ -35,8 +32,4 @@ extension type SmartCaptchaOptions._(JSObject _) implements JSObject {
     bool webview,
     JSFunction callback,
   });
-}
-
-void deleteCaptchaObject() {
-  globalContext.delete(_smartCaptchaObjectName.toJS);
 }

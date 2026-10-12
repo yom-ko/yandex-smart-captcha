@@ -1,3 +1,5 @@
+import 'dart:js_interop';
+
 import 'package:flutter/widgets.dart';
 import 'package:web/web.dart' show HTMLDivElement;
 
@@ -18,8 +20,9 @@ final class CaptchaAdapterWidget extends StatelessWidget {
     return HtmlElementView.fromTagName(
       tagName: 'div',
       onElementCreated: (element) {
-        if (element case final HTMLDivElement container) {
-          controller.attachContainer(container);
+        if (element case final JSObject container
+            when container.isA<HTMLDivElement>()) {
+          controller.attachContainer(container as HTMLDivElement);
         }
       },
     );

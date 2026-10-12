@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:web/web.dart';
 
 import '../captcha_config.dart';
@@ -11,10 +11,11 @@ import 'captcha_adapter_web.dart';
 import 'captcha_script_loader_web.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
+  static const _styleId = 'package-ysc-spinner-hider';
+  static var _styleUsers = 0;
   static var _cCount = 0;
-  static var _sCount = 0;
+
   final _containerId = 'package-ysc-container-${_cCount++}';
-  final _styleId = 'package-ysc-spinner-hider-${_sCount++}';
 
   final CaptchaConfig config;
   final CaptchaAdapterCallbacks callbacks;
@@ -23,7 +24,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   HTMLDivElement? _container;
 
   bool _isDisposed = false;
-  bool _scriptAcquired = false;
+  bool _domReady = false;
 
   @override
   final isReady = ValueNotifier<bool>(false);
@@ -48,22 +49,20 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   Future<void> _initialize() async {
     try {
-      await _acquireScriptReference();
-      _scriptAcquired = true;
+      await _setupDom();
     } catch (_) {
       if (!_isDisposed) callbacks.onNetworkError?.call();
-      return;
+      return _cleanupDom();
     }
-    if (_isDisposed) return _releaseScriptReference();
+    if (_isDisposed) return _cleanupDom();
 
     await _waitUntilContainerConnected();
-    if (_isDisposed) return _releaseScriptReference();
+    if (_isDisposed) return _cleanupDom();
 
     final captcha = smartCaptcha;
     if (captcha == null || _container == null) {
       callbacks.onNetworkError?.call();
-      _releaseScriptReference();
-      return;
+      return _cleanupDom();
     }
 
     try {
@@ -88,13 +87,14 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
           (() => _handleEvent(event)).toJS,
         );
       }
-
-      isReady.value = true;
-      callbacks.onCaptchaReady?.call();
     } catch (_) {
       callbacks.onJavaScriptError?.call();
-      _releaseScriptReference();
+      _destroyJSWidget();
+      return _cleanupDom();
     }
+
+    isReady.value = true;
+    callbacks.onCaptchaReady?.call();
   }
 
   void _onChallengeSolved(JSString? token) {
@@ -131,8 +131,11 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
-  Future<void> _acquireScriptReference() async {
-    await acquireSmartCaptchaScript();
+  Future<void> _setupDom() async {
+    await ensureCaptchaObject();
+    _domReady = true;
+    _styleUsers++;
+
     if (document.getElementById(_styleId) == null) {
       final styleElement = document.createElement('style')
         ..id = _styleId
@@ -144,32 +147,53 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
-  void _releaseScriptReference() {
-    if (!_scriptAcquired) return;
-    _scriptAcquired = false;
-    releaseSmartCaptchaScript();
-    document.getElementById(_styleId)?.remove();
+  void _destroyJSWidget() {
+    final widgetId = _widgetId;
+    _widgetId = null;
+    if (widgetId == null) return;
+
+    try {
+      smartCaptcha?.destroy(widgetId);
+    } catch (_) {
+      // A failing destroy must not break cleanup.
+    }
+  }
+
+  void _cleanupDom() {
+    if (!_domReady) return;
+    _domReady = false;
+
+    if (--_styleUsers == 0) {
+      document.getElementById(_styleId)?.remove();
+    }
+  }
+
+  void _callWidgetMethod(void Function(SmartCaptcha, JSNumber) method) {
+    if (_isDisposed || _widgetId == null || !isReady.value) return;
+    final captcha = smartCaptcha;
+    if (captcha == null) return;
+
+    try {
+      method(captcha, _widgetId!);
+    } catch (_) {
+      callbacks.onJavaScriptError?.call();
+    }
   }
 
   @override
   Future<void> execute() async {
-    if (_isDisposed || _widgetId == null || !isReady.value) return;
-    final captcha = smartCaptcha;
-    captcha?.execute(_widgetId!);
+    _callWidgetMethod((captcha, id) => captcha.execute(id));
   }
 
   @override
   Future<void> reset() async {
-    if (_isDisposed || _widgetId == null || !isReady.value) return;
-    final captcha = smartCaptcha;
-    captcha?.reset(_widgetId!);
+    _callWidgetMethod((captcha, id) => captcha.reset(id));
   }
 
   @override
   Future<void> destroy() async {
-    if (_isDisposed || _widgetId == null || !isReady.value) return;
-    final captcha = smartCaptcha;
-    captcha?.destroy(_widgetId!);
+    _callWidgetMethod((captcha, id) => captcha.destroy(id));
+    if (_isDisposed || !isReady.value) return;
     _widgetId = null;
     isReady.value = false;
   }
@@ -179,13 +203,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     if (_isDisposed) return;
     _isDisposed = true;
 
-    if (_widgetId != null) {
-      final captcha = smartCaptcha;
-      captcha?.destroy(_widgetId);
-      _widgetId = null;
-    }
-
-    _releaseScriptReference();
+    _destroyJSWidget();
     isReady.dispose();
+    _cleanupDom();
   }
 }

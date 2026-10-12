@@ -3,53 +3,34 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart';
 
-import 'captcha_adapter_web.dart' show deleteCaptchaObject;
+import 'captcha_adapter_web.dart' show smartCaptcha;
 
-const smartCaptchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
-const _smartCaptchaScriptSelector = 'script[src="$smartCaptchaScriptUrl"]';
+const _captchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
 
-Future<void>? _scriptFuture;
-int _activeScriptUsers = 0;
+Future<void>? _pendingLoad;
 
-/// Acquires a shared SmartCaptcha script reference for one widget instance.
+/// Ensures the SmartCaptcha object is available.
 ///
-/// The script is loaded only once while one or more widget instances are
-/// active. A failed load clears the future so a later instance can retry.
-Future<void> acquireSmartCaptchaScript() async {
-  await (_scriptFuture ??= _loadSmartCaptchaScript());
-  _activeScriptUsers++;
+/// If the page already provides SmartCaptcha, it is reused.
+/// Otherwise, the JS script is added once and stays on the page.
+/// Concurrent calls share one load, and a failed load can be retried.
+Future<void> ensureCaptchaObject() {
+  if (smartCaptcha != null) return Future<void>.value();
+  return _pendingLoad ??= _loadCaptchaScript();
 }
 
-/// Releases a shared SmartCaptcha script reference.
-///
-/// The script element is removed after the last active widget releases it.
-void releaseSmartCaptchaScript() {
-  if (_activeScriptUsers == 0) return;
-  if (--_activeScriptUsers > 0) return;
-
-  _scriptFuture = null;
-  _deleteSmartCaptchaFromPage();
-}
-
-void _deleteSmartCaptchaFromPage() {
-  deleteCaptchaObject();
-  document.querySelector(_smartCaptchaScriptSelector)?.remove();
-}
-
-Future<void> _loadSmartCaptchaScript() {
-  final existing = document.querySelector(_smartCaptchaScriptSelector);
-  if (existing != null) return Future<void>.value();
-
+Future<void> _loadCaptchaScript() {
   final completer = Completer<void>();
-  final script = HTMLScriptElement()..src = smartCaptchaScriptUrl;
+  final script = HTMLScriptElement()..src = _captchaScriptUrl;
 
   script
     ..onload = ((Event _) {
+      _pendingLoad = null;
       completer.complete();
     }).toJS
     ..onerror = ((Event _) {
       script.remove();
-      _scriptFuture = null;
+      _pendingLoad = null;
       completer.completeError(
         StateError('Failed to load Yandex SmartCaptcha script'),
       );
