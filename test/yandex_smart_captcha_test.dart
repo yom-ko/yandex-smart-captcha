@@ -141,7 +141,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
+        equals([SmartCaptcha.callWidgetMethod('execute')]),
       );
     });
 
@@ -159,7 +159,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        equals(['window.smartCaptcha.reset(window.$widgetIdProp)']),
+        equals([SmartCaptcha.callWidgetMethod('reset')]),
       );
     });
 
@@ -177,7 +177,7 @@ void main() {
 
       expect(
         webViewController.evaluatedJavascriptSources,
-        equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
+        equals([SmartCaptcha.callWidgetMethod('destroy')]),
       );
     });
 
@@ -214,7 +214,7 @@ void main() {
       await newController.execute();
       expect(
         replacementWebViewController.evaluatedJavascriptSources,
-        equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
+        equals([SmartCaptcha.callWidgetMethod('execute')]),
       );
     });
 
@@ -294,7 +294,7 @@ void main() {
         expect(oldWebViewController.evaluatedJavascriptSources, isEmpty);
         expect(
           replacementWebViewController.evaluatedJavascriptSources,
-          equals(['window.smartCaptcha.execute(window.$widgetIdProp)']),
+          equals([SmartCaptcha.callWidgetMethod('execute')]),
         );
       },
     );

@@ -96,7 +96,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when a network error occurs while loading or executing the SmartCaptcha script.
   final VoidCallback? onNetworkError;
 
-  /// Called when an uncaught JavaScript error occurs while executing the SmartCaptcha script.
+  /// Called when a JavaScript error occurs while loading or executing the SmartCaptcha script.
   final VoidCallback? onJavaScriptError;
 
   /// Intercepts navigation requests inside the native WebView.

@@ -36,7 +36,7 @@ In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classe
 
 On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
 
-Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked in the tables) have no effect on the web.
+Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked `*` in the tables) have no effect on the web.
 
 `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain available.
 
@@ -67,21 +67,21 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 
 > Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
-| Parameter              | Required | Default | Description                                                                              |
-| :--------------------- | :------: | :------ | :--------------------------------------------------------------------------------------- |
-| `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                        |
-| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                    |
-| `backgroundColor`*     |          | `null`  | The background color of the SmartCaptcha container.                                      |
-| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                      |
-| `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                     |
-| `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                         |
-| `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                  |
-| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved.   |
-| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script.   |
-| `onJavaScriptError`    |          | `null`  | Called when an uncaught JavaScript error occurs while executing the SmartCaptcha script. |
-| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                  |
-| `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.            |
-| `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.       |
+| Parameter              | Required | Default | Description                                                                               |
+| :--------------------- | :------: | :------ | :---------------------------------------------------------------------------------------- |
+| `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                         |
+| `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                     |
+| `backgroundColor`*     |          | `null`  | The background color of the SmartCaptcha container.                                       |
+| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                       |
+| `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                      |
+| `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                          |
+| `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                   |
+| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved.    |
+| `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script.    |
+| `onJavaScriptError`    |          | `null`  | Called when a JavaScript error occurs while loading or executing the SmartCaptcha script. |
+| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                   |
+| `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.             |
+| `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.        |
 
 ### CaptchaController methods
 

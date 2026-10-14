@@ -17,6 +17,9 @@ class PlatformInAppWebViewControllerFake
   /// The JavaScript sources passed to [evaluateJavascript], in call order.
   final List<String> evaluatedJavascriptSources = [];
 
+  /// When set, [evaluateJavascript] throws this error after recording the source.
+  Object? evaluateJavascriptError;
+
   /// Simulates the WebView invoking the handler previously registered for
   /// [handlerName] (as if `window.flutter_inappwebview.callHandler` was
   /// called from JavaScript) with the given [args].
@@ -38,6 +41,7 @@ class PlatformInAppWebViewControllerFake
     ContentWorld? contentWorld,
   }) async {
     evaluatedJavascriptSources.add(source);
+    if (evaluateJavascriptError case final error?) throw error;
     return null;
   }
 }

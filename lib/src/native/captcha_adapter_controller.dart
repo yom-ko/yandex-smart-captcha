@@ -35,6 +35,9 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     if (_isDisposed) return;
     _webViewController = controller;
 
+    isReady.value = false;
+    isLoaded.value = false;
+
     for (final event in CaptchaEvent.values) {
       _webViewController!.addJavaScriptHandler(
         handlerName: event.name,
@@ -71,8 +74,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   }
 
   NavigationActionPolicy decideNavigation(NavigationAction action) {
-    final url = action.request.url.toString();
-    if (!action.isForMainFrame || _isInitialDocument(url)) {
+    final url = action.request.url?.toString();
+    if (!action.isForMainFrame || url == null || _isInitialDocument(url)) {
       return NavigationActionPolicy.ALLOW;
     }
 
@@ -85,7 +88,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   bool _isInitialDocument(String url) {
     if (url.startsWith('about:')) return true;
 
-    final baseURL = baseUrl;
+    final baseURL = initialData.baseUrl?.toString();
     if (baseURL == null) return false;
     return _removeSlash(url) == _removeSlash(baseURL);
   }
@@ -93,29 +96,34 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   static String _removeSlash(String url) =>
       url.endsWith('/') ? url.substring(0, url.length - 1) : url;
 
+  Future<void> _callWidgetMethod(String method) async {
+    final webViewController = _webViewController;
+    if (_isDisposed || webViewController == null || !isReady.value) return;
+    try {
+      await webViewController.evaluateJavascript(
+        source: SmartCaptcha.callWidgetMethod(method),
+      );
+    } catch (_) {
+      if (!_isDisposed) callbacks.onJavaScriptError?.call();
+    }
+  }
+
   @override
   Future<void> execute() async {
-    if (_isDisposed || _webViewController == null || !isReady.value) return;
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.execute(window.$widgetIdProp)',
-    );
+    return _callWidgetMethod('execute');
   }
 
   @override
   Future<void> reset() async {
-    if (_isDisposed || _webViewController == null || !isReady.value) return;
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.reset(window.$widgetIdProp)',
-    );
+    return _callWidgetMethod('reset');
   }
 
   @override
   Future<void> destroy() async {
-    if (_isDisposed || _webViewController == null || !isReady.value) return;
-    await _webViewController?.evaluateJavascript(
-      source: 'window.smartCaptcha.destroy(window.$widgetIdProp)',
-    );
+    if (_isDisposed || !isReady.value) return;
+    final pending = _callWidgetMethod('destroy');
     isReady.value = false;
+    return pending;
   }
 
   @override

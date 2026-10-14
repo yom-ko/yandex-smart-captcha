@@ -1,4 +1,12 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## Unreleased
+- Fix native:
+  - `execute`, `reset` and `destroy` now report failures through `onJavaScriptError` instead of throwing or failing silently.
+  - Disposing the widget while `destroy` is in flight no longer touches disposed state.
+  - Navigation requests without a URL are allowed, and the `baseUrl` document is matched regardless of host casing.
+  - WebView console messages are logged in debug mode only.
+  - Android file and content access are disabled in the WebView.
+
 ## 7.3.7
 - Fix web:
   - Unmounting the widget or changing `config`/`baseUrl` no longer throws from the SmartCaptcha cleanup.

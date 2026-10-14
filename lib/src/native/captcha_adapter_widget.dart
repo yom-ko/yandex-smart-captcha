@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -28,6 +29,8 @@ final class CaptchaAdapterWidget extends StatelessWidget {
             useShouldOverrideUrlLoading: true,
             mediaPlaybackRequiresUserGesture: false,
             allowsInlineMediaPlayback: true,
+            allowContentAccess: false,
+            allowFileAccess: false,
           ),
           onPermissionRequest: (_, request) async {
             return PermissionResponse(
@@ -39,13 +42,9 @@ final class CaptchaAdapterWidget extends StatelessWidget {
             return controller.decideNavigation(action);
           },
           onConsoleMessage: (_, message) {
-            debugPrint('YSM console message: $message');
+            if (kDebugMode) debugPrint('YSM console message: $message');
           },
-          onWebViewCreated: (webViewController) {
-            controller.isReady.value = false;
-            controller.isLoaded.value = false;
-            controller.attachWebViewController(webViewController);
-          },
+          onWebViewCreated: controller.attachWebViewController,
         ),
         if (loadingIndicator != null)
           ValueListenableBuilder<bool>(

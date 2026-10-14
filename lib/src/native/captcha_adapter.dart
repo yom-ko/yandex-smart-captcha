@@ -130,6 +130,13 @@ final class SmartCaptcha {
 ''';
   }
 
+  static String callWidgetMethod(String method) => '''
+try {
+  window.smartCaptcha.$method(window.$widgetIdProp);
+} catch (e) {
+  window.flutter_inappwebview.callHandler("${CaptchaEvent.javaScriptError.name}");
+}''';
+
   static String _encodeJsString(String value) => jsonEncode(value)
       .replaceAll('<', r'\u003C')
       .replaceAll('>', r'\u003E')

@@ -53,9 +53,9 @@ void main() {
       expect(
         wvController.evaluatedJavascriptSources,
         equals([
-          'window.smartCaptcha.execute(window.$widgetIdProp)',
-          'window.smartCaptcha.reset(window.$widgetIdProp)',
-          'window.smartCaptcha.destroy(window.$widgetIdProp)',
+          SmartCaptcha.callWidgetMethod('execute'),
+          SmartCaptcha.callWidgetMethod('reset'),
+          SmartCaptcha.callWidgetMethod('destroy'),
         ]),
       );
 
@@ -87,7 +87,7 @@ void main() {
         expect(controller.isLoaded.value, isTrue);
         expect(
           wvController.evaluatedJavascriptSources,
-          equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
+          equals([SmartCaptcha.callWidgetMethod('destroy')]),
         );
 
         await controller.execute();
@@ -97,7 +97,7 @@ void main() {
         expect(controller.isReady.value, isFalse);
         expect(
           wvController.evaluatedJavascriptSources,
-          equals(['window.smartCaptcha.destroy(window.$widgetIdProp)']),
+          equals([SmartCaptcha.callWidgetMethod('destroy')]),
         );
 
         controller.dispose();
@@ -147,6 +147,85 @@ void main() {
       expect(expiredCalls, 1);
       expect(networkErrorCalls, 1);
       expect(javaScriptErrorCalls, 1);
+
+      controller.dispose();
+    });
+
+    test('reports WebView evaluation failures as JavaScript errors', () async {
+      var javaScriptErrorCalls = 0;
+      final controller = createController(
+        callbacks: CaptchaAdapterCallbacks(
+          onChallengeSolved: (_) {},
+          onJavaScriptError: () => javaScriptErrorCalls++,
+        ),
+      );
+      final wvController = PlatformInAppWebViewControllerFake()
+        ..evaluateJavascriptError = StateError('evaluation failed');
+      controller.attachWebViewController(
+        InAppWebViewController.fromPlatform(platform: wvController),
+      );
+      wvController.emit(CaptchaEvent.captchaReady.name);
+
+      await controller.execute();
+      await controller.reset();
+      await controller.destroy();
+
+      expect(javaScriptErrorCalls, 3);
+      expect(controller.isReady.value, isFalse);
+
+      controller.dispose();
+    });
+
+    test('does not touch state when disposed during destroy', () async {
+      final controller = createController();
+      final wvController = PlatformInAppWebViewControllerFake();
+      controller.attachWebViewController(
+        InAppWebViewController.fromPlatform(platform: wvController),
+      );
+      wvController.emit(CaptchaEvent.captchaReady.name);
+
+      final pending = controller.destroy();
+      controller.dispose();
+
+      await expectLater(pending, completes);
+    });
+
+    test('allows main-frame navigations without a URL', () {
+      final controller = createController();
+
+      expect(
+        controller.decideNavigation(
+          NavigationAction(request: URLRequest(), isForMainFrame: true),
+        ),
+        NavigationActionPolicy.ALLOW,
+      );
+
+      controller.dispose();
+    });
+
+    test('matches the initial document regardless of host casing', () {
+      final requestedUrls = <String>[];
+      final controller = createController(
+        baseUrl: 'HTTPS://Example.COM',
+        callbacks: CaptchaAdapterCallbacks(
+          onChallengeSolved: (_) {},
+          onNavigationRequest: (url) {
+            requestedUrls.add(url);
+            return false;
+          },
+        ),
+      );
+
+      expect(
+        controller.decideNavigation(
+          NavigationAction(
+            request: URLRequest(url: WebUri('https://example.com/')),
+            isForMainFrame: true,
+          ),
+        ),
+        NavigationActionPolicy.ALLOW,
+      );
+      expect(requestedUrls, isEmpty);
 
       controller.dispose();
     });

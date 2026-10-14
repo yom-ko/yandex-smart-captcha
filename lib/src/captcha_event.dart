@@ -23,7 +23,7 @@ enum CaptchaEvent {
   /// Emitted when a network error occurs while loading or executing the SmartCaptcha script.
   networkError('network-error'),
 
-  /// Emitted when an uncaught JavaScript error occurs while executing the SmartCaptcha script.
+  /// Emitted when a JavaScript error occurs while loading or executing the SmartCaptcha script.
   javaScriptError('javascript-error');
 
   const CaptchaEvent(this.id, {this.subscribable = true});

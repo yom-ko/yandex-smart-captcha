@@ -320,4 +320,20 @@ void main() {
       });
     });
   });
+
+  group('SmartCaptcha.callWidgetMethod', () {
+    test('calls the method on the rendered widget', () {
+      expect(
+        SmartCaptcha.callWidgetMethod('execute'),
+        contains('window.smartCaptcha.execute(window.$widgetIdProp)'),
+      );
+    });
+
+    test('reports failures through the JavaScript error event', () {
+      expect(
+        SmartCaptcha.callWidgetMethod('reset'),
+        contains('callHandler("${CaptchaEvent.javaScriptError.name}")'),
+      );
+    });
+  });
 }
