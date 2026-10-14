@@ -1,11 +1,21 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
-## Unreleased
-- Fix native:
-  - `execute`, `reset` and `destroy` now report failures through `onJavaScriptError` instead of throwing or failing silently.
-  - Disposing the widget while `destroy` is in flight no longer touches disposed state.
-  - Navigation requests without a URL are allowed, and the `baseUrl` document is matched regardless of host casing.
-  - WebView console messages are logged in debug mode only.
-  - Android file and content access are disabled in the WebView.
+## 7.3.8
+- Improve robustness and edge case handling:
+  - Native:
+    - `execute`, `reset` and `destroy` now report failures through `onJavaScriptError` instead of throwing or failing silently.
+    - Navigation requests without a URL are allowed, and the `baseUrl` document is matched regardless of host casing.
+    - Disposing the widget while `destroy` is in flight no longer touches disposed state.
+    - Unnecessary Android file and content access are disabled in the WebView.
+    - WebView console messages are logged in debug mode only.
+  - Web:
+    - The SmartCaptcha script is now loaded once and kept on the page. An already available `smartCaptcha` object is reused, so remounting no longer reloads the script or deletes the global object.
+    - A failure while rendering SmartCaptcha now destroys the partially created widget, reports `onJavaScriptError` and cleans up, instead of leaving it half-initialized.
+    - The loading spinner style is shared between widget instances and removed only after the last one is disposed.
+    - `execute`, `reset` and `destroy` now report failures through `onJavaScriptError` instead of throwing.
+    - The container element is verified before use.
+  - Native and web: the SmartCaptcha's own loading spinner is now hidden on both platforms.
+- Improve and expand test coverage.
+- Improve README.
 
 ## 7.3.7
 - Fix web:
