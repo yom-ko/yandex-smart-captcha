@@ -28,17 +28,19 @@ YandexSmartCaptcha(
 In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
 * On mobile, the `YandexSmartCaptcha`'s parent widget should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered within a single WebView.
-* On the web, the parent widget only needs to provide enough vertical space for the "I'm not a robot" block (with a fixed height of around 100px), because Yandex fully controls the challenge popup.
+* On the web, the parent widget only needs to provide enough vertical space for the "I'm not a robot" block (with a height of around 118px), because Yandex fully controls the challenge popup.
 
 ### Web support
 
-> You don't need to manually add the Yandex SmartCaptcha script to your `index.html`, as the `YandexSmartCaptcha` widget loads it automatically when mounted into the widget tree.
+> **Note:** The `YandexSmartCaptcha` widget automatically injects the Yandex SmartCaptcha script when mounted, so you don't need to add it to your `index.html`.
 
-On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
+On the web, `YandexSmartCaptcha` provides a host element for the Yandex SmartCaptcha HTML widget (aka "I'm not a robot" block). Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control its position. Yandex fully controls the challenge popup's UI and behavior – just as it does on a regular website.
 
-Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked `*` in the tables below) have no effect on the web, but `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain available.
+> **Note:** The height of `YandexSmartCaptcha` is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can still adjust the displayed size using `Transform.scale`, if needed.
 
-The web implementation is compatible with [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
+Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are not applicable to the web and have no effect there. However, all callbacks and `CaptchaController` methods remain available.
+
+The web implementation is compatible with [WebAssembly (Wasm)](https://webassembly.org/).
 
 ### CaptchaConfig parameters
 
@@ -83,13 +85,13 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 
 ### CaptchaController methods
 
-Provide access to the SmartCaptcha JavaScript widget's imperative methods.
+Provide access to the SmartCaptcha HTML widget's imperative operations.
 
 | Method      | Description                                                                        |
 | :---------- | :--------------------------------------------------------------------------------- |
 | `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode. |
 | `reset()`   | Resets the SmartCaptcha to its initial state. Only works for a solved challenge.   |
-| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners.                |
+| `destroy()` | Removes the SmartCaptcha HTML widget and its associated event listeners.           |
 
 These methods are exposed on native and web platforms. Call them after `onCaptchaReady` has fired.
 
