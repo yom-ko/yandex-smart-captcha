@@ -60,7 +60,8 @@ final class CaptchaController {
 /// A Flutter widget that configures and displays Yandex SmartCaptcha.
 ///
 /// On Android and iOS, it hosts SmartCaptcha in a native WebView. On the web,
-/// it renders SmartCaptcha into a browser DOM element at this widget's location.
+/// it renders SmartCaptcha into a browser DOM element at this widget's location
+/// and sizes itself to the height reported by the underlying HTML element.
 /// The challenge UI / overlay are fully controlled by Yandex.
 class YandexSmartCaptcha extends StatefulWidget {
   /// The configuration for this SmartCaptcha instance.

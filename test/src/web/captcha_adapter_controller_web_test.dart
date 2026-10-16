@@ -15,6 +15,7 @@ import '../../mocks/script_network_blocker_web.dart';
 const _captchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
 const _captchaScriptSelector = 'script[src="$_captchaScriptUrl"]';
 const _spinnerStyleSelector = 'style#package-ysc-spinner-hider';
+const _frameBudget = 300;
 
 void main() {
   setUpAll(blockScriptNetwork);
@@ -97,9 +98,11 @@ void main() {
       controller.attachContainer(container);
       await tester.pump();
 
+      final target = container.firstElementChild! as HTMLDivElement;
       expect(container.style.width, equals('100%'));
-      expect(container.style.height, equals('100px'));
-      expect(container.style.display, equals('block'));
+      expect(container.style.height, equals('100%'));
+      expect(target.getAttribute('style'), isNull);
+      expect(renderedContainerId, equals(target.id));
       expect(renderedContainerId, startsWith('package-ysc-container-'));
       expect(controller.isReady.value, isTrue);
       expect(readyCalls, equals(1));
@@ -228,9 +231,11 @@ void main() {
       secondController.attachContainer(secondContainer);
       await tester.pump();
 
-      expect(firstContainer.id, startsWith('package-ysc-container-'));
-      expect(secondContainer.id, startsWith('package-ysc-container-'));
-      expect(firstContainer.id, isNot(equals(secondContainer.id)));
+      final firstTargetId = firstContainer.firstElementChild!.id;
+      final secondTargetId = secondContainer.firstElementChild!.id;
+      expect(firstTargetId, startsWith('package-ysc-container-'));
+      expect(secondTargetId, startsWith('package-ysc-container-'));
+      expect(firstTargetId, isNot(equals(secondTargetId)));
 
       firstController.dispose();
       secondController.dispose();
@@ -550,6 +555,133 @@ void main() {
       expect(_spinnerStyleCount, isZero);
     },
   );
+
+  testWidgets(
+    'reserves the default height, or a minimal one in the invisible mode, up front',
+    (tester) async {
+      final visible = _createController();
+      addTearDown(visible.dispose);
+      final invisible = CaptchaAdapterController(
+        config: const CaptchaConfig(
+          clientKey: 'client-key',
+          useInvisibleMode: true,
+        ),
+        callbacks: CaptchaAdapterCallbacks(onChallengeSolved: (_) {}),
+      );
+      addTearDown(invisible.dispose);
+
+      expect(visible.contentHeight.value, equals(118));
+      expect(invisible.contentHeight.value, equals(1));
+    },
+  );
+
+  testWidgets(
+    'follows the height of the container controlled by the script',
+    (tester) async {
+      _installReadySmartCaptcha(
+        onRender: (containerId) => _setHeight(containerId, 150),
+      );
+      final controller = _createController();
+      addTearDown(controller.dispose);
+      final host = _createContainer();
+
+      controller.attachContainer(host);
+      await _waitFor(tester, () => controller.contentHeight.value == 150);
+      expect(controller.contentHeight.value, equals(150));
+
+      _setHeight(host.firstElementChild!.id, 80.5);
+      await _waitFor(tester, () => controller.contentHeight.value == 80.5);
+      expect(controller.contentHeight.value, equals(80.5));
+    },
+  );
+
+  testWidgets(
+    'keeps the last height while the container is empty',
+    (tester) async {
+      _installReadySmartCaptcha(
+        onRender: (containerId) => _setHeight(containerId, 150),
+      );
+      final controller = _createController();
+      addTearDown(controller.dispose);
+      final host = _createContainer();
+
+      controller.attachContainer(host);
+      await _waitFor(tester, () => controller.contentHeight.value == 150);
+
+      _setHeight(host.firstElementChild!.id, 0);
+      await _settleFrames(tester);
+
+      expect(controller.contentHeight.value, equals(150));
+    },
+  );
+
+  testWidgets(
+    'ignores the initial empty container before SmartCaptcha renders',
+    (tester) async {
+      _installReadySmartCaptcha();
+      final controller = _createController();
+      addTearDown(controller.dispose);
+
+      controller.attachContainer(_createContainer());
+      await _settleFrames(tester);
+
+      expect(controller.isReady.value, isTrue);
+      expect(controller.contentHeight.value, equals(118));
+    },
+  );
+
+  testWidgets(
+    'stops following the container height after disposal',
+    (tester) async {
+      _installReadySmartCaptcha(
+        onRender: (containerId) => _setHeight(containerId, 150),
+      );
+      final controller = _createController();
+      addTearDown(controller.dispose);
+      final host = _createContainer();
+
+      controller.attachContainer(host);
+      await _waitFor(tester, () => controller.contentHeight.value == 150);
+      expect(controller.contentHeight.value, equals(150));
+
+      controller.dispose();
+      _setHeight(host.firstElementChild!.id, 80);
+      await _settleFrames(tester);
+
+      expect(controller.contentHeight.value, equals(150));
+    },
+  );
+}
+
+void _setHeight(String containerId, double height) {
+  (document.getElementById(containerId)! as HTMLElement).style.height =
+      '${height}px';
+}
+
+// ResizeObserver callbacks are delivered by real browser frames, which only
+// advance outside the fake-async zone of testWidgets. The wait is bounded by
+// a frame budget rather than a timeout, so it never depends on wall-clock time.
+Future<void> _waitFor(WidgetTester tester, bool Function() condition) {
+  return tester.runAsync(() async {
+    for (var i = 0; i < _frameBudget && !condition(); i++) {
+      await _nextFrame();
+    }
+  });
+}
+
+// Observers run right after the animation frame callbacks of the same frame,
+// so two frames guarantee that earlier DOM changes have been reported.
+Future<void> _settleFrames(WidgetTester tester) {
+  return tester.runAsync(() async {
+    await _nextFrame();
+    await _nextFrame();
+  });
+}
+
+Future<void> _nextFrame() {
+  final frame = Completer<void>();
+  window.requestAnimationFrame(((JSNumber _) => frame.complete()).toJS);
+  return frame.future;
 }
 
 final _attachedContainers = <HTMLDivElement>[];

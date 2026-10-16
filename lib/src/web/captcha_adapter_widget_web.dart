@@ -17,14 +17,18 @@ final class CaptchaAdapterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HtmlElementView.fromTagName(
-      tagName: 'div',
-      onElementCreated: (element) {
-        if (element case final JSObject container
-            when container.isA<HTMLDivElement>()) {
-          controller.attachContainer(container as HTMLDivElement);
-        }
-      },
+    return ValueListenableBuilder<double>(
+      valueListenable: controller.contentHeight,
+      child: HtmlElementView.fromTagName(
+        tagName: 'div',
+        onElementCreated: (element) {
+          if (element case final JSObject host
+              when host.isA<HTMLDivElement>()) {
+            controller.attachContainer(host as HTMLDivElement);
+          }
+        },
+      ),
+      builder: (_, height, child) => SizedBox(height: height, child: child),
     );
   }
 }

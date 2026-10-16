@@ -11,6 +11,13 @@ import 'captcha_adapter_web.dart';
 import 'captcha_script_loader_web.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
+  // Mirrors the script's default height of a visible widget, so the layout
+  // does not jump once SmartCaptcha is rendered.
+  static const _visibleHeight = 118.0;
+  // Flutter only creates a platform view on the first non-zero size, so
+  // an invisible widget keeps a minimal slot to stay in the DOM.
+  static const _invisibleHeight = 1.0;
+
   static const _styleId = 'package-ysc-spinner-hider';
   static var _styleUsers = 0;
   static var _cCount = 0;
@@ -22,31 +29,55 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   JSNumber? _widgetId;
   HTMLDivElement? _container;
+  ResizeObserver? _resizeObserver;
 
   bool _isDisposed = false;
   bool _domReady = false;
 
   final _isReady = ValueNotifier<bool>(false);
+  final ValueNotifier<double> _contentHeight;
 
   @override
   ValueListenable<bool> get isReady => _isReady;
+  ValueListenable<double> get contentHeight => _contentHeight;
 
   CaptchaAdapterController({
     required this.config,
     required this.callbacks,
     String? baseUrl,
-  });
+  }) : _contentHeight = ValueNotifier<double>(
+          config.useInvisibleMode ? _invisibleHeight : _visibleHeight,
+        );
 
-  void attachContainer(HTMLDivElement container) {
+  /// Renders SmartCaptcha into a dedicated child of [host].
+  ///
+  /// The child is left unstyled so the script fully owns its size,
+  /// which is then observed and exposed through [contentHeight].
+  void attachContainer(HTMLDivElement host) {
     if (_isDisposed || _container != null) return;
 
-    _container = container
-      ..id = _containerId
+    final container = document.createElement('div') as HTMLDivElement
+      ..id = _containerId;
+    host
       ..style.width = '100%'
-      ..style.height = '100px'
-      ..style.display = 'block';
+      ..style.height = '100%'
+      ..appendChild(container);
+    _observeHeight(container);
+    _container = container;
 
     _initialize();
+  }
+
+  void _observeHeight(HTMLDivElement container) {
+    _resizeObserver = ResizeObserver(
+      ((JSArray<ResizeObserverEntry> entries, ResizeObserver _) {
+        final sizes = entries.toDart.lastOrNull?.borderBoxSize.toDart;
+        if (_isDisposed || sizes == null || sizes.isEmpty) return;
+
+        final height = sizes.first.blockSize;
+        if (height > 0) _contentHeight.value = height;
+      }).toJS,
+    )..observe(container, ResizeObserverOptions(box: 'border-box'));
   }
 
   Future<void> _initialize() async {
@@ -205,7 +236,11 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     if (_isDisposed) return;
     _isDisposed = true;
 
+    _resizeObserver?.disconnect();
+    _resizeObserver = null;
+
     _destroyJSWidget();
+    _contentHeight.dispose();
     _isReady.dispose();
     _cleanupDom();
   }
