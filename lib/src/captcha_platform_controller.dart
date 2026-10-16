@@ -4,7 +4,7 @@ typedef ChallengeSolvedCallback = void Function(String? token);
 typedef NavigationRequestCallback = bool Function(String url);
 
 abstract interface class CaptchaPlatformController {
-  ValueNotifier<bool> get isReady;
+  ValueListenable<bool> get isReady;
 
   Future<void> execute();
 

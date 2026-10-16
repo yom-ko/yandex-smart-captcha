@@ -26,8 +26,10 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   bool _isDisposed = false;
   bool _domReady = false;
 
+  final _isReady = ValueNotifier<bool>(false);
+
   @override
-  final isReady = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isReady => _isReady;
 
   CaptchaAdapterController({
     required this.config,
@@ -93,7 +95,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       return _cleanupDom();
     }
 
-    isReady.value = true;
+    _isReady.value = true;
     callbacks.onCaptchaReady?.call();
   }
 
@@ -169,7 +171,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   }
 
   void _callWidgetMethod(void Function(SmartCaptcha, JSNumber) method) {
-    if (_isDisposed || _widgetId == null || !isReady.value) return;
+    if (_isDisposed || _widgetId == null || !_isReady.value) return;
     final captcha = smartCaptcha;
     if (captcha == null) return;
 
@@ -193,9 +195,9 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   @override
   Future<void> destroy() async {
     _callWidgetMethod((captcha, id) => captcha.destroy(id));
-    if (_isDisposed || !isReady.value) return;
+    if (_isDisposed || !_isReady.value) return;
     _widgetId = null;
-    isReady.value = false;
+    _isReady.value = false;
   }
 
   @override
@@ -204,7 +206,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     _isDisposed = true;
 
     _destroyJSWidget();
-    isReady.dispose();
+    _isReady.dispose();
     _cleanupDom();
   }
 }

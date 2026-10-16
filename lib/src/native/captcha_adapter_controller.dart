@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../captcha_config.dart';
@@ -16,9 +16,12 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   bool _isDisposed = false;
 
+  final _isReady = ValueNotifier<bool>(false);
+  final _isLoaded = ValueNotifier<bool>(false);
+
   @override
-  final isReady = ValueNotifier<bool>(false);
-  final isLoaded = ValueNotifier<bool>(false);
+  ValueListenable<bool> get isReady => _isReady;
+  ValueListenable<bool> get isLoaded => _isLoaded;
 
   CaptchaAdapterController({
     required this.config,
@@ -35,8 +38,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     if (_isDisposed) return;
     _webViewController = controller;
 
-    isReady.value = false;
-    isLoaded.value = false;
+    _isReady.value = false;
+    _isLoaded.value = false;
 
     for (final event in CaptchaEvent.values) {
       _webViewController!.addJavaScriptHandler(
@@ -53,8 +56,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
     switch (event) {
       case CaptchaEvent.captchaReady:
-        isReady.value = true;
-        isLoaded.value = true;
+        _isReady.value = true;
+        _isLoaded.value = true;
         callbacks.onCaptchaReady?.call();
       case CaptchaEvent.challengeShown:
         callbacks.onChallengeShown?.call();
@@ -120,9 +123,9 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   @override
   Future<void> destroy() async {
-    if (_isDisposed || !isReady.value) return;
+    if (_isDisposed || !_isReady.value) return;
     final pending = _callWidgetMethod('destroy');
-    isReady.value = false;
+    _isReady.value = false;
     return pending;
   }
 
@@ -132,7 +135,7 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     _isDisposed = true;
 
     _webViewController = null;
-    isLoaded.dispose();
-    isReady.dispose();
+    _isLoaded.dispose();
+    _isReady.dispose();
   }
 }
