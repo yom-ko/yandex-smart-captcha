@@ -1,4 +1,10 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 8.0.0
+- **POTENTIALLY BREAKING CHANGE:**
+  - Web: The `YandexSmartCaptcha` widget now automatically adjusts its height to match the underlying SmartCaptcha HTML element. This simplifies layout but may break existing layouts that rely on a fixed widget height.
+- Improve and expand test coverage.
+- Improve Dartdoc and README.
+
 ## 7.3.8
 - Improve robustness and edge case handling:
   - Native:
