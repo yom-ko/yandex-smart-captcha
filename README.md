@@ -4,7 +4,7 @@
 
 [![Pub Version](https://img.shields.io/pub/v/yandex_smart_captcha.svg?color=f67029)](https://pub.dev/packages/yandex_smart_captcha) [![Pub Points](https://img.shields.io/pub/points/yandex_smart_captcha.svg?color=44cc11)](https://pub.dev/packages/yandex_smart_captcha/score) [![Codecov](https://img.shields.io/codecov/c/github/yom-ko/yandex-smart-captcha?color=44cc11&logo=codecov)](https://codecov.io/github/yom-ko/yandex-smart-captcha) [![Dart Package Docs](https://img.shields.io/badge/documentation-latest-blue.svg)](https://pub.dev/documentation/yandex_smart_captcha/latest) [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT) ![Static Badge](https://img.shields.io/badge/NO_SLOP-foundation-555?labelColor=935513) ![Static Badge](https://img.shields.io/badge/HUMAN-reviewed-555?labelColor=f9d9b3)
 
-This package makes it easy to integrate Yandex SmartCaptcha into Flutter-based Android, iOS, and web apps. On Android and iOS, it uses a native WebView; on the web, it uses a DOM element and JavaScript interop. To learn more about the Yandex SmartCaptcha service, visit its [official page](https://yandex.cloud/en/services/smartcaptcha).
+This package makes it easy to integrate Yandex SmartCaptcha into Flutter-based Android, iOS, and web apps. On Android and iOS, it uses a native in-app WebView. On the web, it uses a DOM element and JavaScript interop. To learn more about the Yandex SmartCaptcha service, visit its [official page](https://yandex.cloud/en/services/smartcaptcha).
 
 ## Motivation
 
@@ -36,9 +36,7 @@ In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classe
 
 On the web, `YandexSmartCaptcha` hosts the Yandex SmartCaptcha JavaScript widget. Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control the position of the "I'm not a robot" block. Yandex controls the challenge popup's UI and behavior (just as it does on a regular website).
 
-Some `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked `*` in the tables) have no effect on the web.
-
-`onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain available.
+Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked `*` in the tables below) have no effect on the web, but `onChallengeShown`/`onChallengeHidden` callbacks and `CaptchaController` methods remain available.
 
 The web implementation is compatible with [WebAssembly (Wasm)](https://docs.flutter.dev/platform-integration/web/wasm).
 
@@ -76,10 +74,10 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                      |
 | `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                          |
 | `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                   |
-| `onTokenExpired`       |          | `null`  | Called when the SmartCaptcha token expires after the challenge is successfully solved.    |
+| `onTokenExpired`       |          | `null`  | Called when the validation token expires after the challenge is successfully solved.      |
 | `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script.    |
 | `onJavaScriptError`    |          | `null`  | Called when a JavaScript error occurs while loading or executing the SmartCaptcha script. |
-| `onNavigationRequest`* |          | `null`  | Called when a main-fraim navigation request is made inside the WebView.                   |
+| `onNavigationRequest`* |          | `null`  | Called when a main-frame navigation request is made inside the WebView.                   |
 | `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.             |
 | `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.        |
 
@@ -87,13 +85,13 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 
 Provide access to the SmartCaptcha JavaScript widget's imperative methods.
 
-| Method      | Description                                                                                   |
-| :---------- | :-------------------------------------------------------------------------------------------- |
-| `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode.            |
-| `reset()`   | Resets the SmartCaptcha to its initial state. Only works after the challenge has been solved. |
-| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners.                           |
+| Method      | Description                                                                        |
+| :---------- | :--------------------------------------------------------------------------------- |
+| `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode. |
+| `reset()`   | Resets the SmartCaptcha to its initial state. Only works for a solved challenge.   |
+| `destroy()` | Removes the SmartCaptcha widget and its associated event listeners.                |
 
-The same methods are exposed on native and web platforms. Call them after `onCaptchaReady` callback fires.
+These methods are exposed on native and web platforms. Call them after `onCaptchaReady` has fired.
 
 ## Screenshots
 

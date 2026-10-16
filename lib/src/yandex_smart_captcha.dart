@@ -90,7 +90,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Called when the challenge popup is hidden or dismissed.
   final VoidCallback? onChallengeHidden;
 
-  /// Called when the SmartCaptcha token expires after the challenge is successfully solved.
+  /// Called when the validation token expires after the challenge is successfully solved.
   final VoidCallback? onTokenExpired;
 
   /// Called when a network error occurs while loading or executing the SmartCaptcha script.
@@ -113,7 +113,7 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// An optional controller for programmatically interacting with the SmartCaptcha instance.
   final CaptchaController? controller;
 
-  /// An HTTP(S) base URL used as the SmartCaptcha document origin on native platforms.
+  /// An HTTP(S) base URL used by the native WebView as the document origin.
   ///
   /// Commonly used for domain validation and resolving origin policy issues.
   /// Ignored on the web, where the browser's current origin is always used.

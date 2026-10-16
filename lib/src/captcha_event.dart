@@ -17,7 +17,7 @@ enum CaptchaEvent {
   /// it is not dispatched reliably, so it is handled manually via the `callback` function.
   challengeSolved('success', subscribable: false),
 
-  /// Emitted when the SmartCaptcha token expires after the challenge is successfully solved.
+  /// Emitted when the validation token expires after the challenge is successfully solved.
   tokenExpired('token-expired'),
 
   /// Emitted when a network error occurs while loading or executing the SmartCaptcha script.
