@@ -34,7 +34,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _isReady = ValueNotifier<bool>(false);
   final _isSolved = ValueNotifier<bool>(false);
 
   final _controller = CaptchaController();
@@ -42,29 +41,30 @@ class _HomePageState extends State<HomePage> {
     clientKey: clientKey,
     language: CaptchaLanguage.en,
     alwaysShowChallenge: true,
+    // Enable to test the execute() method.
+    // useInvisibleMode: true,
   );
 
   @override
   void dispose() {
     _isSolved.dispose();
-    _isReady.dispose();
+    _controller.dispose();
 
     super.dispose();
   }
 
-  Future<void> _onExecutePressed() async {
+  Future<void> _onExecute() async {
     await _controller.execute();
   }
 
-  Future<void> _onResetPressed() async {
+  Future<void> _onReset() async {
     await _controller.reset();
     _isSolved.value = false;
   }
 
-  Future<void> _onDestroyPressed() async {
+  Future<void> _onDestroy() async {
     await _controller.destroy();
     _isSolved.value = false;
-    _isReady.value = false;
   }
 
   @override
@@ -98,7 +98,6 @@ class _HomePageState extends State<HomePage> {
                 },
                 onCaptchaReady: () {
                   debugPrint('called: onCaptchaReady');
-                  _isReady.value = true;
                 },
                 onChallengeShown: () {
                   debugPrint('called: onChallengeShown');
@@ -124,25 +123,28 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: ValueListenableBuilder<bool>(
-                valueListenable: _isReady,
-                builder: (_, isReady, _) => Row(
+                valueListenable: _controller.isReady,
+                builder: (_, ready, _) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: isReady ? _onExecutePressed : null,
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Execute'),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isSolved,
+                      builder: (_, solved, _) => ElevatedButton.icon(
+                        onPressed: ready && !solved ? _onExecute : null,
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Execute'),
+                      ),
                     ),
                     ValueListenableBuilder<bool>(
                       valueListenable: _isSolved,
-                      builder: (_, isSolved, _) => ElevatedButton.icon(
-                        onPressed: isSolved ? _onResetPressed : null,
+                      builder: (_, solved, _) => ElevatedButton.icon(
+                        onPressed: ready && solved ? _onReset : null,
                         icon: const Icon(Icons.refresh),
                         label: const Text('Reset'),
                       ),
                     ),
                     FilledButton.tonalIcon(
-                      onPressed: isReady ? _onDestroyPressed : null,
+                      onPressed: ready ? _onDestroy : null,
                       icon: const Icon(Icons.delete_outline),
                       label: const Text('Destroy'),
                     ),

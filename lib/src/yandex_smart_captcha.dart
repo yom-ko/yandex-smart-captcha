@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'captcha_config.dart';
 import 'captcha_platform_controller.dart';
@@ -13,6 +15,17 @@ import 'native/captcha_adapter_widget.dart'
 /// by exposing its imperative methods.
 final class CaptchaController {
   CaptchaPlatformController? _platformController;
+  bool _isDisposed = false;
+  bool _isSyncScheduled = false;
+
+  final _isReady = ValueNotifier<bool>(false);
+
+  /// Indicates whether the SmartCaptcha widget is ready for interaction.
+  ///
+  /// Becomes `true` when [YandexSmartCaptcha.onCaptchaReady] is invoked.
+  /// Is `false` before the controller is attached to a widget, after [destroy]
+  /// is called, and once the widget is disposed or recreated.
+  ValueListenable<bool> get isReady => _isReady;
 
   /// Creates a controller for [YandexSmartCaptcha].
   CaptchaController();
@@ -46,14 +59,50 @@ final class CaptchaController {
     await _platformController?.destroy();
   }
 
+  /// Releases the resources held by this controller.
+  ///
+  /// Call it when the controller is no longer needed, after the
+  /// [YandexSmartCaptcha] it is attached to has been removed from the tree.
+  /// The controller must not be used after this call.
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    _platformController?.isReady.removeListener(_syncReady);
+    _platformController = null;
+    _isReady.dispose();
+  }
+
   void _attach(CaptchaPlatformController controller) {
+    _platformController?.isReady.removeListener(_syncReady);
     _platformController = controller;
+    controller.isReady.addListener(_syncReady);
+    _syncReady();
   }
 
   void _detach(CaptchaPlatformController controller) {
     if (identical(_platformController, controller)) {
+      controller.isReady.removeListener(_syncReady);
       _platformController = null;
+      _syncReady();
     }
+  }
+
+  void _syncReady() {
+    if (_isDisposed) return;
+
+    final binding = WidgetsBinding.instance;
+    if (binding.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      _isReady.value = _platformController?.isReady.value ?? false;
+      return;
+    }
+
+    if (_isSyncScheduled) return;
+    _isSyncScheduled = true;
+    binding.addPostFrameCallback((_) {
+      _isSyncScheduled = false;
+      _syncReady();
+    });
   }
 }
 

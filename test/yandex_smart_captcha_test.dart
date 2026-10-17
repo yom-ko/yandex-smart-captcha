@@ -316,6 +316,293 @@ void main() {
         expect(webViewController.evaluatedJavascriptSources, isEmpty);
       },
     );
+
+    group('isReady', () {
+      test('is false before it is attached to a WebView', () {
+        final captchaController = CaptchaController();
+
+        expect(captchaController.isReady.value, isFalse);
+
+        captchaController.dispose();
+      });
+
+      testWidgets('becomes true and notifies when SmartCaptcha is ready',
+          (tester) async {
+        final captchaController = CaptchaController();
+        var notifications = 0;
+        captchaController.isReady.addListener(() => notifications++);
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          controller: captchaController,
+        );
+        await tester.pump();
+
+        expect(captchaController.isReady.value, isFalse);
+
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+
+        expect(captchaController.isReady.value, isTrue);
+        expect(notifications, equals(1));
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        captchaController.dispose();
+      });
+
+      testWidgets('becomes false after destroy', (tester) async {
+        final captchaController = CaptchaController();
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          controller: captchaController,
+        );
+        await tester.pump();
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+
+        await captchaController.destroy();
+
+        expect(captchaController.isReady.value, isFalse);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        captchaController.dispose();
+      });
+
+      testWidgets('becomes false when the widget is disposed', (tester) async {
+        final captchaController = CaptchaController();
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          controller: captchaController,
+        );
+        await tester.pump();
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+
+        expect(captchaController.isReady.value, isFalse);
+
+        captchaController.dispose();
+      });
+
+      testWidgets('stays false until the recreated adapter is ready',
+          (tester) async {
+        final captchaController = CaptchaController();
+        final oldWebViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(language: CaptchaLanguage.ru),
+          controller: captchaController,
+        );
+        await tester.pump();
+        oldWebViewController.emit(CaptchaEvent.captchaReady.name);
+        expect(captchaController.isReady.value, isTrue);
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: captchaWidget(
+              config: createConfig(language: CaptchaLanguage.en),
+              controller: captchaController,
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(captchaController.isReady.value, isFalse);
+
+        final replacementWebView =
+            tester.widget<InAppWebView>(find.byType(InAppWebView));
+        (replacementWebView.platform as PlatformInAppWebViewWidgetFake)
+            .controller
+            .emit(CaptchaEvent.captchaReady.name);
+
+        expect(captchaController.isReady.value, isTrue);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        captchaController.dispose();
+      });
+
+      testWidgets('moves to the replacement controller', (tester) async {
+        final oldController = CaptchaController();
+        final newController = CaptchaController();
+        final config = createConfig();
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: config,
+          controller: oldController,
+        );
+        await tester.pump();
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+        expect(oldController.isReady.value, isTrue);
+        expect(newController.isReady.value, isFalse);
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: captchaWidget(config: config, controller: newController),
+          ),
+        );
+
+        expect(oldController.isReady.value, isFalse);
+
+        final replacementWebView =
+            tester.widget<InAppWebView>(find.byType(InAppWebView));
+        (replacementWebView.platform as PlatformInAppWebViewWidgetFake)
+            .controller
+            .emit(CaptchaEvent.captchaReady.name);
+
+        expect(oldController.isReady.value, isFalse);
+        expect(newController.isReady.value, isTrue);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        oldController.dispose();
+        newController.dispose();
+      });
+
+      testWidgets('is not updated after the controller is disposed',
+          (tester) async {
+        final captchaController = CaptchaController();
+        final webViewController = await pumpCaptcha(
+          tester,
+          config: createConfig(),
+          controller: captchaController,
+        );
+        await tester.pump();
+
+        captchaController.dispose();
+        webViewController.emit(CaptchaEvent.captchaReady.name);
+        await tester.pumpWidget(const SizedBox.shrink());
+
+        expect(tester.takeException(), isNull);
+      });
+
+      group('with a listener outside the captcha subtree', () {
+        Widget readyListenerApp(
+          CaptchaController controller, {
+          bool showCaptcha = true,
+          CaptchaConfig? config,
+        }) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Column(
+              children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: controller.isReady,
+                  builder: (_, isReady, __) => Text('ready=$isReady'),
+                ),
+                if (showCaptcha)
+                  Expanded(
+                    child: captchaWidget(
+                      config: config ?? createConfig(),
+                      controller: controller,
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }
+
+        Future<void> emitReady(WidgetTester tester) async {
+          final webView =
+              tester.widget<InAppWebView>(find.byType(InAppWebView));
+          (webView.platform as PlatformInAppWebViewWidgetFake)
+              .controller
+              .emit(CaptchaEvent.captchaReady.name);
+          await tester.pump();
+        }
+
+        testWidgets('rebuilds when SmartCaptcha becomes ready', (tester) async {
+          final captchaController = CaptchaController();
+          await tester.pumpWidget(readyListenerApp(captchaController));
+          await tester.pump();
+          expect(find.text('ready=false'), findsOneWidget);
+
+          await emitReady(tester);
+
+          expect(find.text('ready=true'), findsOneWidget);
+
+          await tester.pumpWidget(const SizedBox.shrink());
+          captchaController.dispose();
+        });
+
+        testWidgets('is notified without errors when the widget is removed',
+            (tester) async {
+          final captchaController = CaptchaController();
+          await tester.pumpWidget(readyListenerApp(captchaController));
+          await tester.pump();
+          await emitReady(tester);
+
+          await tester.pumpWidget(
+            readyListenerApp(captchaController, showCaptcha: false),
+          );
+
+          expect(tester.takeException(), isNull);
+          expect(captchaController.isReady.value, isFalse);
+
+          await tester.pump();
+
+          expect(find.text('ready=false'), findsOneWidget);
+
+          await tester.pumpWidget(const SizedBox.shrink());
+          captchaController.dispose();
+        });
+
+        testWidgets(
+          'is notified without errors when the adapter is recreated',
+          (tester) async {
+            final captchaController = CaptchaController();
+            await tester.pumpWidget(readyListenerApp(captchaController));
+            await tester.pump();
+            await emitReady(tester);
+
+            await tester.pumpWidget(
+              readyListenerApp(
+                captchaController,
+                config: createConfig(language: CaptchaLanguage.en),
+              ),
+            );
+
+            expect(tester.takeException(), isNull);
+            expect(captchaController.isReady.value, isFalse);
+
+            await tester.pump();
+
+            expect(find.text('ready=false'), findsOneWidget);
+
+            await emitReady(tester);
+
+            expect(find.text('ready=true'), findsOneWidget);
+
+            await tester.pumpWidget(const SizedBox.shrink());
+            captchaController.dispose();
+          },
+        );
+
+        testWidgets(
+          'is notified without errors when the controller is replaced',
+          (tester) async {
+            final oldController = CaptchaController();
+            final newController = CaptchaController();
+            await tester.pumpWidget(readyListenerApp(oldController));
+            await tester.pump();
+            await emitReady(tester);
+
+            await tester.pumpWidget(readyListenerApp(newController));
+
+            expect(tester.takeException(), isNull);
+
+            await tester.pump();
+            await emitReady(tester);
+
+            expect(oldController.isReady.value, isFalse);
+            expect(newController.isReady.value, isTrue);
+
+            await tester.pumpWidget(const SizedBox.shrink());
+            oldController.dispose();
+            newController.dispose();
+          },
+        );
+      });
+    });
   });
 
   group('$YandexSmartCaptcha', () {
