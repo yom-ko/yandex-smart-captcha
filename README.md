@@ -32,13 +32,13 @@ In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classe
 
 ### Web support
 
-> **Note:** The `YandexSmartCaptcha` widget automatically injects the Yandex SmartCaptcha script when mounted, so you don't need to add it to your `index.html`.
+> **Note:** The `YandexSmartCaptcha` widget automatically injects the Yandex SmartCaptcha script when mounted, so you don't need to add it to your app's `index.html`.
 
 On the web, `YandexSmartCaptcha` provides a host element for the Yandex SmartCaptcha HTML widget (aka "I'm not a robot" block). Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control its position. Yandex fully controls the challenge popup's UI and behavior – just as it does on a regular website.
 
-> **Note:** The height of `YandexSmartCaptcha` is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can still adjust the displayed size using `Transform.scale`, if needed.
+> **Note:** The height of `YandexSmartCaptcha` is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can adjust the displayed size using `Transform.scale`, if needed.
 
-Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are not applicable to the web and have no effect there. However, all callbacks and `CaptchaController` methods remain available.
+Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are not applicable to the web and have no effect there. However, almost all callbacks and `CaptchaController` methods remain available.
 
 The web implementation is compatible with [WebAssembly (Wasm)](https://webassembly.org/).
 
@@ -83,17 +83,19 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.             |
 | `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.        |
 
-### CaptchaController methods
+### CaptchaController properties and methods
 
-Provide access to the SmartCaptcha HTML widget's imperative operations.
+Provide access to the SmartCaptcha's readiness state and imperative operations.
 
-| Method      | Description                                                                        |
-| :---------- | :--------------------------------------------------------------------------------- |
-| `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode. |
-| `reset()`   | Resets the SmartCaptcha to its initial state. Only works for a solved challenge.   |
-| `destroy()` | Removes the SmartCaptcha HTML widget and its associated event listeners.           |
+| Member      | Description                                                                          |
+| :---------- | :----------------------------------------------------------------------------------- |
+| `isReady`   | A `ValueListenable<bool>` that is `true` once SmartCaptcha is ready for interaction. |
+| `execute()` | Starts user validation by showing a challenge popup. Only works in invisible mode.   |
+| `reset()`   | Resets the SmartCaptcha to its initial state. Only works for a solved challenge.     |
+| `destroy()` | Removes the SmartCaptcha HTML widget and its associated event listeners.             |
+| `dispose()` | Releases the controller's resources.                                                 |
 
-These methods are exposed on native and web platforms. Call them after `onCaptchaReady` has fired.
+The same members are exposed and available on all supported platforms.
 
 ## Screenshots
 
