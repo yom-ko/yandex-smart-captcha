@@ -1,4 +1,10 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 8.1.0
+- Add `CaptchaController.isReady`, a `ValueListenable` reporting whether SmartCaptcha is ready for interaction.
+- Add `CaptchaController.dispose()` method that releases the controller's resources.
+- Update the example app to use `isReady` and dispose the controller.
+- Update README.
+
 ## 8.0.0
 - **POTENTIALLY BREAKING CHANGE:**
   - Web: The `YandexSmartCaptcha` widget now automatically adjusts its height to match the underlying SmartCaptcha HTML element. This simplifies layout but may break existing layouts that rely on a fixed widget height.
