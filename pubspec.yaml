@@ -7,7 +7,6 @@ repository: https://github.com/yom-ko/yandex-smart-captcha
 topics:
   - smart-captcha
   - invisible-captcha
-  - recaptcha
   - captcha
   - yandex
 

@@ -124,7 +124,7 @@ final class SmartCaptcha {
     </style>
   </head>
   <body>
-    <div id="$containerId" style="height:100px"></div>
+    <div id="$containerId" style="height:118px"></div>
   </body>
 </html>
 ''';

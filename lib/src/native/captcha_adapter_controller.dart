@@ -27,12 +27,10 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.config,
     required this.callbacks,
     required this.baseUrl,
-  }) {
-    initialData = InAppWebViewInitialData(
-      data: SmartCaptcha(config).htmlData,
-      baseUrl: baseUrl != null ? WebUri(baseUrl!) : null,
-    );
-  }
+  }) : initialData = InAppWebViewInitialData(
+          data: SmartCaptcha(config).htmlData,
+          baseUrl: baseUrl != null ? WebUri(baseUrl) : null,
+        );
 
   void attachWebViewController(InAppWebViewController controller) {
     if (_isDisposed) return;

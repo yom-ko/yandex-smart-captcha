@@ -11,11 +11,9 @@ import 'captcha_adapter_web.dart';
 import 'captcha_script_loader_web.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
-  // Mirrors the script's default height of a visible widget, so the layout
-  // does not jump once SmartCaptcha is rendered.
+  // Mirrors the script's default height of a visible widget.
   static const _visibleHeight = 118.0;
-  // Flutter only creates a platform view on the first non-zero size, so
-  // an invisible widget keeps a minimal slot to stay in the DOM.
+  // Invisible widget keeps a minimal slot to stay in the DOM.
   static const _invisibleHeight = 1.0;
 
   static const _styleId = 'package-ysc-spinner-hider';
@@ -180,6 +178,15 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     }
   }
 
+  void _cleanupDom() {
+    if (!_domReady) return;
+    _domReady = false;
+
+    if (--_styleUsers == 0) {
+      document.getElementById(_styleId)?.remove();
+    }
+  }
+
   void _destroyJSWidget() {
     final widgetId = _widgetId;
     _widgetId = null;
@@ -189,15 +196,6 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       smartCaptcha?.destroy(widgetId);
     } catch (_) {
       // A failing destroy must not break cleanup.
-    }
-  }
-
-  void _cleanupDom() {
-    if (!_domReady) return;
-    _domReady = false;
-
-    if (--_styleUsers == 0) {
-      document.getElementById(_styleId)?.remove();
     }
   }
 

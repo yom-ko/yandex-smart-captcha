@@ -61,7 +61,7 @@ void main() {
         expect(
           html,
           contains(
-              '<div id="smart-captcha-container" style="height:100px"></div>'),
+              '<div id="smart-captcha-container" style="height:118px"></div>'),
         );
       });
 
