@@ -36,7 +36,7 @@ In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classe
 
 On the web, `YandexSmartCaptcha` provides a host element for the Yandex SmartCaptcha HTML widget (aka "I'm not a robot" block). Use standard layout widgets such as `Center`, `Padding`, or `SizedBox` to control its position. Yandex fully controls the challenge popup's UI and behavior – just as it does on a regular website.
 
-> **Note:** The height of `YandexSmartCaptcha` is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can adjust the displayed size using `Transform.scale`, if needed.
+> **Note:** The height of the `YandexSmartCaptcha` widget is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can adjust the displayed size using `Transform.scale`, if needed.
 
 Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are not applicable to the web and have no effect there. However, almost all callbacks and `CaptchaController` methods remain available.
 
