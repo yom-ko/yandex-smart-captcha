@@ -51,17 +51,29 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
   ///
   /// The child is left unstyled so the script fully owns its size,
   /// which is then observed and exposed through [contentHeight].
+  ///
+  /// If called again with a different [host] – for example, when the
+  /// platform view element is recreated while this controller survives –
+  /// the already-rendered SmartCaptcha container is moved into the new
+  /// host instead of being re-rendered from scratch.
   void attachContainer(HTMLDivElement host) {
-    if (_isDisposed || _container != null) return;
+    if (_isDisposed) return;
 
-    final container = document.createElement('div') as HTMLDivElement
-      ..id = _containerId;
     host
       ..style.width = '100%'
-      ..style.height = '100%'
-      ..appendChild(container);
-    _observeHeight(container);
-    _container = container;
+      ..style.height = '100%';
+
+    final container = _container;
+    if (container != null) {
+      host.appendChild(container);
+      return;
+    }
+
+    final newContainer = document.createElement('div') as HTMLDivElement
+      ..id = _containerId;
+    host.appendChild(newContainer);
+    _observeHeight(newContainer);
+    _container = newContainer;
 
     _initialize();
   }

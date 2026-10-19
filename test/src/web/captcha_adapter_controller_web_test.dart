@@ -243,6 +243,55 @@ void main() {
   );
 
   testWidgets(
+    'moves the rendered container to a replacement host instead of re-rendering',
+    (tester) async {
+      var renderCalls = 0;
+      _installReadySmartCaptcha(onRender: (_) => renderCalls++);
+      final controller = _createController();
+      addTearDown(controller.dispose);
+      final firstHost = _createContainer();
+      final secondHost = _createContainer();
+
+      controller.attachContainer(firstHost);
+      await tester.pump();
+
+      expect(controller.isReady.value, isTrue);
+      expect(renderCalls, equals(1));
+      expect(firstHost.childElementCount, equals(1));
+      final renderedContainer = firstHost.firstElementChild!;
+
+      controller.attachContainer(secondHost);
+
+      expect(renderCalls, equals(1));
+      expect(controller.isReady.value, isTrue);
+      expect(firstHost.contains(renderedContainer), isFalse);
+      expect(renderedContainer.parentElement, same(secondHost));
+    },
+  );
+
+  testWidgets(
+    'keeps following the height of a container moved to a replacement host',
+    (tester) async {
+      _installReadySmartCaptcha(
+        onRender: (containerId) => _setHeight(containerId, 150),
+      );
+      final controller = _createController();
+      addTearDown(controller.dispose);
+      final firstHost = _createContainer();
+      final secondHost = _createContainer();
+
+      controller.attachContainer(firstHost);
+      await _waitFor(tester, () => controller.contentHeight.value == 150);
+
+      controller.attachContainer(secondHost);
+      _setHeight(secondHost.firstElementChild!.id, 80.5);
+      await _waitFor(tester, () => controller.contentHeight.value == 80.5);
+
+      expect(controller.contentHeight.value, equals(80.5));
+    },
+  );
+
+  testWidgets(
     'reports an error when the SmartCaptcha API is unavailable',
     (tester) async {
       _installReadySmartCaptcha();
