@@ -32,10 +32,10 @@ final class CaptchaAdapterWidget extends StatelessWidget {
             allowContentAccess: false,
             allowFileAccess: false,
           ),
-          onPermissionRequest: (_, request) async {
+          onPermissionRequest: (_, __) async {
             return PermissionResponse(
-              resources: request.resources,
-              action: PermissionResponseAction.GRANT,
+              resources: const [],
+              action: PermissionResponseAction.DENY,
             );
           },
           shouldOverrideUrlLoading: (_, action) async {

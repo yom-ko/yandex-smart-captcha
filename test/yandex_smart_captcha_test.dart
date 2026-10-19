@@ -762,7 +762,7 @@ void main() {
         expect(settings.allowsInlineMediaPlayback, isTrue);
       });
 
-      testWidgets('grants every requested WebView permission', (tester) async {
+      testWidgets('denies every requested WebView permission', (tester) async {
         final webViewController =
             await pumpCaptcha(tester, config: createConfig());
 
@@ -776,8 +776,8 @@ void main() {
           request,
         );
 
-        expect(response?.action, equals(PermissionResponseAction.GRANT));
-        expect(response?.resources, same(request.resources));
+        expect(response?.action, equals(PermissionResponseAction.DENY));
+        expect(response?.resources, isEmpty);
       });
 
       testWidgets('allows navigation by default', (tester) async {
