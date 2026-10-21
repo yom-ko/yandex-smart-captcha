@@ -1,5 +1,5 @@
 ---
-name: writing-unit-widget-tests
+name: write-unit-widget-tests
 description: >
   Write and maintain focused Dart and Flutter tests for this Yandex SmartCaptcha package.
   Use it for unit tests, widget tests, HTML/JavaScript assertions, WebView bridge tests,
@@ -9,19 +9,16 @@ description: >
 
 # Writing unit and widget tests
 
-Use this skill when creating or editing unit or widget tests for the `yandex_smart_captcha` Flutter package.
+Use this skill when creating or editing unit or widget tests for the `yandex_smart_captcha` package.
 
 ## Scope
 
-Cover externally observable behavior and stable contracts. Prefer the smallest deterministic test that demonstrates the required behavior or regression.
-
-Do not couple tests to private implementation details when the same behavior is observable through a public API, callback, serialized value, generated HTML/JavaScript, or other stable contract.
+Cover externally observable behavior and stable contracts. Prefer the smallest deterministic test that demonstrates the required behavior or regression. Do not couple tests to private implementation details when the same behavior is observable through a public API, callback, serialized value, generated HTML/JavaScript, or other stable contract.
 
 ## File mapping
 
 Use the corresponding test target. For file-specific tests, mirror `lib/` under
-`test/` and use the `_test.dart` suffix. Public API and platform implementation
-details may instead be covered through a package-level or contract-level test:
+`test/` and use the `_test.dart` suffix:
 
 | Production file                                   | Test target                                             |
 | ------------------------------------------------- | ------------------------------------------------------- |
@@ -39,9 +36,9 @@ details may instead be covered through a package-level or contract-level test:
 | `lib/yandex_smart_captcha.dart`                   | `test/yandex_smart_captcha_test.dart`                   |
 | `lib/src/yandex_smart_captcha.dart`               | `test/yandex_smart_captcha_test.dart`                   |
 
-Keep reusable WebView test infrastructure in `test/mocks/`, especially [`in_app_webview_platform_fake.dart`](../../../test/mocks/in_app_webview_platform_fake.dart).
+This mapping reflects the layout at the time of writing. Follow the actual project structure if files are moved due to a refactor.
 
-This mapping reflects the repository layout at the time of writing. Follow the actual project structure if files are moved during a refactor.
+Keep reusable WebView test infrastructure in `test/mocks/`, especially [`in_app_webview_platform_fake.dart`](../../../test/mocks/in_app_webview_platform_fake.dart).
 
 ## Workflow
 
@@ -51,7 +48,7 @@ This mapping reflects the repository layout at the time of writing. Follow the a
 4. Add the smallest test that demonstrates the required behavior or regression.
 5. Run the smallest affected test target while iterating.
 6. Apply the validation rules in [Running tests](#running-tests).
-7. Review the diff and remove brittle assertions, duplicated coverage, timing assumptions, debug code, and unrelated changes.
+7. Review the diff and remove debug code, brittle assertions, duplicated coverage, and unrelated changes.
 
 ## Test selection
 
@@ -69,23 +66,21 @@ Use `setUpAll()` for shared one-time setup such as fake platform registration. U
 
 Keep tests deterministic. Do not use sleeps, arbitrary delays, real HTTP requests, debug prints, logs, or timing-based assertions when a deterministic fake state or operation log is available.
 
-Avoid duplicating the same expectation across multiple layers unless each layer represents a distinct contract.
-
-Do not weaken a test merely to match the current implementation when the intended public behavior is clear.
-
 Do not snapshot entire generated HTML when focused assertions can verify the contract. Avoid asserting incidental whitespace, ordering, formatting, or wrapper syntax unless those details are themselves part of the contract.
 
 Do not derive expected bridge values solely from the same production enum or constant used by the implementation under test.
 
-Do not change event names or controller semantics merely to make a test pass.
+Do not duplicate the same expectation across multiple layers unless each layer represents a distinct contract.
+
+Do not weaken a test merely to match the current implementation when the intended public behavior is clear.
 
 Do not use a real in-app WebView or the remote SmartCaptcha service in unit or widget tests.
 
+Do not change event names or controller semantics merely to make a test pass.
+
 ## Regression tests
 
-When fixing a bug, add a regression test that reproduces the externally observable failure and fails before the fix when the behavior is testable at this level.
-
-Test the intended behavior rather than the exact implementation detail that caused the bug.
+When fixing a bug, add a regression test that reproduces the externally observable failure and fails before the fix when the behavior is testable at this level. Test the intended behavior rather than the exact implementation detail that caused the bug.
 
 ## Public configuration
 
@@ -94,18 +89,18 @@ When adding or changing a public configuration option:
 1. Test its default in `CaptchaConfig`.
 2. Test nullable or optional behavior when applicable.
 3. Test a non-default value reaching the generated output or other observable widget behavior.
-4. Preserve existing public API coverage unless the public contract intentionally changes.
-5. Update API documentation and/or README examples when required by the current policy or API conventions.
+4. Preserve existing public API coverage unless the public API or contract intentionally changes.
+5. Update API documentation and/or README examples when required by the current conventions.
 
 ## HTML and JavaScript
 
-When generated HTML or JavaScript changes, add or update focused assertions for the affected contract. Depending on the change, this may include:
+When HTML or JavaScript changes, add or update focused assertions for the affected contract. This may include:
 
 * script URL;
 * viewport values;
 * document structure and captcha container;
 * safely escaped JavaScript string configuration values;
-* widget options: `sitekey`, `hl`, `test`, `invisible`, `shieldPosition`, `hideShield`, and `webview`;
+* widget options: `sitekey`, `hl`, `test`, `invisible`, `shieldPosition`, `hideShield`, `webview`;
 * native bridge readiness, including initialization after `flutterInAppWebViewPlatformReady`;
 * `captchaReady`, `challengeSolved`, script-load errors, and missing-API wiring;
 * subscribed event IDs and native handler names for subscribable events;
@@ -121,7 +116,7 @@ When bridge behavior changes, test the affected side of the boundary rather than
 
 For each added or behaviorally changed `CaptchaEvent`, cover the applicable contract:
 
-1. For subscribable events, verify that generated JavaScript subscribes to the expected SmartCaptcha event ID.
+1. For subscribable events, verify that the JavaScript code subscribes to the expected SmartCaptcha event ID.
 2. For non-subscribable events such as `captchaReady` and `challengeSolved`, verify the dedicated callback or bridge wiring.
 3. On native platforms, verify that `YandexSmartCaptcha` registers the expected JavaScript handler and that `PlatformInAppWebViewControllerFake.emit()` invokes the matching Dart callback.
 4. On the web, invoke the relevant typed JavaScript fake callback or subscription and verify the matching Dart callback.
@@ -148,7 +143,7 @@ For `CaptchaController`, cover the behavior relevant to the change:
 * disposing the widget detaches its controller;
 * actions after replacement do not execute against the old WebView.
 
-Inspect `evaluatedJavascriptSources` on `PlatformInAppWebViewControllerFake` instead of relying on sleeps, delays, logs, or timing. Assert the semantic JavaScript operation and its arguments, not incidental formatting or wrapper syntax, unless the exact generated source is part of the contract.
+Inspect `evaluatedJavascriptSources` on `PlatformInAppWebViewControllerFake` instead of relying on sleeps, delays, logs, or timing. Assert the semantic JavaScript operation, not incidental formatting or wrapper syntax, unless the exact source is part of the contract.
 
 ## Web implementations
 
@@ -162,13 +157,11 @@ Keep browser tests deterministic and independent of actual browser navigation or
 
 ## Shared test conventions
 
-Browser-only test files should use `@TestOn('browser')`. Native WebView suites should use `@TestOn('vm')` at the library level.
+Native-only test files should use `@TestOn('vm')` at the library level. Browser-only test files should use `@TestOn('browser')`.
 
-Reuse or extend the existing `pumpCaptcha()` helper in [`test/yandex_smart_captcha_test.dart`](../../../test/yandex_smart_captcha_test.dart) instead of duplicating `pumpWidget` setup.
+`lib/src/web/captcha_adapter_web.dart` contains only external JavaScript interop declarations. Its observable use is covered by the browser controller contract in [`test/src/web/captcha_adapter_controller_web_test.dart`](../../../test/src/web/captcha_adapter_controller_web_test.dart), so do not add declaration-only tests.
 
-`lib/src/web/captcha_adapter_web.dart` contains only external JavaScript interop declarations. Its observable use is covered by the browser controller contract in [`test/src/web/captcha_adapter_controller_web_test.dart`](../../../test/src/web/captcha_adapter_controller_web_test.dart); do not add declaration-only tests.
-
-`lib/src/web/captcha_adapter_widget_web.dart` delegates to Flutter's `HtmlElementView`. Its platform-view lifecycle is covered by Flutter's framework and is not deterministic in the headless package test harness; do not add tests that depend on that lifecycle here.
+`lib/src/web/captcha_adapter_widget_web.dart` delegates to Flutter's `HtmlElementView`. Its platform-view lifecycle is covered by Flutter's framework and is not deterministic in the headless package test harness. Do not add tests that depend on that lifecycle here.
 
 ## Running tests
 
@@ -181,13 +174,13 @@ flutter test test/src/native/captcha_adapter_test.dart
 flutter test test/yandex_smart_captcha_test.dart
 ```
 
-When the change affects the web adapter, run the relevant browser tests explicitly:
+When the change affects a web adapter, run the relevant browser tests explicitly:
 
 ```bash
 flutter test --platform chrome
 ```
 
-Before finishing a change that affects the public API, WebView bridge, or generated HTML/JavaScript, run:
+Before finishing a change that affects the public API, WebView bridge, or HTML/JavaScript code, run:
 
 ```bash
 flutter test
