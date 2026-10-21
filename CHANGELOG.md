@@ -1,4 +1,12 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 8.1.1
+- Improve safety and robustness:
+  - Native: Deny all permission requests from the WebView, as they are not applicable.
+  - Web: Reuse the existing SmartCaptcha container when the platform view host is recreated.
+- Improve and expand test coverage.
+- Improve the example app.
+- Improve the README.
+
 ## 8.1.0
 - Add `CaptchaController.isReady`, a `ValueListenable` reporting whether SmartCaptcha is ready for interaction.
 - Add `CaptchaController.dispose()` method that releases the controller's resources.
