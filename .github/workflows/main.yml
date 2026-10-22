@@ -1,0 +1,111 @@
+name: Main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # Weekly: catch new Flutter and deps releases.
+  workflow_call: # Reused by publish.yml as the release gate.
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+
+jobs:
+  check-agent-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check generated agent context
+        run: ./build-agent-context.sh --check
+
+  test:
+    name: test-${{ matrix.sdk }}
+    needs: check-agent-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sdk: latest
+            flutter-version: ''
+          - sdk: minimum
+            flutter-version: '3.24.0' # Keep in sync with environment.flutter in pubspec.yaml.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          channel: stable
+          flutter-version: ${{ matrix.flutter-version }}
+          cache: true
+      - name: Resolve dependencies
+        if: matrix.sdk == 'latest'
+        run: flutter pub get
+      - name: Resolve lowest allowed dependencies
+        if: matrix.sdk == 'minimum'
+        run: |
+          # flutter_lints 6 needs Dart 3.8; it's dev-only, so pin an older one here.
+          printf 'dependency_overrides:\n  flutter_lints: ^5.0.0\n' > pubspec_overrides.yaml
+          # example/ requires a newer Flutter than the package minimum.
+          flutter pub downgrade --no-example
+      - name: Analyze
+        if: matrix.sdk == 'latest'
+        run: flutter analyze --no-pub
+      - name: Analyze package
+        if: matrix.sdk == 'minimum'
+        # Compatibility check only: lint infos are enforced on latest.
+        run: flutter analyze --no-pub --no-fatal-infos lib test
+      - name: Validate package for publishing
+        if: matrix.sdk == 'latest'
+        run: flutter pub publish --dry-run
+      - name: Run unit and native widget tests
+        run: flutter test --no-pub --coverage
+      - name: Run browser adapter tests
+        run: flutter test --no-pub --platform chrome
+      - name: Upload coverage report
+        if: >-
+          matrix.sdk == 'latest' &&
+          (github.event_name == 'pull_request' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 7
+
+  coverage:
+    needs: test
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download coverage report
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage
+          path: coverage
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage/lcov.info
+          use_oidc: true
