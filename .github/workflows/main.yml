@@ -73,6 +73,9 @@ jobs:
         run: flutter test --no-pub --coverage
       - name: Run browser adapter tests
         run: flutter test --no-pub --platform chrome
+      - name: Run browser adapter tests (Wasm)
+        if: matrix.sdk == 'latest'
+        run: flutter test --no-pub --platform chrome --wasm
       - name: Upload coverage report
         if: >-
           matrix.sdk == 'latest' &&

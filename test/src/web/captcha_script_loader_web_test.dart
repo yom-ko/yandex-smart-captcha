@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart';
 import 'package:yandex_smart_captcha/src/web/captcha_script_loader_web.dart';
 
+import '../../mocks/js_matchers_web.dart';
 import '../../mocks/script_network_blocker_web.dart';
 
 const _captchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
@@ -42,7 +43,7 @@ void main() {
     await ensureCaptchaObject();
 
     expect(document.querySelectorAll(_captchaScriptSelector).length, equals(1));
-    expect(_globalThis.smartCaptcha, same(smartCaptcha));
+    expect(_globalThis.smartCaptcha, jsIdentical(smartCaptcha));
   });
 
   test(
@@ -55,9 +56,14 @@ void main() {
       await ensureCaptchaObject();
 
       expect(
-          document.querySelectorAll(_captchaScriptSelector).length, equals(1));
-      expect(document.querySelector(_captchaScriptSelector), same(hostScript));
-      expect(_globalThis.smartCaptcha, same(hostGlobal));
+        document.querySelectorAll(_captchaScriptSelector).length,
+        equals(1),
+      );
+      expect(
+        document.querySelector(_captchaScriptSelector),
+        jsIdentical(hostScript),
+      );
+      expect(_globalThis.smartCaptcha, jsIdentical(hostGlobal));
     },
   );
 
@@ -79,7 +85,7 @@ void main() {
 
     await ensureCaptchaObject();
     expect(document.querySelectorAll(_captchaScriptSelector).length, equals(2));
-    expect(_globalThis.smartCaptcha, same(smartCaptcha));
+    expect(_globalThis.smartCaptcha, jsIdentical(smartCaptcha));
   });
 
   test(
@@ -97,12 +103,15 @@ void main() {
     final retry = ensureCaptchaObject();
     final retryScript = document.querySelector(_captchaScriptSelector);
     expect(retryScript, isNotNull);
-    expect(retryScript, isNot(same(failedScript)));
+    expect(retryScript, isNot(jsIdentical(failedScript)));
 
     retryScript!.dispatchEvent(Event('load'));
     await retry;
 
-    expect(document.querySelector(_captchaScriptSelector), same(retryScript));
+    expect(
+      document.querySelector(_captchaScriptSelector),
+      jsIdentical(retryScript),
+    );
   });
 }
 

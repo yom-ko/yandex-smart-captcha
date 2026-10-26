@@ -10,6 +10,7 @@ import 'package:yandex_smart_captcha/src/captcha_platform_controller.dart';
 import 'package:yandex_smart_captcha/src/web/captcha_adapter_controller_web.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
+import '../../mocks/js_matchers_web.dart';
 import '../../mocks/script_network_blocker_web.dart';
 
 const _captchaScriptUrl = 'https://smartcaptcha.cloud.yandex.ru/captcha.js';
@@ -265,7 +266,7 @@ void main() {
       expect(renderCalls, equals(1));
       expect(controller.isReady.value, isTrue);
       expect(firstHost.contains(renderedContainer), isFalse);
-      expect(renderedContainer.parentElement, same(secondHost));
+      expect(renderedContainer.parentElement, jsIdentical(secondHost));
     },
   );
 
@@ -362,7 +363,7 @@ void main() {
 
       expect(
           document.querySelectorAll(_captchaScriptSelector).length, equals(1));
-      expect(_globalThis.smartCaptcha, same(smartCaptcha));
+      expect(_globalThis.smartCaptcha, jsIdentical(smartCaptcha));
       expect(_spinnerStyleCount, isZero);
 
       final secondController = _createController();
