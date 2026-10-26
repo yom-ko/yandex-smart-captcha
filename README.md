@@ -28,7 +28,7 @@ YandexSmartCaptcha(
 In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
 * On mobile, the `YandexSmartCaptcha`'s parent widget should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered within a single WebView.
-* On the web, the parent widget only needs to provide enough vertical space for the "I'm not a robot" block (with a height of around 118px), because Yandex fully controls the challenge popup.
+* On the web, the parent widget only needs to provide enough space for the "I'm not a robot" block (around 119px high and at least 300px wide), because Yandex fully controls the challenge popup.
 
 ### Web support
 
