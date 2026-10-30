@@ -9,12 +9,12 @@ description: >-
 ## Main rules
 
 - Test and report only. Do not fix defects or edit tests unless the user explicitly asks.
-- You may temporarily change the example app to reach edge cases (e.g., set `useInvisibleMode: true` flag or add `debugPrint`-s). Revert the changes afterward and list them in the report.
+- You may temporarily modify the example app to test edge cases (e.g., set `useInvisibleMode: true` or add temporary `debugPrint` statements). Revert the changes afterward and list them in the report.
 - Preserve all pre-existing user changes. Revert only changes introduced by this testing session, including temporary source or configuration edits and generated dependency-file changes such as `pubspec.lock`. Never use a blanket reset (`git reset --hard`, `git checkout .`, `git clean`) or discard unrelated working-tree changes.
 - Load the real client key only from `example/.env` with `--dart-define-from-file=.env`. Never commit it.
 - Never reproduce the client key or CAPTCHA tokens in reports, your own output, quoted logs, saved network captures, or screenshots. Redact both wherever they appear. The example app itself prints the token in its `called: onChallengeSolved with token:` log line, so redact it when quoting.
 - Do not bypass or automate the solving of CAPTCHA challenges. Do not use solver services, image recognition, or tampered responses. If a step requires solving a challenge, ask the user to solve it or mark the step as `BLOCKED`.
-- Derive expected behavior from the README, Dartdoc, and the official [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/). Baseline expectations always apply: no crash, no uncaught exception, and no unhandled console error. Beyond that, if no source defines the expected behavior, report the check as `UNCLEAR`; do not invent an expectation or declare a defect.
+- Derive expected behavior from the README, Dartdoc, and the official [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/). Check for crashes, uncaught exceptions, and unhandled console errors, but do not treat their presence alone as evidence of a package defect. Apply the attribution and verdict rules in [Report](#5-report). If no source defines the expected behavior, report the check as `UNCLEAR`; do not invent expectations or declare a defect.
 - Every check is required unless this skill marks it *optional*. Optional checks that were not run may be reported as `NOT RUN` without affecting the verdict; required checks may not.
 - Ask before installing global tools, SDK system images, simulator runtimes, or browsers. This includes tools that install themselves automatically: a first Patrol web run can install Node.js packages and Playwright browser binaries.
 - Stop any apps, servers, emulators, simulators, and browsers you start.
@@ -79,7 +79,7 @@ Inspect `example/pubspec.yaml` for Patrol's `test_directory` configuration and l
 
 Run the Patrol suite on every native target selected in [step 2](#2-select-the-targets). On web, run applicable Patrol tests on Chrome using `patrol test --device chrome --dart-define-from-file=.env`. Before deciding whether a test applies to web, inspect its code. Mark only genuinely platform-inapplicable tests as `N/A`, with a reason (for example, `$.platform.mobile` actions throw `UnsupportedError` on web). Follow the installation-approval rule in [Main rules](#main-rules).
 
-If a test fails, rerun the failing test once when feasible. Record both results and whether the failure is flaky. A flaky test is still a `FAIL`.
+If a test fails, rerun the failing test once when feasible. Record both results and whether the failure is flaky. A flaky failure that establishes a package defect is still a `FAIL`; otherwise, apply the attribution rules in [Report](#5-report). Do not hide a failed test command or count its unverified assertions as passing.
 
 ## 4. Explore the example app
 
@@ -108,6 +108,12 @@ Launch from `example/`:
 ```bash
 flutter run -d <device-id> --dart-define-from-file=.env
 ```
+
+### Challenge solving
+
+When an interactive CAPTCHA challenge appears, pause automation and ask the user to solve it in the running app or browser and submit it. Never solve the challenge on the user's behalf. After submission, verify that `onChallengeSolved` fires with a non-null token and that the expected UI and controller states are reached. Never expose the token.
+
+This check is required. If no interactive challenge appears or the user cannot complete it, mark the check as `BLOCKED` with the reason.
 
 ### Scenarios
 
@@ -138,26 +144,27 @@ Cover the scenarios below on every applicable target/build combination. Skip a s
 
 The example app logs callbacks using the `called:…` format. Use these logs, together with the browser console and network panel, to verify events. Redact client keys and CAPTCHA tokens from all evidence.
 
-For each problem, record the target, steps, expected and actual behavior, evidence (redacted log excerpt or screenshot path), and reproducibility. Classify the cause as one of: package, example app, test infrastructure, environment, or external service.
+For each problem, record the target, steps, expected and actual behavior, evidence (redacted log excerpt or screenshot path), and reproducibility. Classify the cause as one of: package, example app, test infrastructure, environment, external service, or `unresolved` when the evidence does not establish a cause.
 
 ## 5. Report
 
 Follow [`report-template.md`](./report-template.md). Its structure and format are mandatory.
 
-- Use these statuses for each check: `PASS`, `FAIL`, `UNCLEAR` (the check ran, but no source defines the expected behavior), `BLOCKED` (an environment or service issue prevented the check), `NOT RUN` (the check was not executed), or `N/A – reason`.
+- Use these statuses for each check: `PASS`, `FAIL` (a confirmed defect in the Flutter package itself), `UNCLEAR` (the check ran, but expected behavior or attribution to a package defect could not be established), `BLOCKED` (an issue outside the package prevented verification), `NOT RUN` (the check was not executed), or `N/A – reason`.
+- Attribute errors before assigning `FAIL`. Crashes, uncaught exceptions, unhandled console errors, and failed test commands are evidence to investigate, not proof of a package defect by themselves. Errors attributable to the example app, test infrastructure, environment, or external services must be reported with evidence and cause but must not contribute to the package's `FAIL` verdict.
+- If an excluded error does not prevent verification and the package's expected behavior is confirmed, mark the check `PASS` and document the error. If verification is prevented, use `BLOCKED`; if expected behavior or attribution remains unresolved, use `UNCLEAR`. An external error does not excuse a separately confirmed defect in the package's handling of that error.
 - Assign each finding a severity:
   - `HIGH` – crash, data or token loss, or a core flow broken on a supported target;
   - `MEDIUM` – wrong callback, state, or cross-platform inconsistency that has a workaround;
   - `LOW` – cosmetic or minor usability issue.
 - Choose exactly one verdict:
-  - `PASS` – every required check is `PASS` or `N/A`, and no defect was found;
-  - `FAIL` – at least one check failed or a defect was confirmed;
-  - `INCOMPLETE` – nothing failed, but at least one required check is `UNCLEAR`, `BLOCKED`, or `NOT RUN`.
+  - `PASS` – every required check is `PASS` or `N/A`, and no package defect within this package's control was confirmed; excluded errors may still be reported;
+  - `FAIL` – at least one package defect within this package's control was confirmed;
+  - `INCOMPLETE` – no package defect within this package's control was confirmed, but at least one required check is `UNCLEAR`, `BLOCKED`, or `NOT RUN`.
 - Before reporting, revert only the changes made during this session, following [Main rules](#main-rules). Then confirm that `git status --porcelain` matches the output recorded in [step 1](#1-prepare).
 
 ## References
 
-- [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/)
 - [Flutter supported deployment platforms](https://docs.flutter.dev/reference/supported-platforms)
 - [Flutter integration testing](https://docs.flutter.dev/testing/integration-tests)
 - [Flutter WebAssembly](https://docs.flutter.dev/platform-integration/web/wasm)
