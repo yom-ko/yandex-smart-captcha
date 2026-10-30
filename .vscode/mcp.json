@@ -1,0 +1,15 @@
+{
+  "servers": {
+    "patrol": {
+      "type": "stdio",
+      "command": "flutter",
+      "args": ["pub", "run", "patrol_mcp"],
+      "cwd": "${workspaceFolder}/example",
+      "env": {
+        "PROJECT_ROOT": "${workspaceFolder}/example",
+        "PATROL_FLAGS": "--dart-define-from-file=.env",
+        "SHOW_TERMINAL": "false"
+      }
+    }
+  }
+}

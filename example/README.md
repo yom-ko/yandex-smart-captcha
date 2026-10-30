@@ -1,22 +1,14 @@
 # Example app
 
-This app demonstrates the usage of the Yandex SmartCaptcha package on Android, iOS, and Web.
+This app demonstrates the Yandex SmartCaptcha Flutter package on Android, iOS, and web.
 
 ## Before you start
 
-In this directory, rename `.env.example` to `.env` and set a real Yandex SmartCaptcha `CLIENT_KEY`. Keep `.env` local and never commit it.
+Copy `.env.example` to `.env` in this directory and set `CLIENT_KEY` to a valid Yandex SmartCaptcha client key. Keep `.env` local and never commit it. Ensure `.env` is listed in `.gitignore`.
 
-Include `--dart-define-from-file=.env` in every command to load the local key.
+Run project commands from this directory. Include `--dart-define-from-file=.env` in every command that builds or runs the app.
 
-## Android
-
-Run the app on a connected Android device or emulator:
-
-```bash
-flutter run -d <android-device-id> --dart-define-from-file=.env
-```
-
-### Integration tests
+### Integration tests (optional)
 
 Install [Patrol CLI](https://pub.dev/packages/patrol_cli) globally:
 
@@ -24,7 +16,21 @@ Install [Patrol CLI](https://pub.dev/packages/patrol_cli) globally:
 dart pub global activate patrol_cli
 ```
 
-Run the integration tests on an Android device or emulator:
+Ensure the Pub cache's `bin` directory is on your `PATH`. Verify the installation:
+
+```bash
+patrol doctor
+```
+
+## Android
+
+Run the app on an Android emulator or connected physical device:
+
+```bash
+flutter run -d <android-device-id> --dart-define-from-file=.env
+```
+
+Run the Patrol integration tests on an Android emulator or connected physical device:
 
 ```bash
 patrol test -d <android-device-id> --dart-define-from-file=.env
@@ -32,30 +38,46 @@ patrol test -d <android-device-id> --dart-define-from-file=.env
 
 ## iOS
 
-The checked-in iOS project targets iOS 15.0. Install the full [Xcode](https://developer.apple.com/xcode/) application and an iOS 15 or later Simulator runtime.
+The iOS deployment target is 15.0. Install [Xcode](https://developer.apple.com/xcode/) and a compatible iOS Simulator runtime.
 
 Select Xcode as the active developer directory and complete its first-run setup:
 
 ```bash
 sudo xcode-select --switch /path/to/Xcode.app/Contents/Developer
 sudo xcodebuild -runFirstLaunch
+sudo xcodebuild -license
+xcodebuild -downloadPlatform iOS
 ```
 
-Replace `/path/to/Xcode.app` with the installed Xcode application path.
+Flutter uses Swift Package Manager by default and falls back to CocoaPods for plugins that do not support it.
 
-Start a simulator and list the available Flutter devices:
+Boot an iOS simulator and list the available Flutter devices:
 
 ```bash
-open -a Simulator
+# List available simulators
+xcrun simctl list devices available
+
+# Boot a simulator (skip if already booted)
+xcrun simctl boot <ios-simulator-udid>
+xcrun simctl bootstatus <ios-simulator-udid> -b
+
+# Optional: open Device Hub to view the simulator (Xcode 27)
+open -a DeviceHub
+
+# List available Flutter devices
 flutter devices
 ```
-
-Flutter uses Swift Package Manager for plugins that support it and CocoaPods for `flutter_inappwebview_ios`, which does not currently publish an iOS Swift package.
 
 Run the app on an iOS simulator:
 
 ```bash
 flutter run -d <ios-simulator-id> --dart-define-from-file=.env
+```
+
+Run the Patrol integration tests on an iOS simulator:
+
+```bash
+patrol test -d <ios-simulator-id> --dart-define-from-file=.env
 ```
 
 ## Web (Chrome)

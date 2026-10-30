@@ -78,6 +78,7 @@ pubspec.lock
 .vscode/*
 !.vscode/settings.json
 !.vscode/launch.json
+!.vscode/mcp.json
 
 # Misc
 .atom/

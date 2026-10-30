@@ -5,13 +5,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
-// Since SmartCaptcha is loaded over the network, allow generous timeout.
-const _loadTimeout = Duration(seconds: 30);
+import 'native_hit_testing.dart';
+
+// Since captcha is loaded over the network, allow generous timeout.
+const _loadTimeout = Duration(seconds: 60);
+const _challengeTimeout = Duration(seconds: 10);
 
 final _checkbox = Selector(textContains: 'robot');
 final _challengeSubmit = Selector(textContains: 'Submit');
 
 void main() {
+  if (!kIsWeb &&
+      defaultTargetPlatform == TargetPlatform.iOS &&
+      !const bool.fromEnvironment('PATROL_TEST_DISCOVERY')) {
+    setUpAll(setUpNativeHitTesting);
+  }
+
   group(
     'SmartCaptcha example app',
     skip: kIsWeb ? '`platform.mobile` is unavailable on the web.' : false,
@@ -36,14 +45,24 @@ void main() {
       });
 
       patrolTest('shows the challenge when the checkbox is tapped', ($) async {
+        var challengeShown = false;
+        final originalDebugPrint = debugPrint;
+        debugPrint = (message, {wrapWidth}) {
+          if (message == 'called: onChallengeShown') challengeShown = true;
+          originalDebugPrint(message, wrapWidth: wrapWidth);
+        };
+        addTearDown(() => debugPrint = originalDebugPrint);
+
         await $.pumpWidget(const App());
         await _waitUntilCaptchaReady($);
 
         await $.platform.mobile.tap(_checkbox, timeout: _loadTimeout);
+
         await $.platform.mobile.waitUntilVisible(
           _challengeSubmit,
-          timeout: _loadTimeout,
+          timeout: _challengeTimeout,
         );
+        await _waitUntil($, () => challengeShown, timeout: _challengeTimeout);
 
         // The challenge cannot be solved automatically, so no token is issued.
         expect(_isEnabled($, 'Reset'), isFalse);
@@ -73,7 +92,6 @@ bool _isEnabled(PatrolIntegrationTester $, String label) =>
     $.tester.widget<ButtonStyleButton>(_button(label)).enabled;
 
 Future<void> _waitUntilCaptchaReady(PatrolIntegrationTester $) async {
-  // Keep pumping frames until ready so the WebView platform view can load.
   await _waitUntil($, () => _isEnabled($, 'Destroy'));
   await $.platform.mobile.waitUntilVisible(_checkbox, timeout: _loadTimeout);
 }
