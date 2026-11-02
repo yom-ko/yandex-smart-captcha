@@ -73,6 +73,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: Text(widget.title), centerTitle: true),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: YandexSmartCaptcha(
@@ -111,6 +112,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 onTokenExpired: () {
                   debugPrint('called: onTokenExpired');
+                  _isSolved.value = false;
                 },
                 onNetworkError: () {
                   debugPrint('called: onNetworkError');
@@ -124,8 +126,9 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(16),
               child: ValueListenableBuilder<bool>(
                 valueListenable: _controller.isReady,
-                builder: (_, ready, _) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                builder: (_, ready, _) => Wrap(
+                  alignment: WrapAlignment.spaceEvenly,
+                  runSpacing: 8,
                   children: [
                     ValueListenableBuilder<bool>(
                       valueListenable: _isSolved,
