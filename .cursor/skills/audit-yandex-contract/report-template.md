@@ -9,7 +9,7 @@
 ## Findings
 
 <!-- Include only MISMATCH, DEPRECATED, and MISSING findings.
-If there are none, write "None" instead of a table. -->
+If there are none, write "None" instead of the table. -->
 
 | Item | Status | Location | Official contract | Integration | Suggestion |
 | --- | --- | --- | --- | --- | --- |

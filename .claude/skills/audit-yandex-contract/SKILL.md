@@ -8,87 +8,87 @@ description: >-
 
 ## Main rules
 
-- Assess and report only. Do not modify files unless the user explicitly asks.
+- Assess and report only. Do not modify any files unless the user explicitly asks.
 - Do not run tests or execute code. This is a static audit against the documented API contract.
-- Treat official Yandex Cloud documentation as the sole source of truth for API behavior and deprecation claims.
-- If a relevant documentation page cannot be opened or read well enough, record the URL and the limitation. Do not guess.
-- Distinguish API compatibility from feature coverage. An unsupported API feature is not a defect unless the package claims to support it.
+- Treat the official Yandex Cloud documentation as the sole source of truth for API behavior and deprecations.
+- If a relevant documentation page cannot be opened or read well enough, record its URL and the limitation. Do not guess.
 
-## 1. Read the official contract
+## 1. Read the contract
 
-Open these pages:
+Read these pages:
 
-- [SmartCaptcha documentation root](https://yandex.cloud/en/docs/smartcaptcha/)
-- [SmartCaptcha widget installation methods](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods)
+- [Integration methods](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods)
+- [Invisible CAPTCHA](https://yandex.cloud/en/docs/smartcaptcha/concepts/invisible-captcha)
 
-Follow additional links when needed to verify script loading, render parameters, events, method signatures, or deprecation notices.
+Follow other links from the [documentation root](https://yandex.cloud/en/docs/smartcaptcha/) only to verify a specific item.
 
-> If any linked page has moved or its content has been relocated, follow the official redirects or links to the current Yandex Cloud documentation and treat the updated pages as the source of truth.
+> If a page has moved, follow the official redirects or links and treat the current page as the source of truth.
 
 Record the documented:
 
-- Script source/URL and required query parameters.
-- Widget methods, including parameter types and return types.
-- Event names/meaning, callback signatures, and unsubscribe behavior.
-- Render parameters, including names, types, defaults, and allowed values (where documented).
-- Explicit deprecation notices and their documented replacements.
+- Script URL and query parameters of each integration method.
+- Widget methods, with their parameters, types and return types.
+- `render` parameters, with their types, defaults, and allowed values.
+- Event names, meanings, and callback signatures, and how to unsubscribe.
+- Explicit deprecation notices and their replacements.
 
-Do not infer that an item is deprecated merely because it is absent from a page.
+Do not treat an item as deprecated merely because a page does not mention it.
 
-## 2. Inspect the current integration
+## 2. Inspect the integration
 
-Review these files and the relevant definitions or references they depend on:
+Review these files. Trace referenced code only as far as needed to understand the integration:
 
-- `lib/src/captcha_event.dart` – shared event vocabulary.
-- `lib/src/captcha_config.dart` – render options passed to the widget and WebView.
-- `lib/src/native/captcha_adapter.dart` – WebView HTML/JavaScript and script loading.
-- `lib/src/web/captcha_adapter_web.dart` – web interop extensions for the JavaScript widget.
-- `lib/src/web/captcha_script_loader_web.dart` – web script element construction and loading.
-- `lib/src/web/captcha_adapter_controller_web.dart` – web controller and widget methods, including `render`, `subscribe`, `execute`, `reset`, and `destroy`.
+- `lib/src/captcha_config.dart` – options passed to `render` and the WebView.
+- `lib/src/captcha_event.dart` – shared event vocabulary and the events passed to `subscribe`.
+- `lib/src/captcha_language.dart` and `lib/src/dpn_badge_position.dart` – values passed as `hl` and `shieldPosition`.
+- `lib/src/native/captcha_adapter.dart` – WebView HTML/JavaScript: script loading, `render`, `subscribe`, and widget method calls.
+- `lib/src/web/captcha_script_loader_web.dart` – web script loading.
+- `lib/src/web/captcha_adapter_web.dart` – JavaScript interop declarations for `window.smartCaptcha` and the `render` options.
+- `lib/src/web/captcha_adapter_controller_web.dart` – web calls to `render`, `subscribe`, `execute`, `reset`, and `destroy`.
 
-Inspect relevant public API declarations, exports, or package documentation to determine which capabilities the package claims to support.
+To determine which capabilities the package claims to support, read `README.md` and the Dartdoc in `lib/src/yandex_smart_captcha.dart`.
 
-Trace referenced code only as far as necessary to understand the actual integration. Do not expand the audit into unrelated code.
+## 3. Compare and classify findings
 
-## 3. Compare and classify the findings
+Compare the integration with the recorded contract. Check that:
 
-Compare the integration with the documented contract. Use exactly one status for each finding:
+- Script URLs and query parameters match a documented connection method.
+- Method names, arguments, and return types match the documentation.
+- Event names and callback signatures match the documentation.
+- `render` parameter names, values, and types match the documentation. For example, booleans must not be passed as strings.
+- Native and web adapters behave consistently. Platform differences documented in `README.md` are intentional.
+
+Assign each finding exactly one status:
 
 | Status | Meaning |
 | --- | --- |
 | `OK` | The integration matches the documented contract. |
-| `MISMATCH` | A URL, name, type, value, parameter, or behavior conflicts with the documented contract. |
-| `DEPRECATED` | The integration uses an item explicitly marked deprecated or outdated by the documentation. Report the documented replacement when available. |
-| `MISSING` | A documented API capability relevant to the package's scope is not implemented or exposed. This is informational unless the package claims to support this capability. |
+| `MISMATCH` | A URL, name, type, value, parameter, or behavior conflicts with the documented contract, or the package claims a documented capability that it does not implement. |
+| `DEPRECATED` | A URL, name, type, value, parameter, or behavior used by the integration are explicitly marked as deprecated or outdated in the documentation. |
+| `MISSING` | A documented capability within the package's scope is not implemented, and the package does not claim to support it. This is informational only. |
 
-Check that:
+For each non-`OK` finding, record the code location, the documentation URL, and the discrepancy. Suggest a replacement only if the documentation names one. Do not invent expected behavior.
 
-- Script URLs and query parameters comply with the documented integration method.
-- Native and web adapters expose consistent behavior where it is expected. Account for legitimate platform-specific differences.
-- Method names, arguments, return types, event names, callback signatures, and render parameters match the documentation.
-- Values preserve their documented types; for example, booleans are not passed as strings.
-- Deprecated items are identified only when supported by explicit documentation.
-
-For each non-`OK` finding, identify the affected file and relevant code location, cite the official documentation URL, and explain the discrepancy. Do not invent replacements or expected behavior.
-
-> Before reporting, check [`known-exclusions.md`](./known-exclusions.md). Do not report deviations listed there unless the documentation changes in a way that invalidates their rationale.
+> ### Known exclusions
+>
+> [`known-exclusions.md`](./known-exclusions.md) lists deviations that were reviewed and accepted as intentional. Before reporting any finding:
+>
+> 1. Match it to an exclusion by the underlying code deviation, not by how the finding is described. For example, a finding about invisible mode on the web that is caused by the web script URL falls under the script-loading exclusion.
+> 2. If it matches, drop it, unless the exclusion's **Re-evaluate if** condition is literally met. Prove this with a quoted documentation sentence or a cited code or `README.md` location. A related or broader statement is not enough.
+> 3. If you report an excluded deviation, name the exclusion, give the proof, and explain why the rationale no longer holds.
 
 ## 4. Decide the verdict
 
-Use exactly one overall verdict:
+Choose exactly one verdict:
 
-- `ALIGNED` – the relevant documentation was reviewed sufficiently, and no `MISMATCH` or `DEPRECATED` findings remain. Informational `MISSING` findings do not prevent this verdict.
-- `MISALIGNED` – at least one confirmed `MISMATCH` or `DEPRECATED` finding exists. Use this verdict even if an unrelated documentation page was unavailable, and disclose the limitation.
-- `INCONCLUSIVE` – no confirmed `MISMATCH` or `DEPRECATED` finding establishes misalignment, but unavailable or unreadable documentation prevents completing a material part of the audit.
-
-A `MISSING` finding alone must not produce `MISALIGNED`.
+- `ALIGNED` – The documentation was reviewed, and no `MISMATCH` or `DEPRECATED` finding exists. `MISSING` items do not count.
+- `MISALIGNED` – At least one confirmed `MISMATCH` or `DEPRECATED` finding exists, even if some documentation was unavailable.
+- `INCONCLUSIVE` – No `MISMATCH` or `DEPRECATED` finding exists, but unavailable or unreadable documentation prevents auditing a material part of the integration.
 
 ## 5. Report
 
-Use [`report-template.md`](./report-template.md) for every completed audit. Its structure and format are mandatory.
+Follow [`report-template.md`](./report-template.md) for every completed audit. Its structure and format are mandatory.
 
-- Report all relevant `MISMATCH`, `DEPRECATED`, and `MISSING` findings. Do not include `OK` items in the Findings table.
-- Clearly distinguish confirmed incompatibilities from informational coverage gaps.
-- Include the evidence and documentation links required to verify each finding.
-- If there are no findings, write `None` in place of the Findings table.
-- Record inaccessible documentation and any resulting limitations.
+- Replace every `{{...}}` placeholder with the actual value.
+- List every `MISMATCH`, `DEPRECATED`, and `MISSING` finding (omit `OK`). If there are none, write `None` instead of the table.
+- Under Sources, list every documentation page you relied on, including pages you could not access and the resulting limitation.
