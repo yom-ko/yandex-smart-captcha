@@ -1,7 +1,7 @@
 ---
 name: test-m-all-end-to-end
 description: >-
-  Exhaustively test this Flutter package and its example app with automated suites and exploratory runs on Android, iOS, and web. Use only when asked for full end-to-end project verification.
+  Test this Flutter package and its example app end to end with automated suites and exploratory runs on Android, iOS, and web. Use only when explicitly asked for full end-to-end project verification.
 ---
 
 # Testing the package and example app end to end
@@ -9,53 +9,80 @@ description: >-
 ## Main rules
 
 - Test and report only. Do not fix defects or edit tests unless the user explicitly asks.
-- You may temporarily modify the example app to test edge cases (e.g., set `useInvisibleMode: true` or add temporary `debugPrint` statements). Revert the changes afterward and list them in the report.
-- Preserve all pre-existing user changes. Revert only changes introduced by this testing session, including temporary source or configuration edits and generated dependency-file changes such as `pubspec.lock`. Never use a blanket reset (`git reset --hard`, `git checkout .`, `git clean`) or discard unrelated working-tree changes.
-- Load the real client key only from `example/.env` with `--dart-define-from-file=.env`. Never commit it.
-- Never reproduce the client key or CAPTCHA tokens in reports, your own output, quoted logs, saved network captures, or screenshots. Redact both wherever they appear. The example app itself prints the token in its `called: onChallengeSolved with token:` log line, so redact it when quoting.
-- Do not bypass or automate the solving of CAPTCHA challenges. Do not use solver services, image recognition, or tampered responses. If a step requires solving a challenge, ask the user to solve it or mark the step as `BLOCKED`.
-- Derive expected behavior from the README, Dartdoc, and the official [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/). Check for crashes, uncaught exceptions, and unhandled console errors, but do not treat their presence alone as evidence of a package defect. Apply the attribution and verdict rules in [Report](#5-report). If no source defines the expected behavior, report the check as `UNCLEAR`; do not invent expectations or declare a defect.
-- Every check is required unless this skill marks it *optional*. Optional checks that were not run may be reported as `NOT RUN` without affecting the verdict; required checks may not.
-- Ask before installing global tools, SDK system images, simulator runtimes, or browsers. This includes tools that install themselves automatically: a first Patrol web run can install Node.js packages and Playwright browser binaries.
-- Stop any apps, servers, emulators, simulators, and browsers you start.
+- You may temporarily modify the example app to test edge cases (e.g., set `useInvisibleMode: true` or add `debugPrint` statements). Revert the changes afterward and list them in the report.
+- Preserve all pre-existing user changes. Before editing any file, copy it outside the repository, and undo your edits by restoring that copy, never with `git checkout <file>`. Never use a blanket reset (`git reset --hard`, `git checkout .`, `git clean`). Ignored build outputs (e.g., `.dart_tool/`, `build/`) are disposable.
+- Derive expected behavior from the README, Dartdoc, and the official [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/). Crashes, exceptions, and console errors are evidence to investigate, not proof of a package defect. If no source defines the expected behavior, report `UNCLEAR`; do not invent expectations.
 - Never treat skipped, filtered, or unrun tests as passing.
+- Do not bypass or automate CAPTCHA solving: no solver services, image recognition, or tampered responses. The user solves every challenge.
+- Ask before installing global tools, SDK system images, simulator runtimes, browsers, or third-party apps. This includes tools that install themselves, e.g., `playwright-cli` or a first Patrol web run downloading browser binaries. Installing the example app and Patrol's test apps on the selected test devices needs no extra approval.
+- Stop every app, server, emulator, simulator, and browser you start. Record the PID of each process and stop it by PID, never by name: the host may be shared.
+
+### Secrets
+
+- Load the real client key only from `example/.env` with `--dart-define-from-file=.env`. Never commit or print it.
+- Never let the client key or CAPTCHA tokens reach tool output, logs, network captures, screenshots, or reports. Redact at the source:
+  - Before the first app launch, change the example's `called: onChallengeSolved with token: $token` log line to print only `${token != null}`. Keep this change for the whole session; if you revert `example/lib/main.dart` to undo another temporary edit, reapply it.
+  - Do not dump full network traffic or the DOM: request URLs carry the key, and the page's hidden `smart-token` input carries the token. Filter output to what you need (e.g., lines containing `called:`).
+  - For a network request, output only its hostname, path, status, type, and timing. Never output or screenshot full URLs, query strings, or request and response bodies.
+
+### Required and optional checks
+
+Every check is required, except these optional ones:
+
+- Edge, older browser versions, and physical devices;
+- every check on the lowest supported Android and iOS versions, Patrol included (see [step 2](#2-select-the-targets)).
+
+An optional check that was not run is `NOT RUN` and does not affect the verdict. An optional check that runs is reported like any other; a confirmed package defect found by it is still a `FAIL`.
 
 ## 1. Prepare
 
-1. Record the Git commit and the `git status --porcelain` output, so that pre-existing changes can be distinguished from changes made during testing.
-2. Record the output of `flutter --version`, `flutter devices`, `flutter emulators`, and `patrol --version`. On macOS with Xcode installed, also record `xcrun simctl list runtimes`. On other hosts, mark the iOS checks `BLOCKED – no macOS/Xcode host`.
-3. Check the [Patrol compatibility table](https://patrol.leancode.co/documentation/compatibility-table). The installed `patrol_cli` must be compatible with the `patrol` version resolved in `example/pubspec.lock`, and the installed Flutter SDK must meet the table's minimum Flutter version for that pair.
-4. Verify that `example/.env` defines a non-empty `CLIENT_KEY` without printing its value, for example with `grep -c '^CLIENT_KEY=.' example/.env`. If the key is missing, ask the user. Any check that requires the live service is `BLOCKED` until a key is available. If the installed Flutter SDK rejects the file format, do not silently convert the file or create a new key. Instead, mark the affected checks `BLOCKED` and report it as an environment or configuration issue.
-5. Run `flutter pub get` in the package root and in `example/`.
+1. Record the commit and `git status --porcelain` output.
+2. Record `flutter --version`, `flutter devices`, `flutter emulators`, `patrol --version`, `node --version`, and, if installed, `playwright-cli --version`. On macOS with Xcode, also record `xcodebuild -version` and `xcrun simctl list runtimes`. On other hosts, mark the iOS checks `BLOCKED – no macOS/Xcode host`.
+3. Check the [Patrol compatibility table](https://patrol.leancode.co/documentation/compatibility-table): the installed `patrol_cli` must be compatible with the `patrol` version in `example/pubspec.lock`, and the Flutter SDK must meet the minimum listed for that pair.
+4. Verify that `example/.env` defines `CLIENT_KEY` exactly once with a non-empty value, without printing it. Both commands must print `1`:
+
+   ```bash
+   grep -c '^CLIENT_KEY=' example/.env
+   grep -cE "^CLIENT_KEY=(\"[^\"]+\"|'[^']+'|[^\"'[:space:]#][^[:space:]]*)" example/.env
+   ```
+
+   If the key is missing, ask the user; checks that need the live service stay `BLOCKED` until then. If Flutter rejects the file format, do not convert the file or create a key: mark the affected checks `BLOCKED` as an environment issue.
+5. Copy both `pubspec.lock` files outside the repository. They are gitignored, so `git status` cannot show changes, and `flutter test` and `patrol test` resolve dependencies.
+6. Run `flutter pub get` in the package root and in `example/`.
+7. If the user provided a previous report, list its findings so that you can retest each one.
 
 ## 2. Select the targets
 
-Check current versions against Flutter's [supported deployment platforms](https://docs.flutter.dev/reference/supported-platforms) and the platform vendors' release information. Do not rely on remembered version numbers.
+Check current versions against Flutter's [supported deployment platforms](https://docs.flutter.dev/reference/supported-platforms) and the vendors' release information. Then ask the user, in one prompt, for every download approval you need, whether to keep the downloads afterward, and whether they are available to solve challenges.
 
 ### Native
 
-For both Android and iOS, cover at least:
+For both Android and iOS, cover:
 
 - the latest stable OS release that the installed Flutter SDK supports;
-- the lowest OS version supported by both the example app and the installed Flutter SDK. If the app declares a lower minimum than the SDK supports, report the mismatch and do not claim coverage for that OS version. The app's minimum is:
-  - Android: the effective `minSdkVersion` in `example/android/app/build.gradle`. If it is `flutter.minSdkVersion`, read the value from the installed SDK's `packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt`.
-  - iOS: the Runner's `IPHONEOS_DEPLOYMENT_TARGET` in `example/ios/Runner.xcodeproj/project.pbxproj`, which can be confirmed with `xcodebuild -showBuildSettings`. The Podfile platform applies only to pods.
+- the previous major release. If the installed Flutter SDK does not support it, mark its checks `BLOCKED`;
+- optional: the lowest OS version supported by both the example app and the installed Flutter SDK, unless already covered. If it is not run, report runtime coverage at the app's declared minimum as unverified. If the app declares a lower minimum than the SDK supports, report the mismatch and do not claim coverage for that version. The app's minimum is:
+  - Android: the effective `minSdkVersion` in `example/android/app/build.gradle`. For `flutter.minSdkVersion`, read the value from `packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt` in the installed SDK.
+  - iOS: the Runner's `IPHONEOS_DEPLOYMENT_TARGET` in `example/ios/Runner.xcodeproj/project.pbxproj` (confirm with `xcodebuild -showBuildSettings`). The Podfile platform applies only to pods.
 
-Optional: the two previous major releases, when their images are already installed or the user approves downloading them. Prefer emulators and simulators. Physical devices are optional and should be included when connected. On Android, record the Android System WebView version, since it can be updated independently of the OS.
+Prefer emulators and simulators; include physical devices when connected. If a required image or runtime cannot be obtained, mark the checks on that target `BLOCKED` and say why. For every native target, record:
+
+- the exact OS version; an OS family name alone is not coverage;
+- on Android, the active WebView provider and version: the `Current WebView package` line of `adb -s <device-id> shell dumpsys webviewupdate`. The provider may be Chrome rather than Android System WebView. It updates independently of the OS and may be too old for the Yandex widget. Prefer Play-enabled images, and ask before updating the WebView. If Yandex's own script fails because of an old WebView, attribute it to the environment.
 
 ### Web
 
-Flutter supports the latest two versions of Chrome, Firefox, and Edge, plus Safari from a documented minimum version. Flutter lists Wasm support only for Chrome and Edge; Firefox and Safari are supported with the JavaScript build. Cover:
+Flutter's supported-platforms page lists Wasm only for Chrome and Edge; Firefox and Safari are supported with the JavaScript build. Cover:
 
-- Chrome with both JavaScript and Wasm builds;
-- Firefox and WebKit through Playwright with the JavaScript build. WebKit approximates Safari but is not Safari;
-- optional: Edge, if installed, with both builds. Do not report Edge as covered when only Chrome was tested.
+- Chrome with both the JavaScript and Wasm builds;
+- Firefox and WebKit through Playwright with the JavaScript build. WebKit approximates Safari but is not Safari: never report Safari coverage from WebKit alone;
+- optional: Edge, if installed, with both builds. Never report Edge as covered when only Chrome was tested.
 
-Older browser versions are optional – test them only when they are already available.
+Record the exact version of every browser used and the build actually run on it. Ask the browser itself (e.g., `browser.version()` through `playwright-cli run-code`): `navigator.userAgent` may report a reduced version.
 
 ## 3. Run the automated suites
 
-Before running any checks in this section, inspect `.github/workflows/main.yml` and identify the latest-SDK lane. Compare its analyze and test steps with the commands below. Run any missing checks that can be reproduced with the available toolchain, and report differences in commands, SDK versions, or execution environment. Do not treat unavailable CI checks as passing.
+First compare the steps of the latest-SDK lane in `.github/workflows/main.yml` with the commands below. Run any extra CI check the local toolchain can reproduce, and report differences in commands, SDK versions, or environment. Never treat unavailable CI checks as passing.
 
 From the package root:
 
@@ -66,6 +93,8 @@ flutter test --platform chrome
 flutter test --platform chrome --wasm
 ```
 
+`--platform chrome` is deprecated, but it is the only runner for the `@TestOn('browser')` suites in `test/src/web/`: `flutter test -d chrome` runs `test/` on the VM, skips them, and still exits 0. Confirm that each browser run lists tests from `test/src/web/`. If a Flutter release removes the flag or it stops running these suites, mark them `NOT RUN` and report the tooling limitation; never substitute another runner without confirming that it runs them in a browser. The `--wasm` run serves only a `dart2wasm` build, so unlike an app it cannot fall back to JavaScript.
+
 From `example/`:
 
 ```bash
@@ -73,95 +102,95 @@ flutter analyze
 flutter test
 ```
 
-If `example/` contains browser-targeted tests, run them in the applicable browser modes required by CI. Do not force mobile-only tests to run on web.
+If `example/` contains browser-targeted tests, run them in the browser modes that CI requires. Do not force mobile-only tests onto the web.
 
-Inspect `example/pubspec.yaml` for Patrol's `test_directory` configuration and locate the actual Patrol test files before running the suite. Ensure that the command targets the intended tests. Patrol defaults to `patrol_test/` unless configured otherwise.
+### Patrol
 
-Run the Patrol suite on every native target selected in [step 2](#2-select-the-targets). On web, run applicable Patrol tests on Chrome using `patrol test --device chrome --dart-define-from-file=.env`. Before deciding whether a test applies to web, inspect its code. Mark only genuinely platform-inapplicable tests as `N/A`, with a reason (for example, `$.platform.mobile` actions throw `UnsupportedError` on web). Follow the installation-approval rule in [Main rules](#main-rules).
+Read `test_directory` in `example/pubspec.yaml` (Patrol defaults to `patrol_test/`) and confirm that the command targets the intended files. Inspect each test before deciding whether it applies to a platform; mark it `N/A – reason` only when it is genuinely inapplicable (e.g., it is skipped on web or uses `$.platform.mobile`). From `example/`:
 
-If a test fails, rerun the failing test once when feasible. Record both results and whether the failure is flaky. A flaky failure that establishes a package defect is still a `FAIL`; otherwise, apply the attribution rules in [Report](#5-report). Do not hide a failed test command or count its unverified assertions as passing.
+```bash
+patrol test --device <device-id> --dart-define-from-file=.env   # every selected native target
+patrol test --device chrome --dart-define-from-file=.env        # web, if applicable
+```
+
+Let a freshly created emulator finish its first boot before running Patrol: an overloaded host causes timeouts. If a test fails, rerun it once when feasible and record both results and whether the failure is flaky. Never hide a failed run or count its unverified assertions as passing. A flaky failure that establishes a package defect is still a `FAIL`; otherwise attribute it as described in [Report](#6-report).
 
 ## 4. Explore the example app
 
-**Browser automation.** Prefer [`playwright-cli`](https://playwright.dev/docs/getting-started-cli) over [Playwright MCP](https://playwright.dev/mcp/introduction#playwright-mcp-vs-playwright-cli) when its capabilities are sufficient, to reduce token usage. Select one browser per session with `playwright-cli open --browser=chrome` (or `firefox`, `webkit`, or `msedge`). Use Playwright MCP only when the CLI lacks a required capability or MCP materially helps with complex exploratory checks; its browser is selected at server start.
-
-Check that the required browser is already available before launching it: the CLI may download browser binaries on first use. Ask for approval before installing the CLI or downloading browsers. If the required browser is unavailable, use an already configured alternative where suitable; otherwise, ask for approval or mark affected checks as `NOT RUN`.
-
-Launch from `example/`:
+Launch from `example/`. Run the JavaScript build on every selected browser and the Wasm build on the browsers required by [step 2](#web). Run only one web server at a time, and confirm that port 8080 is free before starting another:
 
 ```bash
-# Open http://localhost:8080 using the selected browser tool.
-flutter run -d web-server --web-port 8080 --dart-define-from-file=.env
-
-# Stop the JavaScript server and confirm that port 8080 is free before starting the Wasm build.
-flutter run -d web-server --web-port 8080 --dart-define-from-file=.env --wasm
+flutter run -d <device-id> --dart-define-from-file=.env                            # native
+flutter run -d web-server --web-port 8080 --dart-define-from-file=.env             # web, JavaScript
+flutter run -d web-server --web-port 8080 --dart-define-from-file=.env --wasm      # web, Wasm
 ```
 
-Run only one web server at a time. Run the JavaScript build on each selected browser target and the Wasm build on the targets required by [Step 2 - Web](#web). Record the actual build used for each browser/build combination.
+- **Native:** drive and inspect the app with tools such as the Dart MCP server, Patrol, `adb`, and `xcrun simctl`. Keep the emulator or simulator window visible for the user. Without an interactive terminal, add `--pid-file <tmp>/flutter-run.pid` to `flutter run` and trigger a hot restart with `kill -USR2 <pid from that file>`. On hosts without POSIX signals, relaunch instead.
+- **Web:** prefer [`playwright-cli`](https://playwright.dev/docs/getting-started-cli) over [Playwright MCP](https://playwright.dev/mcp/introduction#playwright-mcp-vs-playwright-cli) to save tokens. Open one browser per session with `playwright-cli open --browser=<chrome|firefox|webkit|msedge> --headed`, after checking that the browser is installed. If a browser is unavailable and no approved alternative exists, mark its checks `NOT RUN`. Keep the viewport within the browser window so the user can reach the widget. To apply a code change, restart the server and reload the page: signals can terminate a `web-server` run instead of restarting it.
+- **Wasm evidence:** Flutter may silently fall back to JavaScript (see [Flutter Wasm browser compatibility](https://docs.flutter.dev/platform-integration/web/wasm)). Add a temporary diagnostic that prints `const bool.fromEnvironment('dart.tool.dart2wasm')` and require `true`; a loaded `main.dart.wasm` is supporting evidence. Never report a fallback run as Wasm coverage.
 
-Flutter may fall back to JavaScript when the browser lacks the required Wasm features or the engine is not enabled in `wasmAllowList`. See [Flutter Wasm browser compatibility](https://docs.flutter.dev/platform-integration/web/wasm). The primary evidence is a temporary diagnostic that prints the compile-time value of `const bool.fromEnvironment('dart.tool.dart2wasm')`. Loading `main.dart.wasm` in the network panel is supporting evidence. Remove temporary diagnostics afterward. Never report a fallback run as Wasm coverage.
-
-**Native automation.** Drive and inspect the app with available tools such as the Dart MCP server, Patrol, `adb`, and `xcrun simctl`.
-
-Launch from `example/`:
-
-```bash
-flutter run -d <device-id> --dart-define-from-file=.env
-```
+Verify events with the example's `called: …` logs, the browser console, and individual network entries, redacted as described in [Secrets](#secrets).
 
 ### Challenge solving
 
-When an interactive CAPTCHA challenge appears, pause automation and ask the user to solve it in the running app or browser and submit it. Never solve the challenge on the user's behalf. After submission, verify that `onChallengeSolved` fires with a non-null token and that the expected UI and controller states are reached. Never expose the token.
+When a challenge appears, ask the user to solve and submit it. Then verify that `onChallengeSolved` fires with a non-null token and that the Execute/Reset states are as expected.
 
-This check is required. If no interactive challenge appears or the user cannot complete it, mark the check as `BLOCKED` with the reason.
+This check is required. If no challenge appears, investigate why; it may be a package defect. If the user cannot complete a challenge, mark the check `BLOCKED` with the reason.
 
 ### Scenarios
 
-Cover the scenarios below on every applicable target/build combination. Skip a scenario only when it does not apply to that platform, and record the reason (e.g., `loadingIndicator` and `onNavigationRequest` apply only to native platforms).
+Cover these on every applicable target and build. Skip a scenario only when it does not apply to the platform (e.g., `loadingIndicator` and `onNavigationRequest` are native-only), and record the reason.
 
 **Core flows:**
 
-- loading indicator, `onCaptchaReady`, and controller readiness enabling the buttons;
+- loading indicator (native), `onCaptchaReady`, and the controls becoming enabled;
 - `onChallengeShown`, then `onChallengeHidden`;
-- `onChallengeSolved` with a non-null token, and the resulting Execute/Reset button states;
+- `onChallengeSolved` with a non-null token, and the resulting Execute/Reset states;
 - `reset`, then solving again;
-- `destroy`, followed by controller calls after destruction;
-- `execute` in invisible mode, which requires the temporary `useInvisibleMode` configuration.
+- `destroy`, then controller calls after destruction;
+- `execute` in invisible mode (temporary `useInvisibleMode: true`).
 
 **Edge cases:**
 
 - language, badge position, and `hideBadge` variants;
-- `onTokenExpired`, which requires waiting for the token to expire;
+- `onTokenExpired`: wait for the [documented token lifetime](https://yandex.cloud/en/docs/smartcaptcha/concepts/validation) (five minutes) plus at most one minute; use the wait for checks on other targets. If the event does not fire, investigate;
 - rapid or repeated `execute`, `reset`, and `destroy` calls, and calls made before the widget is ready;
-- rotation or resize, backgrounding and resuming, hot restart, and widget disposal followed by rebuilding;
-- page reload, back/forward navigation, console errors, and parity between the JavaScript and Wasm builds on web;
-- links inside the widget: native navigation must respect `onNavigationRequest`, and web must use normal browser behavior;
-- no network at launch, and connection loss during a challenge: check `onNetworkError` and script-load errors, then check recovery after the connection returns;
-- small and large viewports, text scaling, dark mode, zoom settings, keyboard navigation, semantic accessibility, and screen-reader behavior where a screen reader is available;
-- invalid client keys, without `--dart-define-from-file=.env` so that the real key cannot leak into the run:
+- rotation or resize, backgrounding and resuming, hot restart, and widget disposal followed by a rebuild;
+- web only: page reload, back/forward navigation, console errors, and JavaScript/Wasm parity;
+- links inside the widget: native must respect `onNavigationRequest`; web must use normal browser behavior;
+- no network at launch, and connection loss during a challenge: check `onNetworkError`, then recovery after the connection returns. On web, block Yandex by hostname (e.g., a Playwright route matching `url.hostname`), not by URL substring: the package's own module URLs contain `yandex`;
+- small and large viewports, text scaling, dark mode, zoom, keyboard navigation, semantics, and screen-reader behavior where available;
+- invalid client keys, run **without** `--dart-define-from-file=.env` so the real key cannot leak:
   - empty key: `flutter run -d <device-id> --dart-define=CLIENT_KEY=`;
-  - non-empty invalid key: no define, so the app uses its placeholder default (`flutter run -d <device-id>`).
+  - non-empty invalid key: no define, so the app uses its placeholder default.
 
-The example app logs callbacks using the `called:…` format. Use these logs, together with the browser console and network panel, to verify events. Redact client keys and CAPTCHA tokens from all evidence.
+### Recording and attributing problems
 
-For each problem, record the target, steps, expected and actual behavior, evidence (redacted log excerpt or screenshot path), and reproducibility. Classify the cause as one of: package, example app, test infrastructure, environment, external service, or `unresolved` when the evidence does not establish a cause.
+For each problem, record the target, steps, expected and actual behavior, evidence (redacted log excerpt or screenshot path), and reproducibility. Classify the cause as `package`, `example app`, `test infrastructure`, `environment`, `external service`, or `unresolved`.
 
-## 5. Report
+- **Package or service:** reproduce the problem on a minimal page that calls the Yandex JavaScript API directly. Keep it outside the repository, since it needs the key, and delete it afterward.
+- **Defect or overload:** repeat the step once on an idle host; slow emulators cause timeouts and ANRs.
+- **Defect or missed input:** before reporting an unresponsive control, retry once, after hovering or confirming the control is on screen. Automated clicks and user taps can fail to register.
 
-Follow [`report-template.md`](./report-template.md). Its structure and format are mandatory.
+## 5. Clean up
 
-- Use these statuses for each check: `PASS`, `FAIL` (a confirmed defect in the Flutter package itself), `UNCLEAR` (the check ran, but expected behavior or attribution to a package defect could not be established), `BLOCKED` (an issue outside the package prevented verification), `NOT RUN` (the check was not executed), or `N/A – reason`.
-- Attribute errors before assigning `FAIL`. Crashes, uncaught exceptions, unhandled console errors, and failed test commands are evidence to investigate, not proof of a package defect by themselves. Errors attributable to the example app, test infrastructure, environment, or external services must be reported with evidence and cause but must not contribute to the package's `FAIL` verdict.
-- If an excluded error does not prevent verification and the package's expected behavior is confirmed, mark the check `PASS` and document the error. If verification is prevented, use `BLOCKED`; if expected behavior or attribution remains unresolved, use `UNCLEAR`. An external error does not excuse a separately confirmed defect in the package's handling of that error.
+1. Stop every process you started, shut down simulators, and delete emulators you created. Keep downloaded images and runtimes only if the user approved keeping them.
+2. Restore every file you edited from its saved copy, including `example/lib/main.dart` with the token-log redaction.
+3. Restore the saved lockfiles if their contents changed.
+4. Delete temporary logs, captures, screenshots, and the minimal page.
+5. Confirm that `git status --porcelain` matches the output recorded in [step 1](#1-prepare).
+
+## 6. Report
+
+Follow [`report-template.md`](./report-template.md). Its structure, status definitions, and verdict definitions are mandatory.
+
+- Attribute every error before assigning `FAIL`. Errors caused by the example app, test infrastructure, environment, or an external service must be reported with evidence and cause, but must not contribute to the `FAIL` verdict.
+- If an excluded error does not prevent verification and the package's expected behavior is confirmed, mark the check `PASS` and document the error. If it prevents verification, mark it `BLOCKED`. If expected behavior or attribution remains unresolved, mark it `UNCLEAR`. An external error does not excuse a separately confirmed defect in the package's handling of that error.
 - Assign each finding a severity:
   - `HIGH` – crash, data or token loss, or a core flow broken on a supported target;
   - `MEDIUM` – wrong callback, state, or cross-platform inconsistency that has a workaround;
   - `LOW` – cosmetic or minor usability issue.
-- Choose exactly one verdict:
-  - `PASS` – every required check is `PASS` or `N/A`, and no package defect within this package's control was confirmed; excluded errors may still be reported;
-  - `FAIL` – at least one package defect within this package's control was confirmed;
-  - `INCOMPLETE` – no package defect within this package's control was confirmed, but at least one required check is `UNCLEAR`, `BLOCKED`, or `NOT RUN`.
-- Before reporting, revert only the changes made during this session, following [Main rules](#main-rules). Then confirm that `git status --porcelain` matches the output recorded in [step 1](#1-prepare).
+- If a previous report was provided, fill in the template's "Previous findings" section: for each old finding, state whether it persists, is gone, or changed.
 
 ## References
 
@@ -169,5 +198,4 @@ Follow [`report-template.md`](./report-template.md). Its structure and format ar
 - [Flutter integration testing](https://docs.flutter.dev/testing/integration-tests)
 - [Flutter WebAssembly](https://docs.flutter.dev/platform-integration/web/wasm)
 - [Patrol documentation](https://patrol.leancode.co/documentation) and [web testing](https://patrol.leancode.co/documentation/web)
-- [Playwright MCP](https://github.com/microsoft/playwright-mcp)
-- [Playwright CLI](https://playwright.dev/docs/getting-started-cli)
+- [Playwright CLI](https://playwright.dev/docs/getting-started-cli) and [Playwright MCP](https://github.com/microsoft/playwright-mcp)
