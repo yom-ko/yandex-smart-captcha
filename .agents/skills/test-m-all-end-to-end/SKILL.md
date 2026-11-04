@@ -27,10 +27,7 @@ description: >-
 
 ### Required and optional checks
 
-Every check is required, except these optional ones:
-
-- Edge, older browser versions, and physical devices;
-- every check on the lowest supported Android and iOS versions, Patrol included (see [step 2](#2-select-the-targets)).
+Every check is required, except checks on Edge, older browser versions, and physical devices.
 
 An optional check that was not run is `NOT RUN` and does not affect the verdict. An optional check that runs is reported like any other; a confirmed package defect found by it is still a `FAIL`.
 
@@ -60,15 +57,14 @@ Check current versions against Flutter's [supported deployment platforms](https:
 For both Android and iOS, cover:
 
 - the latest stable OS release that the installed Flutter SDK supports;
-- the previous major release. If the installed Flutter SDK does not support it, mark its checks `BLOCKED`;
-- optional: the lowest OS version supported by both the example app and the installed Flutter SDK, unless already covered. If it is not run, report runtime coverage at the app's declared minimum as unverified. If the app declares a lower minimum than the SDK supports, report the mismatch and do not claim coverage for that version. The app's minimum is:
+- the lowest OS version supported by both the example app and the installed Flutter SDK. On Android, run it with an up-to-date WebView (see below). If the app declares a lower minimum than the SDK supports, report the mismatch and do not claim coverage for that version. The app's minimum is:
   - Android: the effective `minSdkVersion` in `example/android/app/build.gradle`. For `flutter.minSdkVersion`, read the value from `packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt` in the installed SDK.
   - iOS: the Runner's `IPHONEOS_DEPLOYMENT_TARGET` in `example/ios/Runner.xcodeproj/project.pbxproj` (confirm with `xcodebuild -showBuildSettings`). The Podfile platform applies only to pods.
 
-Prefer emulators and simulators; include physical devices when connected. If a required image or runtime cannot be obtained, mark the checks on that target `BLOCKED` and say why. For every native target, record:
+Prefer emulators and simulators; include physical devices when connected. If a required image or runtime cannot be obtained (e.g., the current Xcode no longer offers it), use a connected physical device with that OS version; otherwise mark the checks on that target `BLOCKED` and say why. For every native target, record:
 
 - the exact OS version; an OS family name alone is not coverage;
-- on Android, the active WebView provider and version: the `Current WebView package` line of `adb -s <device-id> shell dumpsys webviewupdate`. The provider may be Chrome rather than Android System WebView. It updates independently of the OS and may be too old for the Yandex widget. Prefer Play-enabled images, and ask before updating the WebView. If Yandex's own script fails because of an old WebView, attribute it to the environment.
+- on Android, the active WebView provider and version: the `Current WebView package` line of `adb -s <device-id> shell dumpsys webviewupdate`. The provider may be Chrome rather than Android System WebView. It updates independently of the OS, and an image's built-in WebView may be too old for the Yandex widget. Prefer Play-enabled images, and ask before updating the WebView. On the lowest Android version, update the WebView before testing; if that is not possible, mark the target's checks `BLOCKED`. If Yandex's own script fails because of an old WebView, attribute it to the environment.
 
 ### Web
 

@@ -45,7 +45,7 @@ Severity describes the impact of the observed behavior, independently of whether
 <!-- If there are no limitations, write "None" instead of a list. -->
 
 - {{Required checks with `UNCLEAR`, `BLOCKED`, or `NOT RUN` statuses, with reasons}}
-- {{Optional checks not run or not passing, with reasons. If the lowest supported OS versions were not run, state that runtime coverage at the app's declared minimums is unverified}}
+- {{Optional checks not run or not passing, with reasons}}
 - {{Wasm fallbacks or builds not verified as Wasm}}
 - {{OS minimums declared by the app but unsupported by the installed SDK, or images and runtimes that could not be obtained}}
 - {{Other environment or service limitations}}
@@ -67,7 +67,7 @@ Severity describes the impact of the observed behavior, independently of whether
 
 ## Verdict definitions
 
-Optional checks, including all checks on the lowest supported Android and iOS versions, never affect `PASS` or `INCOMPLETE`.
+Optional checks never affect `PASS` or `INCOMPLETE`.
 
 - `PASS` – Every required check is `PASS` or `N/A`, and no package defect within this package's control was confirmed.
 - `FAIL` – At least one package defect within this package's control was confirmed, by any check, optional ones included.
