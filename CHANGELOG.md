@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 8.1.2
+- Improve and expand test coverage.
+- Improve the example app and its integration tests.
+- Improve the README.
+
 ## 8.1.1
 - Improve safety and robustness:
   - Native: Deny all permission requests from the WebView, as they are not applicable.
