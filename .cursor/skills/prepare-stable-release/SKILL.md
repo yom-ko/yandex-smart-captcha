@@ -21,15 +21,18 @@ description: >-
 ## 1. Find the previous release
 
 ```bash
-git status --short --branch
 git fetch --tags
-git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*'
+git status --short --branch
+git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' --exclude '*[-+]*'
+curl -fsS https://pub.dev/api/packages/yandex_smart_captcha  # latest.version, versions[].version
 ```
 
-- `--tags` includes lightweight tags; the glob is not SemVer validation. Confirm a stable
+- Confirm that `HEAD` is on the release branch (normally `main`) and is neither ahead of nor behind
+  its upstream. Otherwise, stop and ask.
+- `--tags` includes lightweight tags; the globs are not SemVer validation. Confirm a stable
   `vMAJOR.MINOR.PATCH` tag matching the latest stable version on
-  [pub.dev](https://pub.dev/packages/yandex_smart_captcha), `pubspec.yaml`, and the top
-  `CHANGELOG.md` entry. If unverified or inconsistent, stop and ask.
+  [pub.dev](https://pub.dev/packages/yandex_smart_captcha), `pubspec.yaml`, and
+  the top `CHANGELOG.md` entry. If unverified or inconsistent, stop and ask.
 - Check the tag trigger and gate in `.github/workflows/publish.yml`. A matching tag starts the
   workflow but does not guarantee publication. Report unverified pub.dev publishing settings.
 
@@ -43,7 +46,7 @@ git --no-pager diff --name-status <last-tag>..HEAD
 Inspect every commit and relevant diffs, not just messages: use `git --no-pager show <commit> -- <path>`
 or `git --no-pager diff <last-tag>..HEAD -- <path>`. Include code, metadata, docs, platform behavior,
 and examples. Tests and CI are supporting evidence. Examples may ship but are not public API. Never
-print secrets.
+print secrets. If there are no commits since the tag, stop.
 
 ## 3. Choose the next version
 
@@ -70,15 +73,18 @@ For `X.Y.Z`, use the highest-impact change:
 ## 5. Verify
 
 1. Read `.github/workflows/main.yml`. Run its applicable latest-SDK checks locally with the current
-   flags, including `./build-agent-context.sh --check`; record SDK versions. Find the run for `HEAD`
-   with `gh run list --commit <HEAD-sha> --workflow main.yml` and confirm that all its jobs passed
-   with `gh run view <run-id> --verbose --exit-status`.
-2. If the minimum-SDK CI job for `HEAD` is unavailable, or the release edits change SDK constraints
+   flags, including `./build-agent-context.sh --check`; record SDK versions. List runs for `HEAD`
+   with `gh run list --commit <HEAD-sha> --workflow main.yml --json databaseId,event,status,conclusion`.
+   The newest must have status `completed` and conclusion `success`; `--exit-status` alone passes
+   pending runs, so wait with `gh run watch <run-id> --exit-status`. Inspect its jobs with
+   `gh run view <run-id> --verbose`. If it failed, stop and ask.
+2. If no successful minimum-SDK CI job exists for `HEAD`, or the release edits change SDK constraints
    or dependencies, run that job's steps from `main.yml` locally in an isolated lane with the exact
    minimum Flutter version. See the `audit-sdk-constraints` skill for lane setup.
-3. Run `dart format --output=none --set-exit-if-changed` on existing Dart files changed since the
-   last tag or in the release edits. If example code changed, run relevant example tests (see
-   `example/README.md`). Browser tests must execute.
+3. Check formatting of existing Dart files changed since the last tag, including release edits:
+   `git diff -z --name-only --diff-filter=d <last-tag> -- '*.dart' | xargs -0 -r dart format --output=none --set-exit-if-changed`.
+   If example code changed, run relevant example tests (see `example/README.md`). Browser tests
+   must execute.
 4. Run `flutter pub publish --dry-run` in the release working tree. Inspect the complete list for
    required `lib/` files, assets, `LICENSE`, `README.md`, `CHANGELOG.md`, and `pubspec.yaml`; exclude
    secrets, local configuration, build outputs, and other unintended files. A `.pubignore`
@@ -96,8 +102,9 @@ For `X.Y.Z`, use the highest-impact change:
 Find the branch and upstream with `git branch --show-current` and
 `git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}'`. Before staging, confirm that
 `git tag -l vX.Y.Z` prints nothing, `git ls-remote --exit-code --tags <remote> refs/tags/vX.Y.Z`
-exits with `2` (no match; any other status means the tag exists or the check failed), and the
-version is unused on pub.dev. If the destination or availability is unverified, stop and ask.
+exits with `2` (no match; any other status means the tag exists or the check failed), and
+re-running the step 1 pub.dev query shows no `X.Y.Z` in `versions[].version`. If the destination
+or availability is unverified, stop and ask.
 
 ```bash
 git add -- pubspec.yaml CHANGELOG.md  # plus any other intended release files
@@ -132,6 +139,7 @@ git push <remote> refs/tags/vX.Y.Z  # May publish to pub.dev.
 - [Dart: Package versioning](https://dart.dev/tools/pub/versioning)
 - [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html)
 - [Dart: Automated publishing](https://dart.dev/tools/pub/automated-publishing)
+- [Dart: Hosted pub repository specification](https://github.com/dart-lang/pub/blob/master/doc/repository-spec-v2.md)
 - [Dart: Package layout conventions](https://dart.dev/tools/pub/package-layout)
 - [Git: `git describe`](https://git-scm.com/docs/git-describe)
 - [Git: `git ls-remote`](https://git-scm.com/docs/git-ls-remote)
