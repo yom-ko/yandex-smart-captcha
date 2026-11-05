@@ -1,7 +1,7 @@
 ---
 name: test-m-all-end-to-end
 description: >-
-  Test this Flutter package and its example app end to end with automated suites and exploratory runs on Android, iOS, and web. Use only when explicitly asked for full end-to-end project verification.
+    Perform comprehensive end-to-end testing of this Flutter package and its example app using automated test suites and exploratory testing on Android, iOS, and web. Use only when the user explicitly asks to run this `test-m-all-end-to-end` skill or another skill explicitly invokes it.
 ---
 
 # Testing the package and example app end to end
@@ -13,9 +13,9 @@ description: >-
 - Preserve all pre-existing user changes. Before editing any file, copy it outside the repository, and undo your edits by restoring that copy, never with `git checkout <file>`. Never use a blanket reset (`git reset --hard`, `git checkout .`, `git clean`). Ignored build outputs (e.g., `.dart_tool/`, `build/`) are disposable.
 - Derive expected behavior from the README, Dartdoc, and the official [Yandex SmartCaptcha documentation](https://yandex.cloud/en/docs/smartcaptcha/). Crashes, exceptions, and console errors are evidence to investigate, not proof of a package defect. If no source defines the expected behavior, report `UNCLEAR`; do not invent expectations.
 - Never treat skipped, filtered, or unrun tests as passing.
-- Do not bypass or automate CAPTCHA solving: no solver services, image recognition, or tampered responses. The user solves every challenge.
+- Do not automate CAPTCHA solving: no solver services, image recognition, or tampered responses. The user solves every challenge.
 - Ask before installing global tools, SDK system images, simulator runtimes, browsers, or third-party apps. This includes tools that install themselves, e.g., `playwright-cli` or a first Patrol web run downloading browser binaries. Installing the example app and Patrol's test apps on the selected test devices needs no extra approval.
-- Stop every app, server, emulator, simulator, and browser you start. Record the PID of each process and stop it by PID, never by name: the host may be shared.
+- Stop every app, server, emulator, simulator, and browser you start. Track the PID of every process started by this skill and stop only those processes by their recorded PIDs, never by process name or broad process matching: the host may be shared.
 
 ### Secrets
 
@@ -29,13 +29,13 @@ description: >-
 
 Every check is required, except checks on Edge, older browser versions, and physical devices.
 
-An optional check that was not run is `NOT RUN` and does not affect the verdict. An optional check that runs is reported like any other; a confirmed package defect found by it is still a `FAIL`.
+An optional check that was not run is `NOT RUN` and does not affect the verdict. An optional check that runs is reported like any other, and a confirmed package defect found by it is still a `FAIL`.
 
 ## 1. Prepare
 
 1. Record the commit and `git status --porcelain` output.
 2. Record `flutter --version`, `flutter devices`, `flutter emulators`, `patrol --version`, `node --version`, and, if installed, `playwright-cli --version`. On macOS with Xcode, also record `xcodebuild -version` and `xcrun simctl list runtimes`. On other hosts, mark the iOS checks `BLOCKED – no macOS/Xcode host`.
-3. Check the [Patrol compatibility table](https://patrol.leancode.co/documentation/compatibility-table): the installed `patrol_cli` must be compatible with the `patrol` version in `example/pubspec.lock`, and the Flutter SDK must meet the minimum listed for that pair.
+3. Check the [Patrol compatibility table](https://patrol.leancode.co/documentation/compatibility-table). The installed `patrol_cli` must be compatible with the `patrol` version in `example/pubspec.lock`, and the Flutter SDK must meet the minimum listed for that pair.
 4. Verify that `example/.env` defines `CLIENT_KEY` exactly once with a non-empty value, without printing it. Both commands must print `1`:
 
    ```bash
@@ -50,7 +50,7 @@ An optional check that was not run is `NOT RUN` and does not affect the verdict.
 
 ## 2. Select the targets
 
-Check current versions against Flutter's [supported deployment platforms](https://docs.flutter.dev/reference/supported-platforms) and the vendors' release information. Then ask the user, in one prompt, for every download approval you need, whether to keep the downloads afterward, and whether they are available to solve challenges.
+Check current versions against Flutter's [supported deployment platforms](https://docs.flutter.dev/reference/supported-platforms) and the vendors' release information. Then ask the user, in one prompt, for every download approval, whether to keep the downloads afterward, and whether they are available to solve challenges.
 
 ### Native
 
@@ -64,17 +64,17 @@ For both Android and iOS, cover:
 Prefer emulators and simulators; include physical devices when connected. If a required image or runtime cannot be obtained (e.g., the current Xcode no longer offers it), use a connected physical device with that OS version; otherwise mark the checks on that target `BLOCKED` and say why. For every native target, record:
 
 - the exact OS version; an OS family name alone is not coverage;
-- on Android, the active WebView provider and version: the `Current WebView package` line of `adb -s <device-id> shell dumpsys webviewupdate`. The provider may be Chrome rather than Android System WebView. It updates independently of the OS, and an image's built-in WebView may be too old for the Yandex widget. Prefer Play-enabled images, and ask before updating the WebView. On the lowest Android version, update the WebView before testing; if that is not possible, mark the target's checks `BLOCKED`. If Yandex's own script fails because of an old WebView, attribute it to the environment.
+- on Android, the active WebView provider and version: the `Current WebView package` line of `adb -s <device-id> shell dumpsys webviewupdate`. The provider may be Chrome rather than Android System WebView. It updates independently of the OS, and an image's built-in WebView may be too old for the Yandex widget. Prefer Play-enabled images, and ask before updating the WebView. On the lowest Android version, update the WebView before testing. If that is not possible, mark the target's checks `BLOCKED`. If Yandex's own script fails because of an old WebView, attribute it to the environment.
 
 ### Web
 
-Flutter's supported-platforms page lists Wasm only for Chrome and Edge; Firefox and Safari are supported with the JavaScript build. Cover:
+Flutter's platforms page lists Wasm only for Chrome and Edge. Firefox and Safari are supported with the JavaScript build. Cover:
 
 - Chrome with both the JavaScript and Wasm builds;
 - Firefox and WebKit through Playwright with the JavaScript build. WebKit approximates Safari but is not Safari: never report Safari coverage from WebKit alone;
 - optional: Edge, if installed, with both builds. Never report Edge as covered when only Chrome was tested.
 
-Record the exact version of every browser used and the build actually run on it. Ask the browser itself (e.g., `browser.version()` through `playwright-cli run-code`): `navigator.userAgent` may report a reduced version.
+Record the exact version of every browser used and the build actually run on it. Ask the browser itself (e.g., `browser.version()` through `playwright-cli run-code`), since `navigator.userAgent` may report a reduced version.
 
 ## 3. Run the automated suites
 
@@ -89,7 +89,7 @@ flutter test --platform chrome
 flutter test --platform chrome --wasm
 ```
 
-`--platform chrome` is deprecated, but it is the only runner for the `@TestOn('browser')` suites in `test/src/web/`: `flutter test -d chrome` runs `test/` on the VM, skips them, and still exits 0. Confirm that each browser run lists tests from `test/src/web/`. If a Flutter release removes the flag or it stops running these suites, mark them `NOT RUN` and report the tooling limitation; never substitute another runner without confirming that it runs them in a browser. The `--wasm` run serves only a `dart2wasm` build, so unlike an app it cannot fall back to JavaScript.
+`--platform chrome` is deprecated, but it is the only runner for the `@TestOn('browser')` suites in `test/src/web/`: `flutter test -d chrome` runs `test/` on the VM, skips them, and still exits 0. Confirm that each browser run lists tests from `test/src/web/`. If a Flutter release removes the flag or it stops running these suites, mark them `NOT RUN` and report the tooling limitation. Never substitute another runner without confirming that it runs them in a browser. The `--wasm` run serves only a `dart2wasm` build, so unlike an app it cannot fall back to JavaScript.
 
 From `example/`:
 
@@ -102,7 +102,7 @@ If `example/` contains browser-targeted tests, run them in the browser modes tha
 
 ### Patrol
 
-Read `test_directory` in `example/pubspec.yaml` (Patrol defaults to `patrol_test/`) and confirm that the command targets the intended files. Inspect each test before deciding whether it applies to a platform; mark it `N/A – reason` only when it is genuinely inapplicable (e.g., it is skipped on web or uses `$.platform.mobile`). From `example/`:
+Read `test_directory` in `example/pubspec.yaml` (Patrol defaults to `patrol_test/`) and confirm that the command targets the intended files. Inspect each test before deciding whether it applies to a platform. Mark it `N/A – reason` only when it is genuinely inapplicable (e.g., it is skipped on web or uses `$.platform.mobile`). From `example/`:
 
 ```bash
 patrol test --device <device-id> --dart-define-from-file=.env   # every selected native target
@@ -178,7 +178,7 @@ For each problem, record the target, steps, expected and actual behavior, eviden
 
 ## 6. Report
 
-Follow [`report-template.md`](./report-template.md). Its structure, status definitions, and verdict definitions are mandatory.
+Follow [`report-template.md`](./report-template.md). Its structure, format, and definitions are mandatory.
 
 - Attribute every error before assigning `FAIL`. Errors caused by the example app, test infrastructure, environment, or an external service must be reported with evidence and cause, but must not contribute to the `FAIL` verdict.
 - If an excluded error does not prevent verification and the package's expected behavior is confirmed, mark the check `PASS` and document the error. If it prevents verification, mark it `BLOCKED`. If expected behavior or attribution remains unresolved, mark it `UNCLEAR`. An external error does not excuse a separately confirmed defect in the package's handling of that error.
@@ -186,7 +186,7 @@ Follow [`report-template.md`](./report-template.md). Its structure, status defin
   - `HIGH` – crash, data or token loss, or a core flow broken on a supported target;
   - `MEDIUM` – wrong callback, state, or cross-platform inconsistency that has a workaround;
   - `LOW` – cosmetic or minor usability issue.
-- If a previous report was provided, fill in the template's "Previous findings" section: for each old finding, state whether it persists, is gone, or changed.
+- If a previous report was provided, fill in the "Previous findings" section: for each old finding, state if it persists, is gone, or changed.
 
 ## References
 
