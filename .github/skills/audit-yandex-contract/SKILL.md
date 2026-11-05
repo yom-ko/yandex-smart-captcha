@@ -1,7 +1,7 @@
 ---
 name: audit-yandex-contract
 description: >-
-  Audit this Flutter package's integration with the Yandex SmartCaptcha JavaScript API contract against official Yandex Cloud documentation. Use when reviewing script URLs, widget methods, events, render parameters, or documented deprecations, especially before releases or after API changes.
+  Audit this Flutter package's integration with the Yandex SmartCaptcha JavaScript API contract against official Yandex Cloud documentation. Use only when the user explicitly asks to run this `audit-yandex-contract` skill or another skill explicitly invokes it.
 ---
 
 # Auditing the Yandex SmartCaptcha contract

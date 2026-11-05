@@ -1,8 +1,7 @@
 ---
 name: prepare-stable-release
 description: >-
-  Prepare a stable release of this Flutter package: review changes, choose a version, update release
-  files, verify, and stage them. Use when asked to prepare a release or bump the package version.
+  Prepare a stable release of this Flutter package: review changes, choose a version, update release files, verify, and stage them. Use only when the user explicitly asks to run this `prepare-stable-release` skill or another skill explicitly invokes it.
 ---
 
 # Preparing a stable release
@@ -84,12 +83,13 @@ For `X.Y.Z`, use the highest-impact change:
    required `lib/` files, assets, `LICENSE`, `README.md`, `CHANGELOG.md`, and `pubspec.yaml`; exclude
    secrets, local configuration, build outputs, and other unintended files. A `.pubignore`
    overrides `.gitignore` only in the same directory.
-5. Investigate every warning. Only a modified checked-in files warning listing exclusively intended
-   release changes is acceptable: Pub runs this Git check in dry runs too. Check `git status` if
-   the list is truncated.
-6. If local checks fail or cannot run, or CI failed, report and stop. If CI is unavailable but
-   equivalent local checks pass, report CI as unverified. Run `git --no-pager diff --check` and
-   confirm that only intended release files changed.
+5. Investigate every warning. A dry run exits `65` when it reports any warning, and Flutter
+   then prints `Failed to update packages.` Pub checks for uncommitted files during a dry run too,
+   so uncommitted release edits always produce a "checked-in files are modified in git" warning.
+   Treat the dry run as passing only if it exits `0`, or exits `65` with `Package has 1 warning.`
+   and that warning lists only the intended release files. Check `git status` if the list is
+   truncated. Treat any other warning, error, or exit status as a failure. Never use
+   `--ignore-warnings` as it ignores every warning.
 
 ## 6. Stage and report
 

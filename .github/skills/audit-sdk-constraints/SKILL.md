@@ -1,7 +1,7 @@
 ---
 name: audit-sdk-constraints
 description: >-
-  Audit this Flutter package's minimum Dart and Flutter SDK constraints. Use when reviewing SDK compatibility, pubspec environment constraints, dependency upgrades, adoption of new language features or APIs, minimum-SDK CI failures, release readiness, or support-policy changes.
+  Audit this Flutter package's minimum Dart and Flutter SDK constraints. Use only when the user explicitly asks to run this `audit-sdk-constraints` skill or another skill explicitly invokes it.
 ---
 
 # Auditing Dart and Flutter SDK constraints
