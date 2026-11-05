@@ -1,7 +1,7 @@
 ---
-name: test-m-all-end-to-end
+name: test-em-all-end-to-end
 description: >-
-    Perform comprehensive end-to-end testing of this Flutter package and its example app using automated test suites and exploratory testing on Android, iOS, and web. Use only when the user explicitly asks to run this `test-m-all-end-to-end` skill or another skill explicitly invokes it.
+    Perform comprehensive end-to-end testing of this Flutter package and its example app using automated test suites and exploratory testing on Android, iOS, and web. Use only when the user explicitly asks to run this `test-em-all-end-to-end` skill or another skill explicitly invokes it.
 ---
 
 # Testing the package and example app end to end
