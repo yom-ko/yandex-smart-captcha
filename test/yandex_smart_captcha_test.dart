@@ -710,18 +710,17 @@ void main() {
         );
       });
 
-      testWidgets('clamps initialScale and maximumScale to the [0.1, 10] range',
-          (tester) async {
+      testWidgets('renders the configured viewport scales', (tester) async {
         await pumpCaptcha(
           tester,
-          config: createConfig(initialScale: 20, maximumScale: 0.01),
+          config: createConfig(initialScale: 2.0, maximumScale: 3.5),
         );
 
         final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
         final html = webView.platform.params.initialData?.data ?? '';
 
-        expect(html, contains('initial-scale=10.0'));
-        expect(html, contains('maximum-scale=0.1'));
+        expect(html, contains('initial-scale=2.0'));
+        expect(html, contains('maximum-scale=3.5'));
       });
     });
 

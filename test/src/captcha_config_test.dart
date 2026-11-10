@@ -44,6 +44,64 @@ void main() {
       expect(config.useWebViewMode, isFalse);
     });
 
+    test('rejects an empty client key', () {
+      expect(
+        () => CaptchaConfig(clientKey: ''),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('accepts scale values at the supported bounds', () {
+      const minimumScaleConfig = CaptchaConfig(
+        clientKey: 'client-key',
+        initialScale: 0.1,
+        maximumScale: 0.1,
+      );
+      const maximumScaleConfig = CaptchaConfig(
+        clientKey: 'client-key',
+        initialScale: 10.0,
+        maximumScale: 10.0,
+      );
+
+      expect(minimumScaleConfig.initialScale, equals(0.1));
+      expect(minimumScaleConfig.maximumScale, equals(0.1));
+      expect(maximumScaleConfig.initialScale, equals(10.0));
+      expect(maximumScaleConfig.maximumScale, equals(10.0));
+    });
+
+    test('rejects scales outside the supported bounds', () {
+      for (final scale in [-0.1, 0.0, 10.1, double.infinity, double.nan]) {
+        expect(
+          () => CaptchaConfig(
+            clientKey: 'client-key',
+            initialScale: scale,
+          ),
+          throwsA(isA<AssertionError>()),
+          reason: 'Expected initialScale $scale to be rejected',
+        );
+        expect(
+          () => CaptchaConfig(
+            clientKey: 'client-key',
+            maximumScale: scale,
+            initialScale: 0.1,
+          ),
+          throwsA(isA<AssertionError>()),
+          reason: 'Expected maximumScale $scale to be rejected',
+        );
+      }
+    });
+
+    test('rejects a maximum scale below the initial scale', () {
+      expect(
+        () => CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 2.0,
+          maximumScale: 1.5,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('considers configurations equal when all values match', () {
       const first = CaptchaConfig(clientKey: 'client-key');
       const second = CaptchaConfig(clientKey: 'client-key');

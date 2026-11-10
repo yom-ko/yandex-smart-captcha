@@ -59,6 +59,7 @@ final class CaptchaConfig {
   /// The initial scale factor for the WebView content.
   ///
   /// Sets the `initial-scale` attribute of the viewport meta tag.
+  /// Must be between `0.1` and `10.0`.
   /// Ignored on the web, where the browser document controls viewport behavior.
   final double initialScale;
 
@@ -71,6 +72,7 @@ final class CaptchaConfig {
   /// The maximum scale factor when [allowUserScaling] is `true`.
   ///
   /// Sets the `maximum-scale` attribute of the viewport meta tag.
+  /// Must be between [initialScale] and `10.0`.
   /// Ignored on the web, where the browser document controls viewport behavior.
   final double maximumScale;
 
@@ -86,7 +88,19 @@ final class CaptchaConfig {
     this.initialScale = 1.0,
     this.allowUserScaling = false,
     this.maximumScale = 3.0,
-  });
+  })  : assert(clientKey != '', 'clientKey must not be empty'),
+        assert(
+          initialScale >= 0.1 && initialScale <= 10.0,
+          'initialScale must be between 0.1 and 10.0',
+        ),
+        assert(
+          maximumScale >= 0.1 && maximumScale <= 10.0,
+          'maximumScale must be between 0.1 and 10.0',
+        ),
+        assert(
+          maximumScale >= initialScale,
+          'maximumScale must be greater than or equal to initialScale',
+        );
 
   @override
   bool operator ==(Object other) {
