@@ -38,6 +38,13 @@ void main() {
       controller.dispose();
     });
 
+    test('asserts that the base URL is a valid HTTP(S) origin', () {
+      expect(
+        () => createController(baseUrl: 'captcha.example'),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('delegates controller operations to the attached WebView', () async {
       final controller = createController();
       final wvController = PlatformInAppWebViewControllerFake();

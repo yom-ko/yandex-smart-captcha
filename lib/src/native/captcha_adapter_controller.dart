@@ -5,6 +5,7 @@ import '../captcha_config.dart';
 import '../captcha_event.dart';
 import '../captcha_platform_controller.dart';
 import 'captcha_adapter.dart';
+import 'utils.dart';
 
 final class CaptchaAdapterController implements CaptchaPlatformController {
   final CaptchaConfig config;
@@ -27,7 +28,11 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.config,
     required this.callbacks,
     required this.baseUrl,
-  }) : initialData = InAppWebViewInitialData(
+  })  : assert(
+          baseUrl == null || isValidBaseUrl(baseUrl),
+          'baseUrl must be an absolute HTTP(S) URL with a host.',
+        ),
+        initialData = InAppWebViewInitialData(
           data: SmartCaptcha(config).htmlData,
           baseUrl: baseUrl != null ? WebUri(baseUrl) : null,
         );
@@ -76,7 +81,8 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
 
   NavigationActionPolicy decideNavigation(NavigationAction action) {
     final url = action.request.url?.toString();
-    if (!action.isForMainFrame || url == null || _isInitialDocument(url)) {
+    if (!action.isForMainFrame) return NavigationActionPolicy.ALLOW;
+    if (url == null || isInitialDocument(url, initialData.baseUrl)) {
       return NavigationActionPolicy.ALLOW;
     }
 
@@ -85,17 +91,6 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
         ? NavigationActionPolicy.ALLOW
         : NavigationActionPolicy.CANCEL;
   }
-
-  bool _isInitialDocument(String url) {
-    if (url.startsWith('about:')) return true;
-
-    final baseURL = initialData.baseUrl?.toString();
-    if (baseURL == null) return false;
-    return _removeSlash(url) == _removeSlash(baseURL);
-  }
-
-  static String _removeSlash(String url) =>
-      url.endsWith('/') ? url.substring(0, url.length - 1) : url;
 
   Future<void> _callWidgetMethod(String method) async {
     final webViewController = _webViewController;
