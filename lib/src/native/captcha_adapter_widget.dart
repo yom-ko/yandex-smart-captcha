@@ -42,7 +42,7 @@ final class CaptchaAdapterWidget extends StatelessWidget {
             return controller.decideNavigation(action);
           },
           onConsoleMessage: (_, message) {
-            if (kDebugMode) debugPrint('YSM console message: $message');
+            if (kDebugMode) debugPrint('YSC console message: $message');
           },
           onWebViewCreated: controller.attachWebViewController,
         ),
