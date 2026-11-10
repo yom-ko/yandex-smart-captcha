@@ -29,6 +29,7 @@ Use the corresponding test target. For file-specific tests, mirror `lib/` under
 | `lib/src/native/captcha_adapter.dart`             | `test/src/native/captcha_adapter_test.dart`             |
 | `lib/src/native/captcha_adapter_controller.dart`  | `test/src/native/captcha_adapter_controller_test.dart`  |
 | `lib/src/native/captcha_adapter_widget.dart`      | `test/src/native/captcha_adapter_widget_test.dart`      |
+| `lib/src/native/utils.dart`                       | `test/src/native/utils_test.dart`                       |
 | `lib/src/web/captcha_adapter_controller_web.dart` | `test/src/web/captcha_adapter_controller_web_test.dart` |
 | `lib/src/web/captcha_adapter_web.dart`            | `test/src/web/captcha_adapter_controller_web_test.dart` |
 | `lib/src/web/captcha_script_loader_web.dart`      | `test/src/web/captcha_script_loader_web_test.dart`      |
