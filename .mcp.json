@@ -1,0 +1,22 @@
+{
+	"mcpServers": {
+		"patrol": {
+			"args": [
+				"pub",
+				"run",
+				"patrol_mcp"
+			],
+			"command": "flutter",
+			"cwd": "example",
+			"env": {
+				"PATROL_FLAGS": "--dart-define-from-file=.env",
+				"PROJECT_ROOT": ".",
+				"SHOW_TERMINAL": "false"
+			},
+			"tools": [
+				"*"
+			],
+			"type": "stdio"
+		}
+	}
+}
