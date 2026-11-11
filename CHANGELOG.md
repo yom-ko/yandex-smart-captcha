@@ -1,4 +1,11 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.0
+- **POTENTIALLY BREAKING CHANGE:** On native platforms, debug assertions now reject invalid settings when initializing the widget:
+  - `initialScale` and `maximumScale` must both be between `0.1` and `10.0` inclusive, and `maximumScale` must be at least `initialScale`, even when `allowUserScaling` is `false`.
+  - `baseUrl`, when provided, must be an absolute HTTP(S) URL with a host.
+- Improve and expand test coverage.
+- Improve README and Dartdoc.
+
 ## 8.1.2
 - Improve and expand test coverage.
 - Improve the example app and its integration tests.
