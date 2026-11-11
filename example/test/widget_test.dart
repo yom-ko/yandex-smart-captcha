@@ -2,9 +2,9 @@
 library;
 
 import 'package:example/main.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
 import 'in_app_webview_platform_fake.dart';

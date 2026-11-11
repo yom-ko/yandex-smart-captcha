@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:yandex_smart_captcha/yandex_smart_captcha.dart';
 
 // Find your key in the Yandex Cloud console.

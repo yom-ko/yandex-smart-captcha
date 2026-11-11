@@ -1,7 +1,7 @@
 @TestOn('vm')
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yandex_smart_captcha/src/captcha_event.dart';
@@ -609,7 +609,7 @@ void main() {
     test('stores its configuration, widget properties, and callbacks', () {
       final config = createConfig();
       void onChallengeSolved(String? token) {}
-      const backgroundColor = Colors.red;
+      const backgroundColor = Color(0xFFF44336);
       const loadingIndicator = SizedBox.shrink();
       void onCaptchaReady() {}
       void onChallengeShown() {}
@@ -1165,14 +1165,15 @@ void main() {
       testWidgets(
         'renders the configured background color',
         (tester) async {
+          const backgroundColor = Color(0xFFF44336);
           await pumpCaptcha(
             tester,
             config: createConfig(),
-            backgroundColor: Colors.red,
+            backgroundColor: backgroundColor,
           );
 
           final coloredBox = tester.widget<ColoredBox>(find.byType(ColoredBox));
-          expect(coloredBox.color, equals(Colors.red));
+          expect(coloredBox.color, equals(backgroundColor));
         },
       );
 
