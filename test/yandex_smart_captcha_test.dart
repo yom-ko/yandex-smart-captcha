@@ -725,6 +725,36 @@ void main() {
     });
 
     group('WebView configuration', () {
+      for (final (description, config, baseUrl) in [
+        (
+          'viewport scales',
+          const CaptchaConfig(clientKey: 'client-key', initialScale: 20.0),
+          null,
+        ),
+        (
+          'base URL',
+          const CaptchaConfig(clientKey: 'client-key'),
+          'captcha.example',
+        ),
+      ]) {
+        testWidgets(
+          'asserts invalid native $description when the widget is mounted',
+          (tester) async {
+            await tester.pumpWidget(
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: captchaWidget(config: config, baseUrl: baseUrl),
+              ),
+            );
+
+            expect(tester.takeException(), isA<AssertionError>());
+
+            await tester.pumpWidget(const SizedBox.shrink());
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+
       testWidgets('uses about:blank when no base URL is provided',
           (tester) async {
         await pumpCaptcha(tester, config: createConfig());

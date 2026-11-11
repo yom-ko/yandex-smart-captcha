@@ -30,7 +30,19 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
     required this.baseUrl,
   })  : assert(
           baseUrl == null || isValidBaseUrl(baseUrl),
-          'baseUrl must be an absolute HTTP(S) URL with a host.',
+          'baseUrl must be an absolute HTTP(S) URL with a host',
+        ),
+        assert(
+          config.initialScale >= 0.1 && config.initialScale <= 10.0,
+          'initialScale must be between 0.1 and 10.0',
+        ),
+        assert(
+          config.maximumScale >= 0.1 && config.maximumScale <= 10.0,
+          'maximumScale must be between 0.1 and 10.0',
+        ),
+        assert(
+          config.maximumScale >= config.initialScale,
+          'maximumScale must be greater than or equal to initialScale',
         ),
         initialData = InAppWebViewInitialData(
           data: SmartCaptcha(config).htmlData,

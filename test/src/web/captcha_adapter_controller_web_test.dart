@@ -155,6 +155,31 @@ void main() {
   );
 
   testWidgets(
+    'ignores native-only viewport values and base URL on the web',
+    (tester) async {
+      var renderCalls = 0;
+      _installReadySmartCaptcha(onRender: (_) => renderCalls++);
+      final controller = CaptchaAdapterController(
+        config: const CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 20.0,
+          maximumScale: 0.01,
+          allowUserScaling: true,
+        ),
+        callbacks: CaptchaAdapterCallbacks(onChallengeSolved: (_) {}),
+        baseUrl: 'not-an-absolute-url',
+      );
+      addTearDown(controller.dispose);
+
+      controller.attachContainer(_createContainer());
+      await tester.pump();
+
+      expect(renderCalls, equals(1));
+      expect(controller.isReady.value, isTrue);
+    },
+  );
+
+  testWidgets(
     'adds spinner CSS after script acquisition and removes it on dispose',
     (tester) async {
       _installReadySmartCaptcha();

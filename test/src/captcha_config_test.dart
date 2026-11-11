@@ -44,62 +44,21 @@ void main() {
       expect(config.useWebViewMode, isFalse);
     });
 
-    test('rejects an empty client key', () {
-      expect(
-        () => CaptchaConfig(clientKey: ''),
-        throwsA(isA<AssertionError>()),
-      );
-    });
-
-    test('accepts scale values at the supported bounds', () {
-      const minimumScaleConfig = CaptchaConfig(
+    test('retains native-only scale values without validating them', () {
+      const config = CaptchaConfig(
         clientKey: 'client-key',
-        initialScale: 0.1,
-        maximumScale: 0.1,
+        initialScale: 20.0,
+        maximumScale: 0.01,
       );
-      const maximumScaleConfig = CaptchaConfig(
+      const aboveDefaultMaximum = CaptchaConfig(
         clientKey: 'client-key',
-        initialScale: 10.0,
-        maximumScale: 10.0,
+        initialScale: 4.0,
       );
 
-      expect(minimumScaleConfig.initialScale, equals(0.1));
-      expect(minimumScaleConfig.maximumScale, equals(0.1));
-      expect(maximumScaleConfig.initialScale, equals(10.0));
-      expect(maximumScaleConfig.maximumScale, equals(10.0));
-    });
-
-    test('rejects scales outside the supported bounds', () {
-      for (final scale in [-0.1, 0.0, 10.1, double.infinity, double.nan]) {
-        expect(
-          () => CaptchaConfig(
-            clientKey: 'client-key',
-            initialScale: scale,
-          ),
-          throwsA(isA<AssertionError>()),
-          reason: 'Expected initialScale $scale to be rejected',
-        );
-        expect(
-          () => CaptchaConfig(
-            clientKey: 'client-key',
-            maximumScale: scale,
-            initialScale: 0.1,
-          ),
-          throwsA(isA<AssertionError>()),
-          reason: 'Expected maximumScale $scale to be rejected',
-        );
-      }
-    });
-
-    test('rejects a maximum scale below the initial scale', () {
-      expect(
-        () => CaptchaConfig(
-          clientKey: 'client-key',
-          initialScale: 2.0,
-          maximumScale: 1.5,
-        ),
-        throwsA(isA<AssertionError>()),
-      );
+      expect(config.initialScale, equals(20.0));
+      expect(config.maximumScale, equals(0.01));
+      expect(aboveDefaultMaximum.initialScale, equals(4.0));
+      expect(aboveDefaultMaximum.maximumScale, equals(3.0));
     });
 
     test('considers configurations equal when all values match', () {

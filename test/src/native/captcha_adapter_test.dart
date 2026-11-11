@@ -167,6 +167,22 @@ void main() {
         expect(html, contains('initial-scale=2.0'));
         expect(html, contains('maximum-scale=3.5'));
       });
+
+      test('clamps viewport scales to the supported range', () {
+        final belowMinimum = createCaptcha(
+          initialScale: 0,
+          maximumScale: -1,
+        ).htmlData;
+        final aboveMaximum = createCaptcha(
+          initialScale: 20,
+          maximumScale: 11,
+        ).htmlData;
+
+        expect(belowMinimum, contains('initial-scale=0.1'));
+        expect(belowMinimum, contains('maximum-scale=0.1'));
+        expect(aboveMaximum, contains('initial-scale=10.0'));
+        expect(aboveMaximum, contains('maximum-scale=10.0'));
+      });
     });
 
     group('event wiring', () {

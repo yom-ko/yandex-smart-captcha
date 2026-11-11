@@ -88,19 +88,7 @@ final class CaptchaConfig {
     this.initialScale = 1.0,
     this.allowUserScaling = false,
     this.maximumScale = 3.0,
-  })  : assert(clientKey != '', 'clientKey must not be empty'),
-        assert(
-          initialScale >= 0.1 && initialScale <= 10.0,
-          'initialScale must be between 0.1 and 10.0',
-        ),
-        assert(
-          maximumScale >= 0.1 && maximumScale <= 10.0,
-          'maximumScale must be between 0.1 and 10.0',
-        ),
-        assert(
-          maximumScale >= initialScale,
-          'maximumScale must be greater than or equal to initialScale',
-        );
+  });
 
   @override
   bool operator ==(Object other) {

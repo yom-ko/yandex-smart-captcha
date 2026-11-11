@@ -14,11 +14,12 @@ import '../../mocks/in_app_webview_platform_fake.dart';
 void main() {
   group('$CaptchaAdapterController', () {
     CaptchaAdapterController createController({
+      CaptchaConfig config = const CaptchaConfig(clientKey: 'client-key'),
       CaptchaAdapterCallbacks? callbacks,
       String? baseUrl,
     }) {
       return CaptchaAdapterController(
-        config: const CaptchaConfig(clientKey: 'client-key'),
+        config: config,
         callbacks: callbacks ??
             CaptchaAdapterCallbacks(
               onChallengeSolved: (_) {},
@@ -43,6 +44,81 @@ void main() {
         () => createController(baseUrl: 'captcha.example'),
         throwsA(isA<AssertionError>()),
       );
+    });
+
+    test('accepts viewport scales at the supported bounds', () {
+      for (final config in [
+        const CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 0.1,
+          maximumScale: 0.1,
+        ),
+        const CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 10.0,
+          maximumScale: 10.0,
+        ),
+      ]) {
+        final controller = createController(config: config);
+        expect(
+          controller.initialData.data,
+          contains('initial-scale=${config.initialScale}'),
+        );
+        expect(
+          controller.initialData.data,
+          contains('maximum-scale=${config.maximumScale}'),
+        );
+        controller.dispose();
+      }
+    });
+
+    test('rejects viewport scales outside the supported bounds', () {
+      for (final scale in [
+        -0.1,
+        0.0,
+        0.099,
+        10.001,
+        double.negativeInfinity,
+        double.infinity,
+        double.nan,
+      ]) {
+        final initialScaleConfig = CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: scale,
+          maximumScale: 10.0,
+        );
+        final maximumScaleConfig = CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 0.1,
+          maximumScale: scale,
+        );
+        expect(
+          () => createController(config: initialScaleConfig),
+          throwsA(isA<AssertionError>()),
+          reason: 'Expected initialScale $scale to be rejected',
+        );
+        expect(
+          () => createController(config: maximumScaleConfig),
+          throwsA(isA<AssertionError>()),
+          reason: 'Expected maximumScale $scale to be rejected',
+        );
+      }
+    });
+
+    test('rejects a maximum scale below the initial scale', () {
+      for (final allowUserScaling in [false, true]) {
+        final config = CaptchaConfig(
+          clientKey: 'client-key',
+          initialScale: 2.0,
+          maximumScale: 1.5,
+          allowUserScaling: allowUserScaling,
+        );
+        expect(
+          () => createController(config: config),
+          throwsA(isA<AssertionError>()),
+          reason: 'allowUserScaling: $allowUserScaling',
+        );
+      }
     });
 
     test('delegates controller operations to the attached WebView', () async {
