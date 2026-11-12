@@ -18,10 +18,10 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_inappwebview: ^6.1.5
   integration_test:
     sdk: flutter
 
+  flutter_inappwebview: ^6.1.5
   flutter_lints: ^6.0.0
   patrol: ^4.11.0
   patrol_mcp: ^0.2.2
