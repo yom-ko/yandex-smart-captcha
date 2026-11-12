@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.2
+- Clean up the example app to reduce the package download size.
+- Improve the package and example app README-s.
+
 ## 9.0.1
 - Fix compatibility with Flutter 3.50 by removing the package's dependency on `flutter/material.dart`.
 - Document a temporary Android Gradle Plugin 9 workaround for `flutter_inappwebview_android`.
