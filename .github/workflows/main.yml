@@ -69,10 +69,40 @@ jobs:
       - name: Validate package for publishing
         if: matrix.sdk == 'latest'
         run: flutter pub publish --dry-run
-      - name: Build Android example
+      - name: Verify published example
         if: matrix.sdk == 'latest'
-        working-directory: example
-        run: flutter build apk --debug --dart-define-from-file=.env.example
+        run: |
+          archive="$RUNNER_TEMP/package.tar.gz"
+          package_dir="$RUNNER_TEMP/published-package"
+          # Create the publication archive without uploading it.
+          flutter pub publish --to-archive="$archive"
+          if tar -tzf "$archive" \
+              | grep -E '(^|/)\.env($|\.)|\.(jks|keystore)$' \
+              | grep -vFx 'example/.env.example'; then
+            echo "::error::Unexpected environment or signing-key file in the package"
+            exit 1
+          fi
+          # Tests and example platform folders are maintainer-only.
+          if tar -tzf "$archive" \
+              | grep -E '^(test|integration_test|example/(test|integration_test|android|ios|web))/'; then
+            echo "::error::Unexpected test or example platform file in the package"
+            exit 1
+          fi
+          if ! tar -tzf "$archive" | grep -Fxq 'example/pubspec.lock'; then
+            echo "::error::Example dependency lockfile is missing from the package"
+            exit 1
+          fi
+          mkdir -p "$package_dir"
+          tar -xzf "$archive" -C "$package_dir"
+      - name: Build published Android example
+        if: matrix.sdk == 'latest'
+        working-directory: ${{ runner.temp }}/published-package/example
+        # Follow the setup steps in example/README.md.
+        run: |
+          flutter create --empty --platforms=android,ios,web .
+          echo 'android.r8.proguardAndroidTxt.disallowed=false' >> android/gradle.properties
+          flutter analyze
+          flutter build apk --debug --dart-define-from-file=.env.example
       - name: Run unit and native widget tests
         run: flutter test --no-pub --coverage
       - name: Run browser adapter tests

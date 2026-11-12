@@ -1,34 +1,46 @@
-# Exclude native platform folders and local build artifacts in example/.
-example/ios/
-example/android/
-example/web/
-example/macos/
-example/windows/
-example/linux/
-example/build/
-example/integration_test/
-example/.dart_tool/
-example/.vscode/
-example/.idea/
-example/analysis_options.yaml
-example/devtools_options.yaml
-
 # Exclude screenshot assets except the main search preview.
 assets/images/*
 !assets/images/screen_2.webp
 
-# Exclude local environment variables, IDE settings, and build files.
+# Exclude maintainer-only tests.
+/test/
+/integration_test/
+/example/test/
+/example/integration_test/
+
+# Exclude the example's platform projects.
+/example/android/
+/example/ios/
+/example/web/
+
+# Exclude local environment variables, signing keys, and generated files.
 build/
 coverage/
-integration_test/
+**/doc/api/
+**/generated_plugin_registrant.dart
 .dart_tool/
 .vscode/
 .idea/
 .env
-.env.example
+.env.*
 .metadata
 .flutter-plugins-dependencies
-devtools_options.yaml
+/devtools_options.yaml
+*.class
+*.iml
+*.ipr
+*.iws
+*.jks
+*.keystore
+*.log
+*.pyc
+*.swp
+env.g.dart
+
+# Publish the example's env template and gitignore.
+!example/.env.example
+!example/.gitignore
+!example/pubspec.lock
 
 # Exclude AI agent context.
 .agents/
