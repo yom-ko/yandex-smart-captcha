@@ -7,6 +7,7 @@
 .pub-cache/
 .pub-preload-cache/
 .pub/
+.widget_preview/
 **/doc/api/
 **/generated_plugin_registrant.dart
 **/integration_test/test_bundle.dart
@@ -14,10 +15,14 @@ build/
 coverage/
 pubspec.lock
 !example/pubspec.lock
+pubspec_overrides.yaml
+devtools_options.yaml
 
 # Android
 .gradle/
+.cxx/
 *.jks
+*.keystore
 **/android/**/GeneratedPluginRegistrant.java
 **/android/**/gradle-wrapper.jar
 **/android/captures/
@@ -71,7 +76,7 @@ pubspec.lock
 *.ipr
 *.iws
 
-# Visual Studio Code
+# VS Code
 .ccls-cache
 .classpath
 .project
@@ -83,13 +88,26 @@ pubspec.lock
 
 # Misc
 .atom/
+.build/
 .buildlog/
 .DS_Store
 .env
+.env.*
+!example/.env.example
 .history
 .svn/
+.swiftpm/
+migrate_working_dir/
+app.*.symbols
+app.*.map.json
 *.class
+*.key
 *.log
+*.mobileprovision
+*.p8
+*.p12
+*.pem
+*.pfx
 *.pyc
 *.swp
 env.g.dart

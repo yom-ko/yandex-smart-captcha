@@ -11,11 +11,20 @@ assets/images/*
 # Exclude the example's platform projects.
 /example/android/
 /example/ios/
+/example/linux/
+/example/macos/
 /example/web/
+/example/windows/
 
 # Exclude local environment variables, signing keys, and generated files.
 build/
 coverage/
+migrate_working_dir/
+pubspec_overrides.yaml
+local.properties
+key.properties
+app.*.symbols
+app.*.map.json
 **/doc/api/
 **/generated_plugin_registrant.dart
 .dart_tool/
@@ -25,19 +34,25 @@ coverage/
 .env.*
 .metadata
 .flutter-plugins-dependencies
-/devtools_options.yaml
+devtools_options.yaml
 *.class
 *.iml
 *.ipr
 *.iws
 *.jks
+*.key
 *.keystore
 *.log
+*.mobileprovision
+*.p8
+*.p12
+*.pem
+*.pfx
 *.pyc
 *.swp
 env.g.dart
 
-# Publish the example's env template and gitignore.
+# Publish the example's env template, gitignore, and lockfile.
 !example/.env.example
 !example/.gitignore
 !example/pubspec.lock
