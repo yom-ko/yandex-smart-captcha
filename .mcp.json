@@ -4,13 +4,13 @@
 			"args": [
 				"pub",
 				"run",
+				"--directory=example",
 				"patrol_mcp"
 			],
-			"command": "flutter",
-			"cwd": "example",
+			"command": "dart",
 			"env": {
 				"PATROL_FLAGS": "--dart-define-from-file=.env",
-				"PROJECT_ROOT": ".",
+				"PROJECT_ROOT": "example",
 				"SHOW_TERMINAL": "false"
 			},
 			"tools": [
