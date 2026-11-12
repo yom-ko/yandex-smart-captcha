@@ -42,6 +42,16 @@ Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the 
 
 The web implementation is compatible with [WebAssembly (Wasm)](https://webassembly.org/).
 
+### Android support
+
+`flutter_inappwebview_android` 1.1.3 uses a legacy ProGuard configuration that AGP 9 rejects. If your Android build fails with `getDefaultProguardFile('proguard-android.txt')`, add this temporary workaround to your `android/gradle.properties`:
+
+```properties
+android.r8.proguardAndroidTxt.disallowed=false
+```
+
+The legacy configuration can reduce release optimization, so remove this setting once the dependency is [fixed](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852).
+
 ### CaptchaConfig parameters
 
 This is an immutable configuration for Yandex SmartCaptcha and WebView content.

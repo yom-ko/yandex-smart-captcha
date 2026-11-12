@@ -69,6 +69,10 @@ jobs:
       - name: Validate package for publishing
         if: matrix.sdk == 'latest'
         run: flutter pub publish --dry-run
+      - name: Build Android example
+        if: matrix.sdk == 'latest'
+        working-directory: example
+        run: flutter build apk --debug --dart-define-from-file=.env.example
       - name: Run unit and native widget tests
         run: flutter test --no-pub --coverage
       - name: Run browser adapter tests
