@@ -50,7 +50,7 @@ The web implementation is compatible with [WebAssembly (Wasm)](https://webassemb
 android.r8.proguardAndroidTxt.disallowed=false
 ```
 
-The legacy configuration can reduce release optimization, so remove this setting once the dependency is [fixed](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852).
+The legacy configuration can reduce release optimization. Remove this setting once the dependency is [fixed](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852).
 
 ### CaptchaConfig parameters
 
