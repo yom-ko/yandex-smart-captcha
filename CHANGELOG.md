@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.1
+- Fix compatibility with Flutter 3.50 by removing the package's dependency on `flutter/material.dart`.
+- Document a temporary Android Gradle Plugin 9 workaround for `flutter_inappwebview_android`.
+- Update the example app for Flutter 3.50 and Android Gradle Plugin 9.
+
 ## 9.0.0
 - **POTENTIALLY BREAKING CHANGE:** On native platforms, debug assertions now reject invalid settings when initializing the widget:
   - `initialScale` and `maximumScale` must both be between `0.1` and `10.0` inclusive, and `maximumScale` must be at least `initialScale`, even when `allowUserScaling` is `false`.
