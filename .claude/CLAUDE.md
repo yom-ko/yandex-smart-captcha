@@ -93,4 +93,6 @@ Never commit or embed real SmartCaptcha keys (e.g., `example/.env`) in source co
 ./build-agent-context.sh
 ```
 
+If the modified files include skills, run the globally installed `skills_lint` command from the repository root. It reads `skills_lint.yaml` and validates the canonical skills in `.agents/skills`. Fix any reported errors before regenerating the provider-specific outputs.
+
 If interested, see [`.agents/README.md`](/.agents/README.md) for details.

@@ -1,0 +1,12 @@
+skills_lint:
+  rules:
+    check-relative-paths: error
+    check-absolute-paths: error
+  directories:
+    - path: '.agents/skills'
+      rules:
+        check-relative-paths:
+          severity: error
+          within-skill: true
+        disallowed-field: error
+        check-trailing-whitespace: error

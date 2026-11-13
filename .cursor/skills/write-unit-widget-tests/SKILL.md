@@ -39,7 +39,7 @@ Use the corresponding test target. For file-specific tests, mirror `lib/` under
 
 This mapping reflects the layout at the time of writing. Follow the actual project structure if files are moved due to a refactor.
 
-Keep reusable WebView test infrastructure in `test/mocks/`, especially [`in_app_webview_platform_fake.dart`](../../../test/mocks/in_app_webview_platform_fake.dart).
+Keep reusable WebView test infrastructure in `test/mocks/`, especially `in_app_webview_platform_fake.dart`.
 
 ## Workflow
 
@@ -160,7 +160,7 @@ Keep browser tests deterministic and independent of actual browser navigation or
 
 Native-only test files should use `@TestOn('vm')` at the library level. Browser-only test files should use `@TestOn('browser')`.
 
-`lib/src/web/captcha_adapter_web.dart` contains only external JavaScript interop declarations. Its observable use is covered by the browser controller contract in [`test/src/web/captcha_adapter_controller_web_test.dart`](../../../test/src/web/captcha_adapter_controller_web_test.dart), so do not add declaration-only tests.
+`lib/src/web/captcha_adapter_web.dart` contains only external JavaScript interop declarations. Its observable use is covered by the browser controller contract in `test/src/web/captcha_adapter_controller_web_test.dart`, so do not add declaration-only tests.
 
 `lib/src/web/captcha_adapter_widget_web.dart` delegates to Flutter's `HtmlElementView`. Its platform-view lifecycle is covered by Flutter's framework and is not deterministic in the headless package test harness. Do not add tests that depend on that lifecycle here.
 
