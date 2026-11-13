@@ -7,7 +7,7 @@
 				"--directory=example",
 				"patrol_mcp"
 			],
-			"command": "dart",
+			"command": "flutter",
 			"env": {
 				"PATROL_FLAGS": "--dart-define-from-file=.env",
 				"PROJECT_ROOT": "example",
