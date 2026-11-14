@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 #
-# Keeps AI agent context files in sync with their sources before relevant commits.
+# Keeps AI agent context files in sync before relevant commits.
 #
 # .agents/ + build-agent-context.sh -> generated targets
 #
 # - Use the staged generator version to determine the managed target set.
-# - Skip commits that do not touch agent-context sources or generated targets.
+# - Skip commits that do not touch agent-context sources, lint config, or generated targets.
 # - Require all agent context source changes to be staged before regeneration.
 # - Reject ignored files under .agents/ that could affect generated outputs;
 #   allow only .DS_Store.
+# - Validate skills with globally installed skills_lint before regeneration.
+#   Install with dart install skills_lint and ensure it is on PATH.
 # - Rebuild generated files from the clean source state, then stage the results.
 # - Stage deletions along with any created or modified generated files.
 # - Keep temporary files isolated and always clean them up.
@@ -33,7 +35,7 @@ has_diff() {
   esac
 }
 
-inputs=(.agents build-agent-context.sh)
+inputs=(.agents build-agent-context.sh skills_lint.yaml)
 
 workdir="$(mktemp -d "${TMPDIR:-/tmp}/agent-context-hook.XXXXXX")"
 cleanup() {
@@ -63,7 +65,7 @@ untracked="$(git ls-files --others --exclude-standard -- "${inputs[@]}")" ||
   die "could not list untracked source files."
 
 if has_diff -- "${inputs[@]}" || [[ -n "$untracked" ]]; then
-  echo "ERROR: .agents/ or build-agent-context.sh has unstaged or untracked changes." >&2
+  echo "ERROR: .agents/, build-agent-context.sh, or skills_lint.yaml has unstaged or untracked changes." >&2
   echo "Stage all of their changes before committing." >&2
   exit 1
 fi
@@ -82,6 +84,13 @@ if ((${#ignored_sources[@]})); then
   echo "Remove them or add them to the repository before committing." >&2
   exit 1
 fi
+
+command -v skills_lint >/dev/null 2>&1 ||
+  die "skills_lint is not on PATH. Install it with 'dart install skills_lint' and add its executable directory to PATH."
+
+echo "Validating agent skills..."
+skills_lint --config skills_lint.yaml --quiet ||
+  die "skill validation failed. Fix the reported errors before committing."
 
 echo "Rebuilding agent context files..."
 ./build-agent-context.sh --quiet
