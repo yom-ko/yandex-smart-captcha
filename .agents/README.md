@@ -37,17 +37,19 @@ Set up the custom hooks path once:
 git config core.hooksPath .githooks
 ```
 
+Then install the linter globally and ensure `skills_lint` is available on PATH.
+
 To consistently keep `.agents/` the single source of truth, the hook implements the following high-level logic:
 
 ```text
 Read managed targets from the staged generator
 └─ fail → abort commit
 
-Staged changes in the generator, .agents/, or managed targets?
+Staged changes in the generator, .agents/, skills_lint.yaml, or managed targets?
 ├─ no → skip regeneration, continue commit as usual
 └─ yes
     ↓
-    Unstaged changes in the generator or unstaged/untracked files in .agents/?
+    Unstaged changes or untracked source/config files?
     ├─ yes → abort commit
     └─ no
         ↓
@@ -55,16 +57,20 @@ Staged changes in the generator, .agents/, or managed targets?
         ├─ yes → abort commit
         └─ no
             ↓
-            Regenerate outputs
+            Validate .agents/skills/ with skills_lint
             ├─ fail → abort commit
             └─ success
                 ↓
-                Stage managed targets, including deletions
-                ↓
-                Commit
+                Regenerate outputs
+                ├─ fail → abort commit
+                └─ success
+                    ↓
+                    Stage managed targets, including deletions
+                    ↓
+                    Commit
 ```
 
-When `.agents/`, the generator script itself, or any generated target is staged, the hook regenerates the outputs and stages all managed targets, including deletions. It refuses to run if the generator or `.agents/` has unstaged changes or untracked files (both ignored and non-ignored) other than `.DS_Store`. The commit is also aborted if generation fails, e.g., because of an invalid rule name or a symlink.
+When `.agents/`, the generator script, `skills_lint.yaml`, or any generated target is staged, the hook validates skills, regenerates outputs, and stages all managed targets, including deletions. It refuses to run if these inputs have unstaged changes or untracked files, or if there are ignored untracked files in `.agents/` other than `.DS_Store`. The commit is aborted if skill validation or generation fails.
 
 > **Note:** Avoid pathspec commits such as `git commit <path>`. The hook may regenerate and stage managed targets, but those files are not included unless they match the commit's pathspec. Use a regular `git commit` so that source changes and generated outputs are committed together.
 
