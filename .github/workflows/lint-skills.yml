@@ -1,0 +1,25 @@
+name: Lint agent skills
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-skills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dart-lang/setup-dart@2286a0c042b44434fe26d292bbce8d34f7ec662b # v1.8.2
+      - name: Install skills_lint
+        env:
+          DART_DATA_HOME: ${{ runner.temp }}/dart-data
+        run: |
+          dart install skills_lint
+          echo "$DART_DATA_HOME/install/bin" >> "$GITHUB_PATH"
+      - name: Lint agent skills
+        run: skills_lint

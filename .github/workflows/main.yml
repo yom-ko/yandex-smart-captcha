@@ -17,6 +17,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name != 'schedule' }}
 
 jobs:
+  lint-skills:
+    uses: ./.github/workflows/lint-skills.yml
+
   check-agent-context:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -29,7 +32,7 @@ jobs:
 
   test:
     name: test-${{ matrix.sdk }}
-    needs: check-agent-context
+    needs: [lint-skills, check-agent-context]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
