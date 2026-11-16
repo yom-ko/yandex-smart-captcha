@@ -6,11 +6,11 @@ This app demonstrates the Yandex SmartCaptcha Flutter package on Android, iOS, a
 
 Copy `.env.example` to `.env` in this directory and set `CLIENT_KEY` to a valid Yandex SmartCaptcha client key. Keep `.env` local and never commit it. Ensure `.env` is listed in `.gitignore`.
 
-Run project commands from this directory. Include `--dart-define-from-file=.env` when building or running the app.
+Run example app commands from this directory. Include `--dart-define-from-file=.env` when building or running the app.
 
 ### Platform setup
 
-The published package omits the `android/`, `ios/`, and `web/` folders. If you downloaded it from pub.dev, generate them with:
+The published archive omits the `android/`, `ios/`, and `web/` folders. If you downloaded the package from pub.dev, generate them with:
 
 ```bash
 flutter create --empty --platforms=android,ios,web .
@@ -23,8 +23,6 @@ Then add the temporary [Android support](https://pub.dev/packages/yandex_smart_c
 ```bash
 echo 'android.r8.proguardAndroidTxt.disallowed=false' >> android/gradle.properties
 ```
-
-The [GitHub repository](https://github.com/yom-ko/yandex-smart-captcha/tree/main/example) already includes these folders.
 
 ## Android
 
@@ -84,18 +82,22 @@ flutter run -d chrome --dart-define-from-file=.env
 
 ## Tests (repository only)
 
-The pub.dev package omits the tests. They are available in the GitHub repository for package maintenance.
+The published archive also omits the test files available in the [GitHub repository](https://github.com/yom-ko/yandex-smart-captcha).
 
-Run the unit and widget tests with `flutter test`. These tests use a fake WebView and do not need a client key.
+From this `example/` directory, run the example app's widget tests:
 
-The Patrol integration tests rely on this repository's platform folders, which have an iOS deployment target of 15.0. Install [Patrol CLI](https://pub.dev/packages/patrol_cli) globally and make sure the Pub cache's `bin` directory is on your `PATH`:
+```bash
+flutter test
+```
+
+The Patrol integration tests rely on the repository's platform folders (the iOS deployment target is 15.0). Install [Patrol CLI](https://pub.dev/packages/patrol_cli) globally and make sure the Pub cache's `bin` directory is on your `PATH`:
 
 ```bash
 dart pub global activate patrol_cli
 patrol doctor
 ```
 
-Run them on an Android emulator, an Android device, or an iOS simulator:
+Run the tests on an Android emulator, an Android device, or an iOS simulator:
 
 ```bash
 patrol test -d <device-id> --dart-define-from-file=.env
