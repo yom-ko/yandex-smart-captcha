@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  material_ui: ^1.11.0
+  material_ui: ^1.11.1
   yandex_smart_captcha:
     path: ..
 
