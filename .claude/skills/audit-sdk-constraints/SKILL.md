@@ -182,7 +182,7 @@ Report missing or skipped checks separately. CI gaps alone do not justify an SDK
 
 ## 5. Report
 
-Follow [`report-template.md`](./report-template.md) for every completed audit. Its structure and format are mandatory.
+Follow [`report-template.md`](./report-template.md) for every completed audit. Its structure and formatting are mandatory.
 
 - Replace every `{{...}}` placeholder with the actual value. Use backticks for commands, file names, and SDK versions.
 - Complete every field concisely. Never guess missing facts. Use `N/A – reason` only when a field or check does not apply, `None identified` when no issue was found, and `UNVERIFIED – reason` when a fact or result could not be verified. These labels are not interchangeable.

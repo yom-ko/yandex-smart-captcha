@@ -178,7 +178,7 @@ For each problem, record the target, steps, expected and actual behavior, eviden
 
 ## 6. Report
 
-Follow [`report-template.md`](./report-template.md). Its structure, format, and definitions are mandatory.
+Follow [`report-template.md`](./report-template.md). Its structure, formatting, and definitions are mandatory.
 
 - Attribute every error before assigning `FAIL`. Errors caused by the example app, test infrastructure, environment, or an external service must be reported with evidence and cause, but must not contribute to the `FAIL` verdict.
 - If an excluded error does not prevent verification and the package's expected behavior is confirmed, mark the check `PASS` and document the error. If it prevents verification, mark it `BLOCKED`. If expected behavior or attribution remains unresolved, mark it `UNCLEAR`. An external error does not excuse a separately confirmed defect in the package's handling of that error.

@@ -87,7 +87,7 @@ Choose exactly one verdict:
 
 ## 5. Report
 
-Follow [`report-template.md`](./report-template.md) for every completed audit. Its structure and format are mandatory.
+Follow [`report-template.md`](./report-template.md) for every completed audit. Its structure and formatting are mandatory.
 
 - Replace every `{{...}}` placeholder with the actual value.
 - List every `MISMATCH`, `DEPRECATED`, and `MISSING` finding (omit `OK`). If there are none, write `None` instead of the table.
