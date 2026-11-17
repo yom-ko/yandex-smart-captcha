@@ -126,12 +126,13 @@ class YandexSmartCaptcha extends StatefulWidget {
   /// Ignored on the web, where the browser document controls presentation.
   final Color? backgroundColor;
 
-  /// A custom widget displayed while SmartCaptcha is loading on native platforms.
+  /// A custom widget displayed while SmartCaptcha is initializing on native platforms.
+  /// It is hidden when initialization succeeds or fails.
   ///
   /// Ignored on the web, where the browser document controls presentation.
   final Widget? loadingIndicator;
 
-  /// Called when the SmartCaptcha script is fully loaded and initialized.
+  /// Called when SmartCaptcha is fully loaded and initialized.
   final VoidCallback? onCaptchaReady;
 
   /// Called when the challenge popup becomes visible.

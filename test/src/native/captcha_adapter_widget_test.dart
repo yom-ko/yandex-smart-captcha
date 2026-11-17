@@ -83,4 +83,51 @@ void main() {
       controller.dispose();
     },
   );
+
+  testWidgets(
+    'hides the loading indicator when initialization fails',
+    (tester) async {
+      for (final event in [
+        CaptchaEvent.networkError,
+        CaptchaEvent.javaScriptError,
+      ]) {
+        final reportedErrors = <CaptchaEvent>[];
+        final controller = CaptchaAdapterController(
+          config: const CaptchaConfig(clientKey: 'client-key'),
+          baseUrl: null,
+          callbacks: CaptchaAdapterCallbacks(
+            onChallengeSolved: (_) {},
+            onNetworkError: () => reportedErrors.add(CaptchaEvent.networkError),
+            onJavaScriptError: () =>
+                reportedErrors.add(CaptchaEvent.javaScriptError),
+          ),
+        );
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: CaptchaAdapterWidget(
+              controller: controller,
+              loadingIndicator: const Text('Loading'),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Loading'), findsOneWidget);
+
+        final webView = tester.widget<InAppWebView>(find.byType(InAppWebView));
+        final platformWidget =
+            webView.platform as PlatformInAppWebViewWidgetFake;
+        platformWidget.controller.emit(event.name);
+        await tester.pump();
+
+        expect(find.text('Loading'), findsNothing);
+        expect(reportedErrors, equals([event]));
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        controller.dispose();
+      }
+    },
+  );
 }

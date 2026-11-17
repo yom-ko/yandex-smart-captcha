@@ -85,8 +85,10 @@ final class CaptchaAdapterController implements CaptchaPlatformController {
       case CaptchaEvent.tokenExpired:
         callbacks.onTokenExpired?.call();
       case CaptchaEvent.networkError:
+        _isLoaded.value = true;
         callbacks.onNetworkError?.call();
       case CaptchaEvent.javaScriptError:
+        _isLoaded.value = true;
         callbacks.onJavaScriptError?.call();
     }
   }

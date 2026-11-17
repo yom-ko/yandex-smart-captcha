@@ -82,8 +82,8 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `config`               |    ✔     |         | The configuration for this SmartCaptcha instance.                                         |
 | `onChallengeSolved`    |    ✔     |         | Called when the user successfully solves a challenge.                                     |
 | `backgroundColor`*     |          | `null`  | The background color of the SmartCaptcha container.                                       |
-| `loadingIndicator`*    |          | `null`  | A custom widget displayed while the SmartCaptcha script is loading.                       |
-| `onCaptchaReady`       |          | `null`  | Called when the SmartCaptcha script is fully loaded and initialized.                      |
+| `loadingIndicator`*    |          | `null`  | A custom widget displayed while SmartCaptcha is initializing.                             |
+| `onCaptchaReady`       |          | `null`  | Called when SmartCaptcha is fully loaded and initialized.                                 |
 | `onChallengeShown`     |          | `null`  | Called when the challenge popup becomes visible.                                          |
 | `onChallengeHidden`    |          | `null`  | Called when the challenge popup is hidden or dismissed.                                   |
 | `onTokenExpired`       |          | `null`  | Called when the validation token expires after the challenge is successfully solved.      |
