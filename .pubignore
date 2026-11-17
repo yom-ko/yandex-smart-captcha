@@ -64,3 +64,4 @@ env.g.dart
 .github/
 AGENTS.md
 build-agent-context.sh
+skills_lint.yaml
