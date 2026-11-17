@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.3
+- Native: the loading indicator is now hidden after initialization fails with a network or JS error.
+- Update the example app's dependencies and README.
+- Improve and expand test coverage.
+
 ## 9.0.2
 - Clean up the example app to reduce the package download size.
 - Improve the package and example app README-s.
