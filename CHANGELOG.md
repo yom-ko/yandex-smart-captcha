@@ -1,4 +1,7 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.4
+- Update the package description.
+
 ## 9.0.3
 - Native: the loading indicator is now hidden after initialization fails with a network or JS error.
 - Update the example app's dependencies and README.
