@@ -2,15 +2,12 @@
 	"mcpServers": {
 		"patrol": {
 			"args": [
-				"pub",
-				"run",
-				"--directory=example",
-				"patrol_mcp"
+				"--packages=example/.dart_tool/package_config.json",
+				"tool/patrol_mcp.dart"
 			],
-			"command": "flutter",
+			"command": "dart",
 			"env": {
 				"PATROL_FLAGS": "--dart-define-from-file=.env",
-				"PROJECT_ROOT": "example",
 				"SHOW_TERMINAL": "false"
 			},
 			"tools": [
