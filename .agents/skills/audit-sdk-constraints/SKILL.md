@@ -4,7 +4,7 @@ description: >-
   Audit this Flutter package's minimum Dart and Flutter SDK constraints. Use only when the user explicitly asks to run this `audit-sdk-constraints` skill or another skill explicitly invokes it.
 ---
 
-# Auditing Dart and Flutter SDK constraints
+# Auditing the Dart and Flutter SDK constraints
 
 ## Main rules
 
@@ -17,35 +17,28 @@ description: >-
 ```text
 Inspect package, constraints, dependencies, and CI.
 ↓
-Do findings affect the published package?
-├─ No → KEEP. Report tooling/example findings separately.
-└─ Yes
+Verify the current floor + latest stable.
+├─ Both pass → Is a raise proposed anyway?
+│              ├─ No → KEEP
+│              └─ Yes → POLICY DECISION
+├─ Verification blocked → INCONCLUSIVE
+├─ Floor passes, latest fails → Investigate and retest.
+└─ Floor fails
    ↓
-   Is this a policy-only change?
-   ├─ Yes → POLICY DECISION
-   └─ No
+   Classify the failure. Resolve infrastructure or dependency issues first.
+   ↓
+   Package incompatibility confirmed?
+   ├─ No or unresolved → Resolve and retest. If blocked → INCONCLUSIVE
+   └─ Yes
       ↓
-      Verify the current floor + latest stable.
-      ├─ Both pass → KEEP
-      ├─ Verification blocked → INCONCLUSIVE
-      ├─ Floor passes, latest fails → Investigate and retest.
-      └─ Floor fails
-         ↓
-         Classify the failure. Resolve infrastructure or dependency issues first.
-         ↓
-         Package incompatibility confirmed?
-         ├─ No or unresolved → Resolve and retest. If blocked → INCONCLUSIVE
-         └─ Yes
-            ↓
-            Can a fix preserve the current floor?
-            ├─ Yes → Verify the fix in lanes.
-            │        ├─ Both pass → KEEP
-            │        ├─ Floor fails → Reassess compatibility.
-            │        ├─ Latest fails → Investigate and retest.
-            │        └─ Verification blocked → INCONCLUSIVE
-            └─ No
-               ↓
-               Verify the lowest compatible SDK candidate + latest stable.
+      Can a fix preserve the current floor?
+      ├─ Yes → Verify the fix in lanes.
+      │        ├─ Both pass → KEEP
+      │        ├─ Floor fails → Reassess compatibility.
+      │        ├─ Latest fails → Investigate and retest.
+      │        └─ Verification blocked → INCONCLUSIVE
+      │
+      └─ No →  Verify the lowest compatible SDK candidate + latest stable.
                ├─ Both pass → BUMP
                ├─ Candidate passes, latest fails → Investigate and retest.
                ├─ Candidate fails → Classify the failure.
@@ -62,7 +55,7 @@ A lane is a disposable snapshot of the working tree, tested with one Flutter SDK
 | --- | --- | --- |
 | `minimum` | The exact `environment.flutter` floor (e.g., `3.24.0`) | [Minimum lane](#minimum-lane) |
 | `candidate` | The proposed floor, only when the decision flow requires one | [Candidate lane](#candidate-lane) |
-| `latest` | The latest stable release | [Dependency audit](#1-inspect-and-audit) and [Latest lane](#latest-lane) |
+| `latest` | The current stable release listed in the [Flutter SDK archive](https://docs.flutter.dev/install/archive) | [Dependency audit](#1-inspect-and-audit) and [Latest lane](#latest-lane) |
 
 To create lanes:
 
@@ -90,7 +83,7 @@ While working in lanes:
 1. Record `git rev-parse HEAD` and `git status --short` to identify the exact source state under review.
 2. Read `pubspec.yaml`, `example/pubspec.yaml`, and every workflow in `.github/workflows/`.
 3. Inspect SDK constraints, `dependency_overrides`, and any `pubspec_overrides.yaml`.
-4. Record the exact Flutter version used by the latest CI run from its logs, and the bundled Dart version from the [Flutter SDK archive](https://docs.flutter.dev/install/archive). If logs are unavailable, record that limitation rather than guessing.
+4. Find the latest `Main` run on `main` with `gh run list --workflow main.yml --branch main --limit 1`. From `gh run view <id> --log`, record the exact Flutter version of its `test-latest` and `test-minimum` jobs, and the bundled Dart version from the [Flutter SDK archive](https://docs.flutter.dev/install/archive). If logs are unavailable, record that limitation rather than guessing.
 5. Separate the published package from tooling and the example app. Only the package's code, metadata, SDK constraints, runtime dependencies, and published generated files affect consumers. Tooling- and example-only requirements do not by themselves justify raising the package floor.
 
 Audit the published package's runtime dependency graph in the `latest` lane:
@@ -121,7 +114,7 @@ Only when the decision flow requires a candidate:
 
 ## 3. Verify the constraints
 
-Test the exact Flutter floor (e.g., `3.24.0`), not a range (e.g., `3.24.x`). `flutter pub downgrade` changes dependency versions, not the SDK version.
+Test the exact Flutter floor (e.g., `3.24.0` instead of `3.24.x`). `flutter pub downgrade` changes dependency versions, not the SDK.
 
 A browser run passes only if it executes tests. Do not treat skipped browser tests as passing.
 
@@ -129,7 +122,7 @@ A browser run passes only if it executes tests. Do not treat skipped browser tes
 
 ### Minimum lane
 
-Dev-only dependencies that block resolution on the minimum SDK do not affect consumers. For each one, find the newest release compatible with the lane's SDK and override it in the lane's `pubspec_overrides.yaml`. Create the file if needed; otherwise merge into its existing `dependency_overrides`. For example, `flutter_lints` 6 requires Dart 3.8, so CI uses `flutter_lints` 5 on the minimum SDK:
+Dev-only dependencies that block resolution on the minimum SDK do not affect consumers. For each one, find the newest release compatible with the lane's SDK and override it in the lane's `pubspec_overrides.yaml`. Lanes never inherit this gitignored file, and its `dependency_overrides` replace any in `pubspec.yaml`. For example, `flutter_lints` 6 requires Dart 3.8, so CI uses `flutter_lints` 5 on the minimum SDK:
 
 ```yaml
 dependency_overrides:
@@ -146,13 +139,17 @@ flutter test --no-pub
 flutter test --no-pub --platform chrome
 ```
 
-This resolves the lowest dependency versions allowed by the constraints, skips the example app (which requires a newer Flutter), and keeps warnings and errors fatal while tolerating informational lints. Never override runtime dependencies to make this lane pass.
+This resolves the lowest dependency versions allowed by the constraints, skips the example app (which requires a newer Flutter), and keeps warnings and errors fatal while tolerating informational lints.
+
+Then run `flutter pub upgrade --no-example` and repeat the analyze and test commands. This resolves the newest dependency versions compatible with the lane's SDK, as a consumer on the minimum SDK gets, and the upgrade output shows which versions changed.
+
+Never override runtime dependencies to make this lane pass.
 
 ### Candidate lane
 
 Apply the proposed constraints to the lane's `pubspec.yaml`, then follow the [minimum lane](#minimum-lane) steps with the candidate SDK. Reassess the dev-only overrides for the candidate Dart version.
 
-If the Dart lower bound becomes 3.7 or later, files at the package's default language version switch to the tall `dart format` style. After resolving dependencies, run `dart format lib test` in the lane and review the resulting changes.
+If the Dart lower bound becomes 3.7 or later, files at the package's default language version switch to the tall `dart format` style. After resolving dependencies, run `dart format --output=none lib test` in the lane to list the files that would be reformatted, and report the scope of the change.
 
 ### Latest lane
 
