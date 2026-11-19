@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD033 -->
-<!-- Do not append a trailing period to standalone status or template values such as
-`KEEP`, `BUMP`, `POLICY DECISION`, `INCONCLUSIVE`, `None` or `None identified`. -->
+<!-- Do not append a trailing period to standalone status or template values
+such as "KEEP", "BUMP", "POLICY DECISION", "INCONCLUSIVE", "None" , etc. -->
 
 # Report: SDK constraints audit
 
