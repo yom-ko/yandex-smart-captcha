@@ -21,7 +21,7 @@ such as "PASS", "FAIL", "INCOMPLETE", "HIGH", "MEDIUM", "LOW", "None", etc. -->
 
 ## Exploratory coverage
 
-Use separate rows for different statuses; never hide a blocked or unrun scenario in a `PASS` row.
+<!-- Use separate rows for different statuses; never include a blocked or unrun scenario in a `PASS` row. Mark results observed by the user as user-reported. -->
 
 | Platform | Target | Build | Scenarios covered | Scenarios not covered | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -30,12 +30,11 @@ Use separate rows for different statuses; never hide a blocked or unrun scenario
 ## Findings
 
 <!-- If there are no findings or excluded errors, write "None" instead of a table. -->
+<!-- Severity describes the impact of the observed behavior, independently of whether it is attributable to the package. -->
 
 | # | Severity | Target(s) | Scenario | Expected | Actual | Evidence | Cause | Verdict impact |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| {{n}} | {{HIGH, MEDIUM, or LOW}} | {{Affected targets}} | {{Steps}} | {{Expected behavior, with source}} | {{Observed behavior; deterministic or flaky}} | {{Log excerpt or screenshot path, with client keys and tokens redacted}} | {{package, example app, test infrastructure, environment, external service, or unresolved}} | {{FAIL – confirmed package defect / Excluded – reason / INCOMPLETE – required check remains BLOCKED or UNCLEAR}} |
-
-Severity describes the impact of the observed behavior, independently of whether it is attributable to the package.
+| {{n}} | {{HIGH, MEDIUM, or LOW}} | {{Affected targets}} | {{Steps}} | {{Expected behavior and source}} | {{Observed behavior; deterministic or flaky}} | {{Redacted log excerpt or screenshot path}} | {{package, example app, test infrastructure, environment, external service, or unresolved}} | {{FAIL – confirmed package defect / Excluded – reason / INCOMPLETE – required check remains BLOCKED or UNCLEAR}} |
 
 ## Previous findings
 
