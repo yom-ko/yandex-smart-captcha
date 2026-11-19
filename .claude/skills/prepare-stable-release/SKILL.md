@@ -64,9 +64,13 @@ For `X.Y.Z`, use the highest-impact change:
 
 ## 4. Update the release files
 
-1. Update the version in `pubspec.yaml`; check SDK constraints, dependencies, and platforms.
+1. Update the version in `pubspec.yaml`; check SDK constraints, dependencies, and platforms. Then
+   run `flutter pub get` to refresh the package version in `example/pubspec.lock`, and confirm that
+   its diff changes only that `version` line. CI resolves the example with `--enforce-lockfile`,
+   which fails on a stale lockfile.
 2. Add a top `CHANGELOG.md` entry in the existing style. List user-facing changes first; mark
-   breaking changes with `**BREAKING CHANGE:**` and explain details and migration if they are not obvious.
+   breaking changes with `**BREAKING CHANGE:**` (or `**POTENTIALLY BREAKING CHANGE:**` if only
+   some usages break) and explain details and migration if they are not obvious.
 3. Update `README.md` and Dartdoc as needed. Briefly note significant example or internal changes.
    Omit agent-context changes.
 
@@ -107,7 +111,7 @@ re-running the step 1 pub.dev query shows no `X.Y.Z` in `versions[].version`. If
 or availability is unverified, stop and ask.
 
 ```bash
-git add -- pubspec.yaml CHANGELOG.md  # plus any other intended release files
+git add -- pubspec.yaml CHANGELOG.md example/pubspec.lock  # plus any other intended release files
 git --no-pager diff --cached --check
 git --no-pager diff --cached --name-only
 git --no-pager diff --cached
