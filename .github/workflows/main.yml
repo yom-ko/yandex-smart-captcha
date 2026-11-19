@@ -143,6 +143,20 @@ jobs:
       - name: Run example widget tests
         working-directory: example
         run: flutter test --no-pub
+      - name: Configure Flutter Gradle plugin repositories
+        run: |
+          mkdir -p "${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
+          cat > "${GRADLE_USER_HOME:-$HOME/.gradle}/init.d/flutter-plugin-repositories.gradle" <<'EOF'
+          gradle.beforeSettings { settings ->
+              def flutterGradle = new File(System.getenv("FLUTTER_ROOT"), "packages/flutter_tools/gradle")
+              if (settings.settingsDir.canonicalFile == flutterGradle.canonicalFile) {
+                  settings.pluginManagement.repositories {
+                      mavenCentral()
+                      gradlePluginPortal()
+                  }
+              }
+          }
+          EOF
       - name: Build checked-in Android example
         working-directory: example
         run: flutter build apk --debug --dart-define-from-file=.env.example
