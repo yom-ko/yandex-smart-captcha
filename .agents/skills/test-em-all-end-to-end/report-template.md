@@ -1,4 +1,7 @@
-# Report: End-to-end test
+<!-- Do not append a trailing period to standalone status or template values
+such as "PASS", "FAIL", "INCOMPLETE", "HIGH", "MEDIUM", "LOW", "None", etc. -->
+
+# Report: End-to-end testing
 
 **Date:** {{YYYY-MM-DD}}
 
@@ -14,13 +17,15 @@
 
 | Suite | Command | Target | Status | Notes |
 | --- | --- | --- | --- | --- |
-| {{Analyze / package VM / package browser JS / package browser Wasm / example widget / Patrol}} | {{command}} | {{VM, browser, or device and OS version}} | {{status}} | {{Actual command outcome, failures, flakiness, attribution, and excluded errors; or None}} |
+| {{Analyze / VM / browser JS / modern interop / browser Wasm / example widget / build / Patrol}} | {{command without secrets}} | {{VM, browser, or device and OS version}} | {{status}} | {{Exit result; tests passed, failed, or skipped where applicable; retry outcome and attribution}} |
 
 ## Exploratory coverage
 
+Use separate rows for different statuses; never hide a blocked or unrun scenario in a `PASS` row.
+
 | Platform | Target | Build | Scenarios covered | Scenarios not covered | Status |
 | --- | --- | --- | --- | --- | --- |
-| {{Android, iOS, or web}} | {{Device or browser and its version; Android WebView provider and version}} | {{debug, JS, or Wasm with execution evidence}} | {{Core flows and edge cases exercised}} | {{Scenarios not run, blocked, or N/A, with reasons; or None}} | {{status}} |
+| {{Android, iOS, or web}} | {{Device or exact browser/engine and version; Android WebView provider and version}} | {{debug or release; JS, default fallback, or opt-in Wasm with execution evidence}} | {{Core flows and edge cases exercised}} | {{Required scenarios not run, blocked, or N/A, with reasons; or None}} | {{status}} |
 
 ## Findings
 
@@ -38,23 +43,21 @@ Severity describes the impact of the observed behavior, independently of whether
 
 | Previous # | Finding | Now | Evidence |
 | --- | --- | --- | --- |
-| {{n}} | {{Short description}} | {{Persists, Gone, or Changed – how}} | {{Targets retested and result}} |
+| {{n}} | {{Short description}} | {{Persists, Gone, Changed – how, or NOT RUN/BLOCKED/UNCLEAR – why}} | {{Targets retested and result}} |
 
 ## Limitations
 
 <!-- If there are no limitations, write "None" instead of a list. -->
 
-- {{Required checks with `UNCLEAR`, `BLOCKED`, or `NOT RUN` statuses, with reasons}}
+- {{Required checks marked `UNCLEAR`, `BLOCKED`, or `NOT RUN`, with reasons. Distinguish an expected JS fallback from a missing required Wasm result.}}
 - {{Optional checks not run or not passing, with reasons}}
-- {{Wasm fallbacks or builds not verified as Wasm}}
-- {{OS minimums declared by the app but unsupported by the installed SDK, or images and runtimes that could not be obtained}}
-- {{Other environment or service limitations}}
+- {{Other environment or service limitations, including unsupported app minimums}}
 
 ## Temporary changes
 
 <!-- If no changes were made, write "None" instead of a list. -->
 
-- {{Temporary change, including restored lockfiles and created emulators, and confirmation that it was reverted}}
+- {{Snapshot edits, devices, downloads, and settings: what was removed or restored, and what remains and why}}
 
 ## Status definitions
 
@@ -67,7 +70,7 @@ Severity describes the impact of the observed behavior, independently of whether
 
 ## Verdict definitions
 
-Optional checks never affect `PASS` or `INCOMPLETE`.
+Optional checks affect the verdict only when they confirm a package defect.
 
 - `PASS` – Every required check is `PASS` or `N/A`, and no package defect within this package's control was confirmed.
 - `FAIL` – At least one package defect within this package's control was confirmed, by any check, optional ones included.
