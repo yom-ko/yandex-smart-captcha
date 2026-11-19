@@ -143,6 +143,7 @@ jobs:
       - name: Run example widget tests
         working-directory: example
         run: flutter test --no-pub
+      # Flutter's included build otherwise resolves plugins only through the portal.
       - name: Configure Flutter Gradle plugin repositories
         run: |
           mkdir -p "${GRADLE_USER_HOME:-$HOME/.gradle}/init.d"
