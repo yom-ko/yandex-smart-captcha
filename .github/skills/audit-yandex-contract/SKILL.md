@@ -15,10 +15,10 @@ description: >-
 
 ## 1. Read the contract
 
-Read these pages:
+Read these pages, preferring the Markdown versions for a shorter fetch. If a Markdown version is unavailable, use its HTML page instead:
 
-- [Integration methods](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods)
-- [Invisible CAPTCHA mode](https://yandex.cloud/en/docs/smartcaptcha/concepts/invisible-captcha)
+- Integration methods: [Markdown](https://docs.yandex.cloud/int/en/smartcaptcha/concepts/widget-methods.md) | [HTML](https://yandex.cloud/en/docs/smartcaptcha/concepts/widget-methods)
+- Invisible CAPTCHA mode: [Markdown](https://docs.yandex.cloud/int/en/smartcaptcha/concepts/invisible-captcha.md) | [HTML](https://yandex.cloud/en/docs/smartcaptcha/concepts/invisible-captcha)
 
 Follow other links from the [documentation root](https://yandex.cloud/en/docs/smartcaptcha/) only to verify a specific item.
 
@@ -51,21 +51,29 @@ To determine which capabilities the package claims to support, read `README.md`,
 
 ## 3. Compare and classify findings
 
-Compare the integration with the recorded contract. Check that:
+Compare the integration with the recorded contract on both native and web. Use this checklist as a starting point, not an exhaustive contract; add any newly documented or implemented items:
+
+- Script URL, query parameters, and loading prerequisites.
+- `render`: container and return value; `sitekey`, `callback`, `hl`, `test`, `webview`, `invisible`, `shieldPosition`, and `hideShield`.
+- `getResponse`, `execute`, `reset`, `destroy`, and `subscribe`, including unsubscription.
+- `challenge-visible`, `challenge-hidden`, `network-error`, `javascript-error`, `success`, and `token-expired`.
+- Invisible mode and the data processing notice when the badge is hidden.
+
+Check that:
 
 - Script URLs and query parameters match the documentation.
 - Event names and callback signatures match the documentation.
 - Method names, arguments, and return types match the documentation.
 - `render` parameter names, values, and types match the documentation. For example, booleans must not be passed as strings.
-- Documented prerequisites are met by the package or, if the consuming app is responsible, explained in the package docs. This includes the data processing notice when the badge is hidden.
+- Documented prerequisites are met by the package or, if the consuming app is responsible, explained in the package docs. Public API Dartdoc and the README count as package documentation. This includes the data processing notice when the badge is hidden.
 - Native and web adapters provide the claimed behavior, accounting for documented platform differences. A documented difference does not by itself establish compliance with Yandex's contract.
 
-For Dart/JavaScript interop use [Dart's interop documentation](https://dart.dev/interop/js-interop) and [Flutter's WebAssembly guidance](https://docs.flutter.dev/platform-integration/web/wasm#js-interop-wasm) to interpret the bridge. Also:
+For Dart/JavaScript interop use [Dart's JS types documentation](https://dart.dev/interop/js-interop/js-types) to interpret the bridge. Consult [Flutter's WebAssembly guidance](https://docs.flutter.dev/platform-integration/web/wasm#js-interop-wasm) if needed for a specific compatibility question. Also:
 
 - Compare JavaScript values, not just Dart type names.
 - Ignoring an unused return value or event payload is not itself a mismatch.
 - An explicit, accurately documented package default may differ from the JavaScript default.
-- If the documentation names a value without defining its JavaScript type, such as `WidgetId`, treat it as opaque. It is `OK` if the bridge stores it untyped (for example, as `JSAny`) and passes it back unchanged. A narrower declared type, such as `JSNumber`, is an undocumented assumption; record it as a limitation.
+- If the documentation names a value without defining its JavaScript type, such as `WidgetId`, treat it as opaque. It is `OK` if the bridge stores it untyped (for example, as `JSAny`) and passes it back unchanged. A narrower declared type, such as `JSNumber`, is an undocumented assumption; record it as a limitation and check for a matching exclusion.
 
 Assign each verifiable item one status:
 
@@ -86,12 +94,12 @@ For each non-`OK` finding:
 
 > ### Known exclusions
 >
-> [`known-exclusions.md`](./known-exclusions.md) lists deviations that were reviewed and accepted as intentional. Before reporting any finding:
+> [`known-exclusions.md`](./known-exclusions.md) lists deviations that were reviewed and accepted as intentional. Check it for every potential finding or limitation:
 >
 > 1. Check for an exclusion matching the underlying code deviation, not the wording. Use the relevant code location.
-> 2. If none matches, report the finding normally. Otherwise, check the **Re-evaluate if** condition.
-> 3. If the condition cannot be checked, record the limitation. Do not assume it is unmet.
-> 4. If it is not met, omit the finding and name the exclusion in the Summary.
+> 2. If none matches, report the finding or limitation normally. Otherwise, check the **Re-evaluate if** condition.
+> 3. If the condition cannot be checked, record the limitation. Do not assume it is unmet. When a condition requires a specific documented statement, the condition is not met if the relevant accessible documentation was checked and does not contain that statement. Silence alone does not establish a type, behavior, deprecation, or removal.
+> 4. If it is not met, omit the finding and name the exclusion in the Summary. Record any underlying undocumented assumption as a limitation in Sources; it does not make the verdict inconclusive.
 > 5. If it is met, report the finding. Name the exclusion, prove the condition with a quoted documentation sentence or cited code or `README.md` location, and explain why its rationale is no longer sufficient. Related or broader statements are not enough.
 >
 > Applied exclusions are accepted deviations, not evidence that the excluded behavior matches the contract.
@@ -103,6 +111,8 @@ Choose exactly one verdict:
 - `ALIGNED` – No non-excluded `MISMATCH` or `DEPRECATED` finding exists. `MISSING` findings do not count.
 - `MISALIGNED` – At least one non-excluded `MISMATCH` or `DEPRECATED` finding exists, even if some evidence is unavailable.
 - `INCONCLUSIVE` – No non-excluded `MISMATCH` or `DEPRECATED` finding exists, but evidence is insufficient to check a material non-excluded item or applicable material exclusion condition.
+
+A limitation is material when resolving it could establish a non-excluded `MISMATCH` or `DEPRECATED` finding, or change whether an applicable exclusion applies. An undocumented assumption covered by an exclusion whose re-evaluation condition is checked and not met is not material to the verdict.
 
 ## 5. Report
 
