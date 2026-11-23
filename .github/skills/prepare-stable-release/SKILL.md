@@ -20,9 +20,25 @@ description: >-
 
 ## 1. Find the previous release
 
+Check the working tree and index before fetching or running release checks:
+
+```bash
+git status --short --branch
+```
+
+If either is dirty, stop and ask. Then fetch tags and check the branch against its upstream:
+
 ```bash
 git fetch --tags
 git status --short --branch
+```
+
+Confirm that `HEAD` is on the release branch (normally `main`) and is neither ahead of nor behind
+its upstream. Otherwise, stop and ask.
+
+Find and verify the previous release:
+
+```bash
 git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' --exclude '*[-+]*'
 curl -fsS https://pub.dev/api/packages/yandex_smart_captcha | python3 -c \
   'import json,sys; d=json.load(sys.stdin); print("latest:", d["latest"]["version"]); print("all:", *[v["version"] for v in d["versions"]])'
@@ -30,8 +46,6 @@ grep -m1 '^version:' pubspec.yaml
 grep -m1 '^## ' CHANGELOG.md
 ```
 
-- Confirm that `HEAD` is on the release branch (normally `main`) and is neither ahead of nor behind
-  its upstream. Otherwise, stop and ask.
 - `--tags` includes lightweight tags; the globs are not SemVer validation. Confirm a stable
   `vMAJOR.MINOR.PATCH` tag matching the latest stable version on
   [pub.dev](https://pub.dev/packages/yandex_smart_captcha), `pubspec.yaml`, and
@@ -46,17 +60,19 @@ git --no-pager log --reverse --format='%h %s' <last-tag>..HEAD
 # Generated agent-context mirrors of .agents/ are omitted to keep the list short.
 git --no-pager diff --name-status <last-tag>..HEAD -- . ':!AGENTS.md' ':!.claude' ':!.cursor' \
   ':!.github/copilot-instructions.md' ':!.github/instructions' ':!.github/skills'
-flutter pub publish --dry-run  # On the clean tree: expect exit 0 and 0 warnings.
 ```
+
+If there are no commits since the tag, stop.
 
 Inspect every commit and relevant diffs, not just messages: use `git --no-pager show <commit> -- <path>`
 or `git --no-pager diff <last-tag>..HEAD -- <path>`. Include code, metadata, docs, platform behavior,
 and examples. Tests and CI are supporting evidence. Examples may ship but are not public API. Never
-print secrets. If there are no commits since the tag, stop.
+print secrets.
 
-Compare the dry-run file list with the changed paths. Every added or changed file that appears in the
-list ships to pub.dev. If maintainer-only files (tooling, configuration, agent context) would ship,
-report them and ask whether to exclude them in `.pubignore`. Pub already omits dotfiles and
+Run `flutter pub publish --dry-run` on the clean tree. If it does not exit 0 with 0 warnings, stop
+and ask. Compare its file list with the changed paths. Every added or changed file that appears in
+the list ships to pub.dev. If maintainer-only files (tooling, configuration, agent context) would
+ship, report them and ask whether to exclude them in `.pubignore`. Pub already omits dotfiles and
 dot-directories.
 
 If no shipped file changed (for example, only agent context, CI, tests, or excluded tooling changed),
@@ -84,30 +100,32 @@ For `X.Y.Z`, use the highest-impact change:
    which fails on a stale lockfile.
 2. Add a top `CHANGELOG.md` entry in the existing style. List user-facing changes first; mark
    breaking changes with `**BREAKING CHANGE:**` (or `**POTENTIALLY BREAKING CHANGE:**` if only
-   some usages break) and explain details and migration if they are not obvious.
-3. Update `README.md` and Dartdoc as needed. Briefly note significant example or internal changes.
-   Omit agent-context changes.
+   some usages break) and explain details and migration if they are not obvious. Briefly note
+   significant example or internal changes; omit agent-context changes.
+3. Update `README.md` and Dartdoc as needed.
 
 ## 5. Verify
 
-1. Read `.github/workflows/main.yml`. Run its applicable latest-SDK checks locally with the current
-   flags, including `./build-agent-context.sh --check`; record SDK versions. List runs for `HEAD`
-   with `gh run list --commit <HEAD-sha> --workflow main.yml --json databaseId,event,status,conclusion`.
+1. Read `.github/workflows/main.yml`. List runs for `HEAD` with
+   `gh run list --commit <HEAD-sha> --workflow main.yml --json databaseId,event,status,conclusion`.
    The newest must have status `completed` and conclusion `success`; `--exit-status` alone passes
    pending runs, so wait with `gh run watch <run-id> --exit-status`. Inspect its jobs with
    `gh run view <run-id> --verbose`. If it failed, stop and ask.
-2. If no successful minimum-SDK CI job exists for `HEAD`, or the release edits change SDK constraints
+2. Run the applicable latest-SDK checks from `main.yml` locally with the current flags, including
+   `./build-agent-context.sh --check`; record SDK versions. Run and evaluate the publish dry run
+   in step 5.
+3. If no successful minimum-SDK CI job exists for `HEAD`, or the release edits change SDK constraints
    or dependencies, run that job's steps from `main.yml` locally in an isolated lane with the exact
    minimum Flutter version. See `audit-sdk-constraints` for lane setup.
-3. Check formatting of existing Dart files changed since the last tag, including release edits:
+4. Check formatting of existing Dart files changed since the last tag, including release edits:
    `git diff -z --name-only --diff-filter=d <last-tag> -- '*.dart' | xargs -0 -r dart format --output=none --set-exit-if-changed`.
    If example code changed, run relevant example tests (see `example/README.md`). Browser tests
    must execute.
-4. Run `flutter pub publish --dry-run` in the release working tree. Inspect the complete list for
+5. Run `flutter pub publish --dry-run` in the release working tree. Inspect the complete list for
    required `lib/` files, assets, `LICENSE`, `README.md`, `CHANGELOG.md`, and `pubspec.yaml`; exclude
    secrets, local configuration, build outputs, and other unintended files. A `.pubignore`
    overrides `.gitignore` only in the same directory.
-5. Investigate every warning. A dry run exits `65` when it reports any warning, and Flutter
+   Investigate every warning. A dry run exits `65` when it reports any warning, and Flutter
    then prints `Failed to update packages.` Pub checks for uncommitted files during a dry run too,
    so uncommitted release edits always produce a "checked-in files are modified in git" warning.
    Treat the dry run as passing only if it exits `0`, or exits `65` with `Package has 1 warning.`
