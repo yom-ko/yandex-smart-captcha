@@ -36,7 +36,9 @@ Do not infer undocumented types, defaults, or behavior. Do not treat an item as 
 
 ## 2. Inspect the integration
 
-Review these files. Trace referenced code only as far as needed to understand the integration:
+First determine which client-side capabilities the package claims to support. Read `README.md`, the public exports in `lib/yandex_smart_captcha.dart`, and the Dartdoc in `lib/src/yandex_smart_captcha.dart`. Use these claims to establish the audit scope; do not treat server-side capabilities as missing.
+
+Then review these files. Trace referenced code only as far as needed to understand the integration:
 
 - `lib/src/captcha_config.dart` – options passed to `render`.
 - `lib/src/captcha_event.dart` – shared event vocabulary and the events passed to `subscribe`.
@@ -46,8 +48,6 @@ Review these files. Trace referenced code only as far as needed to understand th
 - `lib/src/web/captcha_script_loader_web.dart` – web script loading.
 - `lib/src/web/captcha_adapter_web.dart` – JavaScript interop declarations for `window.smartCaptcha` and `render` options.
 - `lib/src/web/captcha_adapter_controller_web.dart` – web calls to `render`, `subscribe`, `execute`, `reset`, and `destroy`.
-
-To determine which capabilities the package claims to support, read `README.md`, the public exports in `lib/yandex_smart_captcha.dart`, and the Dartdoc in `lib/src/yandex_smart_captcha.dart`. Focus on the client-side widget; do not treat server-side capabilities as missing.
 
 ## 3. Compare and classify findings
 
@@ -75,7 +75,21 @@ For Dart/JavaScript interop use [Dart's JS types documentation](https://dart.dev
 - An explicit, accurately documented package default may differ from the JavaScript default.
 - If the documentation names a value without defining its JavaScript type, such as `WidgetId`, treat it as opaque. It is `OK` if the bridge stores it untyped (for example, as `JSAny`) and passes it back unchanged. A narrower declared type, such as `JSNumber`, is an undocumented assumption; record it as a limitation and check for a matching exclusion.
 
-Assign each verifiable item one status:
+### Check known exclusions
+
+Before classifying a potential finding or limitation, check [`known-exclusions.md`](./known-exclusions.md) for a deviation matching the underlying code behavior, not merely the wording:
+
+1. If no exclusion matches, do not apply an exclusion; continue classifying the item normally.
+2. If an exclusion matches, check its **Re-evaluate if** condition.
+3. If the condition cannot be checked, record the limitation; do not assume it is unmet. When a condition requires a specific documented statement, it is not met if the relevant accessible documentation was checked and does not contain that statement. Silence alone does not establish a type, behavior, deprecation, or removal.
+4. If the condition is not met, omit the finding and name the exclusion in the Summary. Record any underlying undocumented assumption as a limitation in Sources; it does not make the verdict inconclusive.
+5. If the condition is met, report the finding. Name the exclusion, prove the condition with a quoted documentation sentence or cited code or `README.md` location, and explain why its rationale is no longer sufficient. Related or broader statements are not enough.
+
+Applied exclusions are accepted deviations, not evidence that the excluded behavior matches the contract.
+
+### Assign a status
+
+Assign each remaining verifiable item one status:
 
 | Status | Meaning |
 | --- | --- |
@@ -86,23 +100,11 @@ Assign each verifiable item one status:
 
 Do not classify an undocumented detail as `OK` or `MISMATCH`; record the limitation instead.
 
-For each non-`OK` finding:
+For each non-`OK` finding that remains after checking exclusions:
 
 - Cite the code location and documentation URL, and explain the discrepancy.
 - For a missing capability, cite the relevant public API or state `Not implemented` instead of a code location.
 - Suggest a replacement only if the documentation names one.
-
-> ### Known exclusions
->
-> [`known-exclusions.md`](./known-exclusions.md) lists deviations that were reviewed and accepted as intentional. Check it for every potential finding or limitation:
->
-> 1. Check for an exclusion matching the underlying code deviation, not the wording. Use the relevant code location.
-> 2. If none matches, report the finding or limitation normally. Otherwise, check the **Re-evaluate if** condition.
-> 3. If the condition cannot be checked, record the limitation. Do not assume it is unmet. When a condition requires a specific documented statement, the condition is not met if the relevant accessible documentation was checked and does not contain that statement. Silence alone does not establish a type, behavior, deprecation, or removal.
-> 4. If it is not met, omit the finding and name the exclusion in the Summary. Record any underlying undocumented assumption as a limitation in Sources; it does not make the verdict inconclusive.
-> 5. If it is met, report the finding. Name the exclusion, prove the condition with a quoted documentation sentence or cited code or `README.md` location, and explain why its rationale is no longer sufficient. Related or broader statements are not enough.
->
-> Applied exclusions are accepted deviations, not evidence that the excluded behavior matches the contract.
 
 ## 4. Decide the verdict
 
