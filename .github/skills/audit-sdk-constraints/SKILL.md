@@ -83,8 +83,21 @@ While working in lanes:
 1. Record `git rev-parse HEAD` and `git status --short` to identify the exact source state under review.
 2. Read `pubspec.yaml`, `example/pubspec.yaml`, and every workflow in `.github/workflows/`.
 3. Inspect SDK constraints, `dependency_overrides`, and any `pubspec_overrides.yaml`.
-4. Find the latest `Main` run on `main` with `gh run list --workflow main.yml --branch main --limit 1`. From `gh run view <id> --log`, record the exact Flutter version of its `test-latest` and `test-minimum` jobs, and the bundled Dart version from the [Flutter SDK archive](https://docs.flutter.dev/install/archive). If logs are unavailable, record that limitation rather than guessing.
-5. Separate the published package from tooling and the example app. Only the package's code, metadata, SDK constraints, runtime dependencies, and published generated files affect consumers. Tooling- and example-only requirements do not by themselves justify raising the package floor.
+4. Find the latest `Main` run on `main` with `gh run list --workflow main.yml --branch main --limit 1`. CI logs do not print `flutter --version`, and the full log is very large, so extract the exact Flutter version of the `test-latest` and `test-minimum` jobs from the `subosito/flutter-action` cache keys:
+
+   ```bash
+   gh run view <id> --log | grep -oE '^test-(latest|minimum)[[:space:]].*key: flutter-[a-z]+-stable-[0-9.]+-' | sed -E 's/^(test-[a-z]+)[[:space:]].*-stable-([0-9.]+)-$/\1 \2/' | sort -u
+   ```
+
+   If logs are unavailable or the command prints nothing, record that limitation rather than guessing.
+5. Look up the current stable release and the Dart version bundled with each relevant Flutter release. The [Flutter SDK archive](https://docs.flutter.dev/install/archive) page renders its table with JavaScript, so query its JSON source instead, passing the Flutter versions of interest (here, the `3.24.0` floor). The current stable is always printed:
+
+   ```bash
+   curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | python3 -c 'import json,sys; d=json.load(sys.stdin); c=d["current_release"]["stable"]; [print(r["version"], "Dart", r["dart_sdk_version"], "(latest stable)" if r["hash"]==c else "") for r in d["releases"] if r["channel"]=="stable" and (r["hash"]==c or r["version"] in sys.argv[1:])]' 3.24.0 | sort -u
+   ```
+
+6. List the installed SDKs with `puro ls` or `fvm list`. If the exact floor or the latest stable is missing, ask before installing it.
+7. Separate the published package from tooling and the example app. Only the package's code, metadata, SDK constraints, runtime dependencies, and published generated files affect consumers. Tooling- and example-only requirements do not by themselves justify raising the package floor.
 
 Audit the published package's runtime dependency graph in the `latest` lane:
 
@@ -101,14 +114,16 @@ flutter pub outdated --no-dev-dependencies --transitive --no-dependency-override
 - `Resolvable` – latest version resolvable together with all other dependency constraints.
 - `Latest` – latest published stable version.
 
-Inspect the SDK constraints and changelogs of relevant newer dependency versions. A newer release requiring a higher SDK does not by itself justify a bump if Pub can select an older compatible version that satisfies the package's requirements.
+Transitive packages that the Flutter SDK pins (e.g., `material_color_utilities`, `test_api`) may show `Resolvable` below `Latest`. This is expected and is not a finding.
+
+Inspect the SDK constraints and changelogs of relevant newer dependency versions. Read `environment` constraints from `https://pub.dev/api/packages/<package>` (`latest.pubspec` and `versions[].pubspec`). A newer release requiring a higher SDK does not by itself justify a bump if Pub can select an older compatible version that satisfies the package's requirements.
 
 ## 2. Choose the candidate
 
 Only when the decision flow requires a candidate:
 
 - Use official Dart and Flutter documentation, dependency constraints, and release notes to identify the lowest SDK versions that meet the confirmed requirement.
-- Change only the minimum SDK constraints that must change. The minimum Flutter release must bundle a Dart version that satisfies the Dart constraint – verify this in the [Flutter SDK archive](https://docs.flutter.dev/install/archive).
+- Change only the minimum SDK constraints that must change. The minimum Flutter release must bundle a Dart version that satisfies the Dart constraint – verify this with the release query from [step 1](#1-inspect-and-audit).
 - Keep the Dart upper bound at `<4.0.0`, and revisit it only as part of an explicit Dart 4 compatibility decision. Do not rely on a Flutter upper bound instead of compatibility testing, as Pub ignores it when resolving the package as a dependency.
 - Prefer a code or dependency fix that preserves existing SDK support.
 
@@ -116,7 +131,11 @@ Only when the decision flow requires a candidate:
 
 Test the exact Flutter floor (e.g., `3.24.0` instead of `3.24.x`). `flutter pub downgrade` changes dependency versions, not the SDK.
 
-A browser run passes only if it executes tests. Do not treat skipped browser tests as passing.
+The `minimum` and `latest` lanes are independent, so run them concurrently.
+
+Run every `flutter test` command with `-r failures-only`. The default compact reporter rewrites one line with carriage returns, which floods captured output and breaks `tail`. With `failures-only`, the run ends with a summary line such as `+109: All tests passed!` (`~N` counts skipped tests, `-N` failed ones). Use the exit status and this line together, and record the test count for each run.
+
+A browser run passes only if it executes tests: the summary shows `+N` with `N > 0` and no `~N`. Do not treat skipped browser tests or `No tests ran.` as passing. Browser runs also print `[BROWSER CONSOLE]` warnings about discarded `flutter/lifecycle` messages; these are harmless.
 
 `--platform chrome` is hidden and marked deprecated, but it is the only runner for the `@TestOn('browser')` tests in `test/`. Do not substitute `-d chrome`: `flutter test` uses devices only for `integration_test/`, so it runs `test/` on the VM and skips the browser tests. If a target SDK no longer supports `--platform chrome`, mark the browser checks `BLOCKED` and report it as a tooling finding.
 
@@ -135,8 +154,8 @@ Run:
 flutter --version
 flutter pub downgrade --no-example
 flutter analyze --no-pub --no-fatal-infos lib test
-flutter test --no-pub
-flutter test --no-pub --platform chrome
+flutter test --no-pub -r failures-only
+flutter test --no-pub -r failures-only --platform chrome
 ```
 
 This resolves the lowest dependency versions allowed by the constraints, skips the example app (which requires a newer Flutter), and keeps warnings and errors fatal while tolerating informational lints.
@@ -158,9 +177,9 @@ Reuse the `latest` lane from [step 1](#1-inspect-and-audit), without the minimum
 ```bash
 flutter analyze --no-pub lib test
 flutter pub publish --dry-run
-flutter test --no-pub
-flutter test --no-pub --platform chrome
-flutter test --no-pub --platform chrome --wasm
+flutter test --no-pub -r failures-only
+flutter test --no-pub -r failures-only --platform chrome
+flutter test --no-pub -r failures-only --platform chrome --wasm
 ```
 
 This mirrors CI: normal analysis strictness, package validation before tests, and both JS and Wasm browser runs.
