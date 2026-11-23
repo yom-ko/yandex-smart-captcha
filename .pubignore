@@ -8,6 +8,9 @@ assets/images/*
 /example/test/
 /example/integration_test/
 
+# Exclude maintainer-only tooling.
+/tool/
+
 # Exclude the example's platform projects.
 /example/android/
 /example/ios/
