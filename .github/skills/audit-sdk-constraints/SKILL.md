@@ -54,8 +54,8 @@ A lane is a disposable snapshot of the working tree, tested with one Flutter SDK
 | Lane | Flutter SDK | Used for |
 | --- | --- | --- |
 | `minimum` | The exact `environment.flutter` floor (e.g., `3.24.0`) | [Minimum lane](#minimum-lane) |
-| `candidate` | The proposed floor, only when the decision flow requires one | [Candidate lane](#candidate-lane) |
 | `latest` | The current stable release listed in the [Flutter SDK archive](https://docs.flutter.dev/install/archive) | [Dependency audit](#1-inspect-and-audit) and [Latest lane](#latest-lane) |
+| `candidate` | The proposed floor, only when the decision flow requires one | [Candidate lane](#candidate-lane) |
 
 To create lanes:
 
@@ -83,21 +83,21 @@ While working in lanes:
 1. Record `git rev-parse HEAD` and `git status --short` to identify the exact source state under review.
 2. Read `pubspec.yaml`, `example/pubspec.yaml`, and every workflow in `.github/workflows/`.
 3. Inspect SDK constraints, `dependency_overrides`, and any `pubspec_overrides.yaml`.
-4. Find the latest `Main` run on `main` with `gh run list --workflow main.yml --branch main --limit 1`. CI logs do not print `flutter --version`, and the full log is very large, so extract the exact Flutter version of the `test-latest` and `test-minimum` jobs from the `subosito/flutter-action` cache keys:
+4. Separate the published package from tooling and the example app. Only the package's code, metadata, SDK constraints, runtime dependencies, and published generated files affect consumers. Tooling- and example-only requirements do not by themselves justify raising the package floor.
+5. Find the latest `Main` run on `main` with `gh run list --workflow main.yml --branch main --limit 1`. CI logs do not print `flutter --version`, and the full log is very large, so extract the exact Flutter version of the `test-latest` and `test-minimum` jobs from the `subosito/flutter-action` cache keys:
 
    ```bash
    gh run view <id> --log | grep -oE '^test-(latest|minimum)[[:space:]].*key: flutter-[a-z]+-stable-[0-9.]+-' | sed -E 's/^(test-[a-z]+)[[:space:]].*-stable-([0-9.]+)-$/\1 \2/' | sort -u
    ```
 
    If logs are unavailable or the command prints nothing, record that limitation rather than guessing.
-5. Look up the current stable release and the Dart version bundled with each relevant Flutter release. The [Flutter SDK archive](https://docs.flutter.dev/install/archive) page renders its table with JavaScript, so query its JSON source instead, passing the Flutter versions of interest (here, the `3.24.0` floor). The current stable is always printed:
+6. Look up the current stable release and the Dart version bundled with each relevant Flutter release. The [Flutter SDK archive](https://docs.flutter.dev/install/archive) page renders its table with JavaScript, so query its JSON source instead, passing the Flutter versions of interest. The command below uses `3.24.0` as an example floor; replace it with the package's actual floor and any candidate version. The current stable is always printed:
 
    ```bash
    curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json | python3 -c 'import json,sys; d=json.load(sys.stdin); c=d["current_release"]["stable"]; [print(r["version"], "Dart", r["dart_sdk_version"], "(latest stable)" if r["hash"]==c else "") for r in d["releases"] if r["channel"]=="stable" and (r["hash"]==c or r["version"] in sys.argv[1:])]' 3.24.0 | sort -u
    ```
 
-6. List the installed SDKs with `puro ls` or `fvm list`. If the exact floor or the latest stable is missing, ask before installing it.
-7. Separate the published package from tooling and the example app. Only the package's code, metadata, SDK constraints, runtime dependencies, and published generated files affect consumers. Tooling- and example-only requirements do not by themselves justify raising the package floor.
+7. List the installed SDKs with `puro ls` or `fvm list`. If the exact floor or the latest stable is missing, ask before installing it.
 
 Audit the published package's runtime dependency graph in the `latest` lane:
 
@@ -164,12 +164,6 @@ Then run `flutter pub upgrade --no-example` and repeat the analyze and test comm
 
 Never override runtime dependencies to make this lane pass.
 
-### Candidate lane
-
-Apply the proposed constraints to the lane's `pubspec.yaml`, then follow the [minimum lane](#minimum-lane) steps with the candidate SDK. Reassess the dev-only overrides for the candidate Dart version.
-
-If the Dart lower bound becomes 3.7 or later, files at the package's default language version switch to the tall `dart format` style. After resolving dependencies, run `dart format --output=none lib test` in the lane to list the files that would be reformatted, and report the scope of the change.
-
 ### Latest lane
 
 Reuse the `latest` lane from [step 1](#1-inspect-and-audit), without the minimum-lane override. Run:
@@ -185,6 +179,12 @@ flutter test --no-pub -r failures-only --platform chrome --wasm
 This mirrors CI: normal analysis strictness, package validation before tests, and both JS and Wasm browser runs.
 
 Classify every failure before deciding whether to BUMP: package incompatibility, dependency resolution, tooling/example, latest-SDK-only, or infrastructure. A latest-SDK-only failure does not justify raising the minimum.
+
+### Candidate lane
+
+Evaluate this lane only after the current minimum and latest stable have been checked and the decision flow establishes that a candidate is needed. Apply the proposed constraints to the lane's `pubspec.yaml`, then follow the [minimum lane](#minimum-lane) steps with the candidate SDK. Reassess the dev-only overrides for the candidate Dart version.
+
+If the Dart lower bound becomes 3.7 or later, files at the package's default language version switch to the tall `dart format` style. After resolving dependencies, run `dart format --output=none lib test` in the lane to list the files that would be reformatted, and report the scope of the change.
 
 ## 4. Check CI
 
