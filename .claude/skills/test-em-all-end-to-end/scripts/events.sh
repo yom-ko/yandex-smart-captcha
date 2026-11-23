@@ -12,14 +12,20 @@
 set -euo pipefail
 
 log=${1:?log required}
+[[ -f $log && -r $log ]] || { echo "error: event log is not readable" >&2; exit 1; }
 pattern='called: (probe done|onCaptchaReady|onChallengeShown|onChallengeHidden|onChallengeSolved, token non-null: (true|false)|onTokenExpired|onNetworkError|onJavaScriptError|onNavigationRequest: [A-Za-z0-9.-]*)|Wasm: (true|false)'
 
 sanitized() {
-  grep -oE "$pattern" "$log" || true
+  local status=0
+  grep -oE "$pattern" "$log" || status=$?
+  ((status == 0 || status == 1)) || return "$status"
 }
 
 count() {
-  sanitized | grep -cF -- "$1" || true
+  local lines status=0
+  lines=$(sanitized) || return "$?"
+  printf '%s\n' "$lines" | grep -cF -- "$1" || status=$?
+  ((status == 0 || status == 1)) || return "$status"
 }
 
 case ${2:-} in

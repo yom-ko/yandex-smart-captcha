@@ -9,29 +9,36 @@
 //   checkbox                      click the SmartCaptcha checkbox
 //   click X Y                     click at viewport coordinates
 //   shot FILE                     save a screenshot (may show the challenge; never share it unredacted)
-//   block | unblock               Chrome only: block or unblock SmartCaptcha hosts, then reload
+//   block [SECONDS]               Chrome only: block SmartCaptcha hosts, reload, and hold the session
 //   reload                        Chrome only: reload, bypassing the cache
 //   window WIDTH HEIGHT           Chrome only: resize the browser window
 //   end                           Safari only: end the WebDriver session
 //
-// Start the browser with the remote debugging port listed in PORTS. Safari keeps its WebDriver
+// Set E2E_CHROME_TARGET_ID to the run-owned Chrome page ID. Ports can be overridden with
+// E2E_CHROME_PORT, E2E_FIREFOX_PORT, or E2E_SAFARI_PORT. Safari keeps its WebDriver
 // session ID in $E2E_TMP/safari-session, so set E2E_TMP to <tmp> for Safari.
 // Output is limited to the sanitized E2E text, button states, and coordinates.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const PORTS = { chrome: 9333, firefox: 9334, safari: 9335 };
+const PORTS = {
+  chrome: process.env.E2E_CHROME_PORT || '9333',
+  firefox: process.env.E2E_FIREFOX_PORT || '9334',
+  safari: process.env.E2E_SAFARI_PORT || '9335',
+};
 const LABELS = ['Execute', 'Reset', 'Destroy', 'Probe'];
 const BLOCKED_HOSTS = ['*smartcaptcha.cloud.yandex.ru*', '*smartcaptcha.yandexcloud.net*'];
 
 const [, , browser, cmd, ...args] = process.argv;
-if (!(browser in PORTS) || !cmd) {
+if (!Object.hasOwn(PORTS, browser) || !cmd) {
   console.error('usage: node web.mjs <chrome|firefox|safari> <command> [args]; see the header comment');
   process.exit(2);
 }
 const port = PORTS[browser];
+if (!/^\d+$/.test(port) || +port < 1 || +port > 65535) throw new Error('invalid browser port');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const timeout = 10000;
 
 // Enables Flutter semantics once, then reads only the E2E text and the button states.
 const STATE_JS = `(() => {
@@ -70,18 +77,45 @@ const CHECKBOX_JS = `(() => {
 })()`;
 
 async function connect(url) {
+  const endpoint = new URL(url);
+  if (endpoint.protocol !== 'ws:' || endpoint.hostname !== '127.0.0.1' || endpoint.port !== port) {
+    throw new Error('browser endpoint is not the selected local port');
+  }
   const socket = new WebSocket(url);
-  await new Promise((resolve, reject) => { socket.onopen = resolve; socket.onerror = reject; });
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { socket.close(); reject(new Error('browser connection timed out')); }, timeout);
+    socket.onopen = () => { clearTimeout(timer); resolve(); };
+    socket.onerror = () => { clearTimeout(timer); reject(new Error('browser connection failed')); };
+  });
   let id = 0;
   const pending = new Map();
+  const rejectPending = () => {
+    for (const { reject, timer } of pending.values()) {
+      clearTimeout(timer);
+      reject(new Error('browser connection closed'));
+    }
+    pending.clear();
+  };
+  socket.onclose = rejectPending;
+  socket.onerror = rejectPending;
   socket.onmessage = (m) => {
     const data = JSON.parse(m.data);
-    if (pending.has(data.id)) { pending.get(data.id)(data); pending.delete(data.id); }
+    const request = pending.get(data.id);
+    if (!request) return;
+    clearTimeout(request.timer);
+    pending.delete(data.id);
+    if (data.error) request.reject(new Error(`${request.method} failed`));
+    else request.resolve(data);
   };
-  const send = (method, params = {}) => new Promise((resolve) => {
+  const send = (method, params = {}) => new Promise((resolve, reject) => {
     const i = ++id;
-    pending.set(i, resolve);
-    socket.send(JSON.stringify({ id: i, method, params }));
+    const timer = setTimeout(() => {
+      pending.delete(i);
+      reject(new Error(`${method} timed out`));
+    }, timeout);
+    pending.set(i, { resolve, reject, timer, method });
+    try { socket.send(JSON.stringify({ id: i, method, params })); }
+    catch (error) { clearTimeout(timer); pending.delete(i); reject(error); }
   });
   return { send, close: () => socket.close() };
 }
@@ -94,8 +128,14 @@ const pointer = (x, y, extra = {}) => [{
 }];
 
 async function chrome() {
-  const targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
-  const c = await connect(targets.find((t) => t.type === 'page').webSocketDebuggerUrl);
+  const targetId = process.env.E2E_CHROME_TARGET_ID;
+  if (!targetId) throw new Error('set E2E_CHROME_TARGET_ID to the run-owned page ID');
+  const response = await fetch(`http://127.0.0.1:${port}/json`, { signal: AbortSignal.timeout(timeout) });
+  if (!response.ok) throw new Error('Chrome target discovery failed');
+  const targets = await response.json();
+  const target = targets.find((t) => t.type === 'page' && t.id === targetId);
+  if (!target?.webSocketDebuggerUrl) throw new Error('run-owned Chrome page not found');
+  const c = await connect(target.webSocketDebuggerUrl);
   const click = async (x, y) => {
     for (const type of ['mousePressed', 'mouseReleased']) {
       await c.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 });
@@ -103,24 +143,27 @@ async function chrome() {
   };
   const reload = () => c.send('Page.reload', { ignoreCache: true });
   return {
-    nav: (url) => c.send('Page.navigate', { url }),
-    eval: async (expression) => (await c.send('Runtime.evaluate', { expression, returnByValue: true })).result?.result?.value,
+    nav: async (url) => {
+      const response = await c.send('Page.navigate', { url });
+      if (response.result?.errorText) throw new Error('Page.navigate failed');
+    },
+    eval: async (expression) => {
+      const response = await c.send('Runtime.evaluate', { expression, returnByValue: true });
+      if (response.result?.exceptionDetails) throw new Error('Runtime.evaluate failed');
+      return response.result?.result?.value;
+    },
     shot: async () => (await c.send('Page.captureScreenshot')).result.data,
     click,
     // CDP input reaches cross-origin iframes at viewport coordinates.
     clickCheckbox: (p) => click(p.x, p.y),
     extra: {
-      // Blocking lasts only while the CDP session is open, so keep it open while the page loads.
-      block: async () => {
+      block: async (seconds = '120') => {
+        if (!/^\d+$/.test(seconds) || +seconds < 1 || +seconds > 3600) throw new Error('invalid block duration');
         await c.send('Network.enable');
         await c.send('Network.setBlockedURLs', { urls: BLOCKED_HOSTS });
         await reload();
-        await sleep(15000);
-      },
-      unblock: async () => {
-        await c.send('Network.enable');
-        await c.send('Network.setBlockedURLs', { urls: [] });
-        await reload();
+        console.log('blocking');
+        await sleep(+seconds * 1000);
       },
       reload,
       // Emulation overrides end with the CDP session; window bounds persist.
@@ -135,17 +178,24 @@ async function chrome() {
 
 async function firefox() {
   const c = await connect(`ws://127.0.0.1:${port}/session`);
-  const created = await c.send('session.new', { capabilities: {} });
-  if (created.error) throw new Error(`session.new: ${created.error} ${created.message}`);
-  const top = async () => (await c.send('browsingContext.getTree')).result.contexts[0];
+  await c.send('session.new', { capabilities: {} });
+  const top = async () => {
+    const contexts = (await c.send('browsingContext.getTree')).result.contexts;
+    if (contexts.length !== 1) throw new Error('expected exactly one run-owned Firefox tab');
+    return contexts[0];
+  };
   const context = (await top()).context;
   const perform = async (ctx, x, y) => {
     const r = await c.send('input.performActions', { context: ctx, actions: pointer(x, y) });
-    if (r.error) throw new Error(`input.performActions: ${r.error} ${r.message}`);
+    return r;
   };
   return {
     nav: (url) => c.send('browsingContext.navigate', { context, url, wait: 'none' }),
-    eval: async (expression) => (await c.send('script.evaluate', { expression, target: { context }, awaitPromise: false })).result?.result?.value,
+    eval: async (expression) => {
+      const response = await c.send('script.evaluate', { expression, target: { context }, awaitPromise: false });
+      if (response.result?.type === 'exception') throw new Error('script.evaluate failed');
+      return response.result?.result?.value;
+    },
     shot: async () => (await c.send('browsingContext.captureScreenshot', { context })).result.data,
     click: (x, y) => perform(context, x, y),
     // Top-level pointer actions do not reach the cross-origin iframe, so act inside its browsing context.
@@ -165,9 +215,13 @@ async function safari() {
   const file = path.join(process.env.E2E_TMP, 'safari-session');
   const base = `http://127.0.0.1:${port}`;
   const request = async (method, p, body) => {
-    const res = await fetch(base + p, { method, headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) });
+    const res = await fetch(base + p, { method, headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body), signal: AbortSignal.timeout(timeout) });
     const { value } = await res.json();
-    if (value?.error) throw new Error(`${value.error}: ${value.message}`);
+    if (!res.ok || value?.error) {
+      const error = new Error('Safari WebDriver request failed');
+      error.invalidSession = value?.error === 'invalid session id';
+      throw error;
+    }
     return value;
   };
   let sid = fs.existsSync(file) ? fs.readFileSync(file, 'utf8').trim() : null;
@@ -189,7 +243,10 @@ async function safari() {
     clickCheckbox: (p) => click(p.x, p.y),
     extra: {
       end: async () => {
-        if (sid) await request('DELETE', `/session/${sid}`);
+        if (sid) {
+          try { await request('DELETE', `/session/${sid}`); }
+          catch (error) { if (!error.invalidSession) throw error; }
+        }
         fs.rmSync(file, { force: true });
       },
     },
@@ -198,7 +255,22 @@ async function safari() {
 }
 
 async function state(d) {
-  return JSON.parse(await d.eval(STATE_JS));
+  const raw = JSON.parse(await d.eval(STATE_JS));
+  const events = raw.events;
+  const allowed = /^(?:called: (?:probe done|onCaptchaReady|onChallengeShown|onChallengeHidden|onTokenExpired|onNetworkError|onJavaScriptError|onNavigationRequest|onChallengeSolved, token non-null: (?:true|false))|Wasm: (?:true|false))$/;
+  if (typeof events !== 'string' || (events !== '(no E2E text)' &&
+      (!events.startsWith('E2E:') || events.slice(4).trim().split(' | ').some((event) => event && !allowed.test(event))))) {
+    throw new Error('invalid event history');
+  }
+  if (!raw.buttons || typeof raw.buttons !== 'object') throw new Error('invalid button state');
+  const buttons = {};
+  for (const label of LABELS) {
+    if (!(label in raw.buttons)) continue;
+    if (!['enabled', 'disabled'].includes(raw.buttons[label])) throw new Error('invalid button state');
+    buttons[label] = raw.buttons[label];
+  }
+  const warning = raw.warning === 'page hidden; keep the browser window visible' ? raw.warning : undefined;
+  return { events, buttons, warning };
 }
 
 function count(s, text) {
@@ -216,6 +288,7 @@ try {
 let exitCode = 0;
 try {
   if (cmd === 'nav') {
+    if (!args[0]) throw new Error('URL required');
     await d.nav(args[0]);
     console.log('navigated');
   } else if (cmd === 'state') {

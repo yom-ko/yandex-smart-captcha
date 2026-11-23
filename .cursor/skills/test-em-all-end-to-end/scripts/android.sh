@@ -3,6 +3,8 @@
 #
 # Usage:
 #   android.sh <device-id> state                          print Execute/Reset/Destroy/Probe states
+#   android.sh <device-id> centers                        print "<name> <x> <y>" screen centers of the buttons
+#                                                         and the WebView, for raw taps before readiness
 #   android.sh <device-id> tap <label>                    tap a button by label
 #   android.sh <device-id> wait <label> <enabled|disabled> [seconds]
 #                                                         poll until the button has the state (default 30 s)
@@ -16,23 +18,27 @@
 # UiAutomator sees only the WebView node, not SmartCaptcha inside it, so `checkbox` and `tap-webview`
 # tap by position. Take a screenshot (`adb -s <id> exec-out screencap -p > shot.png`) to aim
 # `tap-webview` and to confirm the result. Each dump takes about 1 s; for taps that must land before
-# readiness, run `state` after a previous launch, note the button center, and use
+# readiness, run `centers` after a previous launch, note the button center, and use
 # `adb -s <id> shell input tap X Y`. To see the state before readiness, `record` the launch instead.
 set -euo pipefail
 
 device=${1:?device-id required}
 cmd=${2:?command required}
-dump=$(mktemp)
+dump=$(mktemp "${E2E_TMP:?set E2E_TMP to the run directory}/android-dump.XXXXXX")
 trap 'rm -f "$dump"' EXIT
 
 # Prints "<name> <enabled|disabled> <x1> <y1> <x2> <y2>" for each known button and the WebView.
 read_nodes() {
   # A dump fails while the app starts or animates; report nothing so callers can poll again.
-  adb -s "$device" exec-out uiautomator dump /dev/tty 2>/dev/null | sed 's#</hierarchy>.*#</hierarchy>#' > "$dump" || return 0
-  python3 - "$dump" <<'PY' || true
+  adb -s "$device" exec-out uiautomator dump /dev/tty | sed 's#</hierarchy>.*#</hierarchy>#' > "$dump"
+  python3 - "$dump" <<'PY'
 import re, sys, xml.etree.ElementTree as ET
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+except ET.ParseError:
+    sys.exit(0)
 seen = set()
-for node in ET.parse(sys.argv[1]).getroot().iter('node'):
+for node in root.iter('node'):
     name = node.get('content-desc') or node.get('text') or ''
     # Disabled Flutter buttons are not clickable, so also match by class.
     is_button = node.get('clickable') == 'true' or node.get('class', '').endswith('Button')
@@ -46,7 +52,19 @@ PY
 }
 
 node_line() {
-  read_nodes | awk -v l="$1" '$1 == l'
+  read_nodes_retry | awk -v l="$1" '$1 == l'
+}
+
+# A dump taken during an animation can be empty, so retry a few times before giving up.
+read_nodes_retry() {
+  local out
+  for _ in 1 2 3 4 5; do
+    out=$(read_nodes)
+    [[ -n $out ]] && { printf '%s\n' "$out"; return 0; }
+    sleep 1
+  done
+  echo "no UI nodes found; is the app in the foreground?" >&2
+  return 1
 }
 
 tap_webview() {
@@ -59,7 +77,10 @@ tap_webview() {
 
 case "$cmd" in
   state)
-    read_nodes | awk '$1 != "WebView" {print $1 "=" $2}' | paste -sd ' ' -
+    read_nodes_retry | awk '$1 != "WebView" {print $1 "=" $2}' | paste -sd ' ' -
+    ;;
+  centers)
+    read_nodes_retry | awk '{printf "%s %d %d\n", $1, ($3 + $5) / 2, ($4 + $6) / 2}'
     ;;
   tap)
     label=${3:?label required}
@@ -97,9 +118,13 @@ case "$cmd" in
   record)
     seconds=${3:?seconds required}
     file=${4:?file required}
-    adb -s "$device" shell screenrecord --time-limit "$seconds" /sdcard/e2e-rec.mp4
-    adb -s "$device" pull /sdcard/e2e-rec.mp4 "$file" >/dev/null 2>&1
-    adb -s "$device" shell rm -f /sdcard/e2e-rec.mp4
+    remote=$(adb -s "$device" shell mktemp /data/local/tmp/e2e-rec.XXXXXXXX | tr -d '\r')
+    [[ $remote =~ ^/data/local/tmp/e2e-rec\.[A-Za-z0-9]+$ ]] || { echo "invalid recording path" >&2; exit 1; }
+    trap 'adb -s "$device" shell rm -f "$remote"; rm -f "$dump"' EXIT
+    adb -s "$device" shell screenrecord --time-limit "$seconds" "$remote"
+    adb -s "$device" pull "$remote" "$file" >/dev/null
+    adb -s "$device" shell rm -f "$remote"
+    trap 'rm -f "$dump"' EXIT
     echo "saved $file (only changed frames are encoded, so it can be shorter than $seconds s)"
     ;;
   rotate)

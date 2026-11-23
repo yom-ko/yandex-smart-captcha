@@ -9,19 +9,19 @@ such as "PASS", "FAIL", "INCOMPLETE", "HIGH", "MEDIUM", "LOW", "None", etc. -->
 
 **Summary:** {{One or two sentences: package-focused conclusion, confirmed package defects, and important excluded errors or checks.}}
 
-**Scope:** {{Commit and any pre-existing uncommitted changes under test}}
+**Scope:** {{Commit and any pre-existing uncommitted changes under test; for a partial retest, identify the previous scope and distinguish carried-forward results from rerun results}}
 
 **Environment:** Host {{OS and version}} / Flutter {{version}} / Dart {{version}} / patrol_cli {{version}} / patrol {{version}} / Xcode {{version, or N/A}}
 
 ## Automated suites
 
-| Suite | Command | Target | Status | Notes |
-| --- | --- | --- | --- | --- |
-| {{Analyze / VM / browser JS / modern interop / browser Wasm / example widget / build / Patrol}} | {{command without secrets}} | {{VM, browser, or device and OS version}} | {{status}} | {{Exit result; tests passed, failed, or skipped where applicable; retry outcome and attribution}} |
+| Suite | Command | Target | Exit | Test outcomes | Status | Attribution |
+| --- | --- | --- | --- | --- | --- | --- |
+| {{Suite}} | {{command without secrets}} | {{target}} | {{exit code}} | {{passed, failed, skipped; retries}} | {{status}} | {{package, environment, infrastructure, or unresolved}} |
 
 ## Exploratory coverage
 
-<!-- Use separate rows for different statuses; never include a blocked or unrun scenario in a `PASS` row. Mark results observed by the user as user-reported. -->
+<!-- Use separate rows for each target/build/scenario and status; never include a blocked or unrun scenario in a `PASS` row. Mark results observed by the user as user-reported, including their build and runtime evidence. -->
 
 | Platform | Target | Build | Scenarios covered | Scenarios not covered | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -50,7 +50,7 @@ such as "PASS", "FAIL", "INCOMPLETE", "HIGH", "MEDIUM", "LOW", "None", etc. -->
 
 - {{Required checks marked `UNCLEAR`, `BLOCKED`, or `NOT RUN`, with reasons. Distinguish an expected JS fallback from a missing required Wasm result.}}
 - {{Optional checks not run or not passing, with reasons}}
-- {{Other environment or service limitations, including unsupported app minimums}}
+- {{Other environment or service limitations}}
 
 ## Temporary changes
 

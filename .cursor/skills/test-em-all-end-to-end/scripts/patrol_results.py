@@ -1,32 +1,46 @@
 #!/usr/bin/env python3
 """Print Patrol test names and outcomes from result files, then a count line.
 
-For each failed case, the first line of its failure message follows as `  reason: ...`, with
-SmartCaptcha keys and other long opaque strings redacted and the line shortened.
+Only known test names and failure categories are printed. Unknown names or failures are withheld,
+because arbitrary test output may contain keys or tokens of any length.
 
 Usage:
   python3 patrol_results.py android <snapshot>/example/build/app/outputs/androidTest-results/connected
   python3 patrol_results.py ios <tmp>/ios-tests-<target>-<attempt>.json
 
 The iOS input is the output of `xcrun xcresulttool get test-results tests --path <xcresult>`.
-Exits with 1 when no test cases are found.
+Exits with 1 when no test cases are found or a name or outcome is unrecognized.
 """
 
 import glob
 import json
 import os
-import re
 import sys
+import urllib.parse
 import xml.etree.ElementTree as ET
 
 
+TEST_NAMES = (
+    'loads SmartCaptcha and enables the controls',
+    'shows the challenge when the checkbox is tapped',
+    'destroys SmartCaptcha and disables the controls',
+)
+
+
+def safe_name(name):
+    matches = [known for known in TEST_NAMES if known in (name or '')]
+    return matches[0] if len(matches) == 1 else '[unrecognized test name]'
+
+
 def reason(text):
-    lines = [line.strip() for line in (text or '').splitlines() if line.strip()]
-    if not lines:
-        return None
-    line = re.sub(r'ysc[12]_\S+', '[redacted]', lines[0])
-    line = re.sub(r'[A-Za-z0-9_\-.=+/]{40,}', '[redacted]', line)
-    return line[:200]
+    text = text or ''
+    if 'A SemanticsHandle was active at the end of the test.' in text:
+        return 'SemanticsHandle active at end of test'
+    if 'AndroidAutomatorClient._sendRequest' in text:
+        return 'AndroidAutomatorClient request failed or timed out'
+    if 'TimeoutException' in text:
+        return 'TimeoutException'
+    return 'failure details withheld'
 
 
 def android(directory):
@@ -36,19 +50,26 @@ def android(directory):
             if failure is None:
                 failure = case.find('error')
             if failure is not None:
-                text = failure.get('message') or failure.text
-                yield case.get('name'), 'Failed', reason(text)
+                text = '\n'.join(filter(None, (failure.get('message'), failure.text)))
+                yield safe_name(case.get('name')), 'Failed', reason(text)
             elif case.find('skipped') is not None:
-                yield case.get('name'), 'Skipped', None
+                yield safe_name(case.get('name')), 'Skipped', None
             else:
-                yield case.get('name'), 'Passed', None
+                yield safe_name(case.get('name')), 'Passed', None
 
 
 def ios(path):
     def walk(node):
         if node.get('nodeType') == 'Test Case':
             messages = [c.get('name') for c in node.get('children', []) if c.get('nodeType') == 'Failure Message']
-            yield node.get('name'), node.get('result'), reason(messages[0]) if messages else None
+            # Patrol form-encodes iOS test names ("app_test+SmartCaptcha+...").
+            name = urllib.parse.unquote_plus(node.get('name') or '')
+            outcome = node.get('result')
+            yield (
+                safe_name(name),
+                outcome if outcome in ('Passed', 'Failed', 'Skipped') else 'Unknown',
+                reason('\n'.join(filter(None, messages))) if messages else None,
+            )
         for child in node.get('children', []):
             yield from walk(child)
 
@@ -70,7 +91,11 @@ def main(argv):
     for _, outcome, _ in cases:
         counts[outcome] = counts.get(outcome, 0) + 1
     print(f'total {len(cases)}: ' + ', '.join(f'{k} {v}' for k, v in sorted(counts.items())))
-    sys.exit(0 if cases else 1)
+    valid = cases and all(
+        name != '[unrecognized test name]' and outcome != 'Unknown'
+        for name, outcome, _ in cases
+    )
+    sys.exit(0 if valid else 1)
 
 
 if __name__ == '__main__':
