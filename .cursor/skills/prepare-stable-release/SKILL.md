@@ -24,7 +24,10 @@ description: >-
 git fetch --tags
 git status --short --branch
 git describe --tags --abbrev=0 --match 'v[0-9]*.[0-9]*.[0-9]*' --exclude '*[-+]*'
-curl -fsS https://pub.dev/api/packages/yandex_smart_captcha  # latest.version, versions[].version
+curl -fsS https://pub.dev/api/packages/yandex_smart_captcha | python3 -c \
+  'import json,sys; d=json.load(sys.stdin); print("latest:", d["latest"]["version"]); print("all:", *[v["version"] for v in d["versions"]])'
+grep -m1 '^version:' pubspec.yaml
+grep -m1 '^## ' CHANGELOG.md
 ```
 
 - Confirm that `HEAD` is on the release branch (normally `main`) and is neither ahead of nor behind
@@ -40,13 +43,24 @@ curl -fsS https://pub.dev/api/packages/yandex_smart_captcha  # latest.version, v
 
 ```bash
 git --no-pager log --reverse --format='%h %s' <last-tag>..HEAD
-git --no-pager diff --name-status <last-tag>..HEAD
+# Generated agent-context mirrors of .agents/ are omitted to keep the list short.
+git --no-pager diff --name-status <last-tag>..HEAD -- . ':!AGENTS.md' ':!.claude' ':!.cursor' \
+  ':!.github/copilot-instructions.md' ':!.github/instructions' ':!.github/skills'
+flutter pub publish --dry-run  # On the clean tree: expect exit 0 and 0 warnings.
 ```
 
 Inspect every commit and relevant diffs, not just messages: use `git --no-pager show <commit> -- <path>`
 or `git --no-pager diff <last-tag>..HEAD -- <path>`. Include code, metadata, docs, platform behavior,
 and examples. Tests and CI are supporting evidence. Examples may ship but are not public API. Never
 print secrets. If there are no commits since the tag, stop.
+
+Compare the dry-run file list with the changed paths. Every added or changed file that appears in the
+list ships to pub.dev. If maintainer-only files (tooling, configuration, agent context) would ship,
+report them and ask whether to exclude them in `.pubignore`. Pub already omits dotfiles and
+dot-directories.
+
+If no shipped file changed (for example, only agent context, CI, tests, or excluded tooling changed),
+stop and ask before step 3 whether to prepare a patch maintenance release.
 
 ## 3. Choose the next version
 
@@ -59,7 +73,7 @@ For `X.Y.Z`, use the highest-impact change:
 | Fix | Backward-compatible bug or documentation fixes | Patch: increment `Z` |
 
 - For internal or example-only changes, prepare a patch maintenance release only if the user
-  explicitly confirms it.
+  explicitly confirms it (see step 2).
 - Treat SDK minimum increases as breaking, as this project does. Ask if the impact is unclear.
 
 ## 4. Update the release files
