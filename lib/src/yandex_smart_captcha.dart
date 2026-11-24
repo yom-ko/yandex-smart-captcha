@@ -30,7 +30,7 @@ final class CaptchaController {
   /// Creates a controller for [YandexSmartCaptcha].
   CaptchaController();
 
-  /// Starts user validation.
+  /// Starts user validation in invisible mode.
   ///
   /// This method should be called after [YandexSmartCaptcha.onCaptchaReady] has been invoked.
   ///

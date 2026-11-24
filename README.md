@@ -8,11 +8,11 @@ This package makes it easy to integrate Yandex SmartCaptcha into Flutter-based A
 
 ## Motivation
 
-One day at work, I urgently needed to integrate Yandex SmartCaptcha into a mobile app, and the `flutter_yandex_smartcaptcha` package came to the rescue. However, I discovered a serious bug and reported it to the author. When they didn’t respond, I decided to create a similar package myself and learn how to publish packages on pub.dev in the process. End of story.
+One day at work, I urgently needed to integrate Yandex SmartCaptcha into a mobile app, and the `flutter_yandex_smartcaptcha` package came to the rescue. However, I discovered a serious bug and reported it to the author. When they didn't respond, I decided to create a similar package myself and learn how to publish packages on pub.dev in the process. End of story.
 
 ## Usage
 
-Super simple! Here’s the minimal example:
+Super simple! Here's the minimal example:
 
 ```dart
 YandexSmartCaptcha(
@@ -20,15 +20,15 @@ YandexSmartCaptcha(
     clientKey: 'your-client-key',
   ),
   onChallengeSolved: (token) {
-    // Send the token for verification.
+    // Send the token out for verification.
   },
 )
 ```
 
 In most cases, you only need the `YandexSmartCaptcha` and `CaptchaConfig` classes. `CaptchaController` is optional and useful when you need to trigger validation, reset the widget, or destroy it programmatically.
 
-* On mobile, the `YandexSmartCaptcha`'s parent widget should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered within a single WebView.
-* On the web, the parent widget only needs to provide enough space for the "I'm not a robot" block (around 119px high and at least 300px wide), because Yandex fully controls the challenge popup.
+* On mobile, the parent widget of `YandexSmartCaptcha` should provide enough vertical space to accommodate both the "I'm not a robot" block and the challenge popup, as they are rendered within a single WebView.
+* On the web, the parent widget only needs to provide enough space for the "I'm not a robot" block (around 118px high and at least 300px wide), because Yandex fully controls the challenge popup.
 
 ### Web support
 
@@ -38,7 +38,7 @@ On the web, `YandexSmartCaptcha` provides a host element for the Yandex SmartCap
 
 > **Note:** The height of `YandexSmartCaptcha` is calculated by the SmartCaptcha script and cannot be set directly. The resulting height is usually appropriate, but you can adjust the widget's displayed size using `Transform.scale`, if needed.
 
-Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are only applicable to native platforms and have no effect on web. However, almost all callbacks and `CaptchaController` methods remain available.
+Certain `CaptchaConfig`/`YandexSmartCaptcha` parameters (marked with `*` in the tables below) are only applicable to native platforms and have no effect on web. All other parameters, callbacks, and `CaptchaController` members remain available.
 
 The web implementation is compatible with [WebAssembly (Wasm)](https://webassembly.org/).
 
@@ -54,7 +54,7 @@ The legacy configuration can reduce release optimization. Remove it once the dep
 
 ### CaptchaConfig parameters
 
-This is an immutable configuration for Yandex SmartCaptcha and WebView content.
+An immutable configuration for SmartCaptcha JavaScript options and WebView content.
 
 > Ignored on web: `useWebViewMode`, `initialScale`, `allowUserScaling`, `maximumScale`.
 
@@ -73,7 +73,7 @@ This is an immutable configuration for Yandex SmartCaptcha and WebView content.
 
 ### YandexSmartCaptcha parameters
 
-Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and callback registration.
+Flutter-level UI customization, callbacks, and an optional controller.
 
 > Ignored on web: `backgroundColor`, `loadingIndicator`, `onNavigationRequest`, `baseUrl`.
 
@@ -89,19 +89,19 @@ Control SmartCaptcha's runtime lifecycle, Flutter-level UI customization, and ca
 | `onTokenExpired`       |          | `null`  | Called when the validation token expires after the challenge is successfully solved.      |
 | `onNetworkError`       |          | `null`  | Called when a network error occurs while loading or executing the SmartCaptcha script.    |
 | `onJavaScriptError`    |          | `null`  | Called when a JavaScript error occurs while loading or executing the SmartCaptcha script. |
-| `onNavigationRequest`* |          | `null`  | Called when a main-frame navigation request is made inside the WebView.                   |
+| `onNavigationRequest`* |          | `null`  | Intercepts main-frame navigations inside the WebView. Return `false` to block one.        |
 | `controller`           |          | `null`  | A controller for programmatically interacting with the SmartCaptcha instance.             |
 | `baseUrl`*             |          | `null`  | An HTTP(S) base URL used for domain validation and resolving origin policy issues.        |
 
 ### CaptchaController properties and methods
 
-Provide access to the SmartCaptcha's readiness state and imperative operations.
+Access to SmartCaptcha's readiness state and imperative operations.
 
 | Member      | Description                                                                          |
 | :---------- | :----------------------------------------------------------------------------------- |
 | `isReady`   | A `ValueListenable<bool>` that is `true` once SmartCaptcha is ready for interaction. |
-| `execute()` | Starts user validation by showing a challenge popup (only works in invisible mode).  |
-| `reset()`   | Resets the SmartCaptcha to its initial state (only works for a solved challenge).    |
+| `execute()` | Starts user validation in invisible mode.                                            |
+| `reset()`   | Resets the SmartCaptcha widget to its initial state.                                 |
 | `destroy()` | Removes the SmartCaptcha HTML widget and its associated event listeners.             |
 | `dispose()` | Releases the controller's resources.                                                 |
 
@@ -118,7 +118,7 @@ The same members are available on all supported platforms.
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_2.webp"
-    alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve."
+    alt="The initial state of the Yandex SmartCaptcha popup, featuring a challenge for the user to solve."
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_3.webp"
@@ -135,7 +135,7 @@ The same members are available on all supported platforms.
     width="250">
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_laz_2.webp"
-    alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve in a real-world application."
+    alt="The initial state of the Yandex SmartCaptcha popup, featuring a challenge for the user to solve in a real-world application."
     width="250">
 </div><br/>
 
@@ -144,6 +144,6 @@ The same members are available on all supported platforms.
 <div>
   <img
     src="https://raw.githubusercontent.com/yom-ko/yandex-smart-captcha/refs/heads/main/assets/images/screen_web.webp"
-    alt="The initial state of the Yandex SmartCaptcha pop-up, featuring a challenge for the user to solve. Chrome browser."
+    alt="The initial state of the Yandex SmartCaptcha popup, featuring a challenge for the user to solve. Chrome browser."
     width="250">
 </div>
