@@ -1,4 +1,8 @@
 <!-- markdownlint-disable MD041 MD022 MD032 -->
+## 9.0.5
+- Update the example app's dependencies.
+- Improve the README.
+
 ## 9.0.4
 - Update the package description.
 
