@@ -21,3 +21,5 @@ If there are none, write "None" instead of the table. -->
 ## Sources
 
 - {{Documentation page title and URL}} – {{Reviewed successfully / Could not access or verify a material detail – reason}}
+
+<!-- Add a button or link "Save the report" that lets the user save the report as a Markdown file named "<skill-name>-report.md". -->
