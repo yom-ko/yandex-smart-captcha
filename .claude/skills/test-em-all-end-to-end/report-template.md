@@ -75,4 +75,4 @@ Optional checks affect the verdict only when they confirm a package defect.
 - `FAIL` – At least one package defect within this package's control was confirmed, by any check, optional ones included.
 - `INCOMPLETE` – No package defect was confirmed, but at least one required check is `UNCLEAR`, `BLOCKED`, or `NOT RUN`.
 
-<!-- Add a button or link "Save the report" that lets the user save the report as a Markdown file named "<skill-name>-report.md". -->
+<!-- Add a button or link labeled "Save the report" that lets the user save the report as a Markdown file named "<skill-name>-report.md". -->

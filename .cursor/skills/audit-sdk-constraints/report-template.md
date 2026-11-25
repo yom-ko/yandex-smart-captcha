@@ -35,4 +35,4 @@ such as "KEEP", "BUMP", "POLICY DECISION", "INCONCLUSIVE", "None" , etc. -->
 | **Latest stable** | Flutter {{exact version or UNVERIFIED – reason}} / Dart {{exact version or UNVERIFIED – reason}} | {{`flutter pub upgrade --no-example` and outcome}} | <p>Analyze: {{status}}</p><p>Unit/widget tests: {{status}}</p><p>Browser tests (JS): {{status}}</p><p>Browser tests (Wasm): {{status}}</p><p>Publish dry run: {{status}}</p> | {{PASS, FAIL, BLOCKED, or INCOMPLETE – reason}} |
 | **Proposed candidate** | Flutter {{exact version or UNVERIFIED – reason}} / Dart {{exact version or UNVERIFIED – reason}} | {{Commands and outcomes; versions changed by the upgrade; temporary overrides used}} | <p>Analyze: {{status}}</p><p>Unit/widget tests: {{status}}</p><p>Browser tests: {{status}}</p><p>Upgraded-dependency rerun: {{status}}</p> | {{PASS, FAIL, BLOCKED, or INCOMPLETE – reason}} |
 
-<!-- Add a button or link "Save the report" that lets the user save the report as a Markdown file named "<skill-name>-report.md". -->
+<!-- Add a button or link labeled "Save the report" that lets the user save the report as a Markdown file named "<skill-name>-report.md". -->
