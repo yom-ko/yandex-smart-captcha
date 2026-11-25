@@ -72,7 +72,7 @@ To create lanes:
 
 While working in lanes:
 
-- **SDK:** Select an installed SDK for each command only: `puro -e <env> flutter …`, `fvm spawn <version> …`, or the absolute path to that SDK's `bin/flutter`. Do not copy SDKs or change the selected SDK (`puro use`, `fvm use`, `flutter channel`, `flutter upgrade`, or `flutter downgrade`). Ask before installing a missing SDK.
+- **SDK:** Select an installed SDK for each command only: `puro -e <env> flutter …`, `fvm spawn <version> …`, or the absolute path to that SDK's `bin/flutter`. For Dart commands, use the matching SDK, e.g. `puro -e <env> dart …` or that Flutter SDK's `bin/dart`. Do not copy SDKs or change the selected SDK (`puro use`, `fvm use`, `flutter channel`, `flutter upgrade`, or `flutter downgrade`). Ask before installing a missing SDK.
 - **Changes:** Apply proposed fixes, constraints, and temporary overrides only to lane copies.
 - **Environment:** Keep the user's environment. Never override `HOME`: Chrome tests need the macOS login keychain, and without it, a blocking "Keychain Not Found" dialog appears.
 - **Dialogs:** Agents cannot see system dialogs. If a run hangs or the user reports a dialog, stop the run and ask the user to click **Cancel**. Never choose an option that resets data. Mark the affected checks `BLOCKED`.
@@ -160,7 +160,7 @@ flutter test --no-pub -r failures-only --platform chrome
 
 This resolves the lowest dependency versions allowed by the constraints, skips the example app (which requires a newer Flutter), and keeps warnings and errors fatal while tolerating informational lints.
 
-Then run `flutter pub upgrade --no-example` and repeat the analyze and test commands. This resolves the newest dependency versions compatible with the lane's SDK, as a consumer on the minimum SDK gets, and the upgrade output shows which versions changed.
+Then run `dart pub upgrade --no-example` using the Dart SDK bundled with the lane's Flutter SDK and repeat the analyze and test commands. This resolves the newest dependency versions compatible with the lane's SDK, as a consumer on the minimum SDK gets, and the upgrade output shows which versions changed. On Flutter 3.24.0, `flutter pub upgrade --no-example` can exit after resolving the package because Flutter also tries to update the skipped example's missing package config; invoking Dart Pub directly avoids that Flutter-tool issue without resolving the example. If Dart Pub cannot find the Flutter SDK, set `FLUTTER_ROOT` to the lane's Flutter SDK for that command only.
 
 Never override runtime dependencies to make this lane pass.
 

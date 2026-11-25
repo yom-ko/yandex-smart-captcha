@@ -65,7 +65,7 @@ Check that:
 - Event names and callback signatures match the documentation.
 - Method names, arguments, and return types match the documentation.
 - `render` parameter names, values, and types match the documentation. For example, booleans must not be passed as strings.
-- Documented prerequisites are met by the package or, if the consuming app is responsible, explained in the package docs. Public API Dartdoc and the README count as package documentation. This includes the data processing notice when the badge is hidden.
+- Documented prerequisites are met by the package or, if the consuming app is responsible, explained in the package docs, subject to the known exclusions below. Public API Dartdoc and the README count as package documentation. This includes the data processing notice when the badge is hidden.
 - Native and web adapters provide the claimed behavior, accounting for documented platform differences. A documented difference does not by itself establish compliance with Yandex's contract.
 
 For Dart/JavaScript interop use [Dart's JS types documentation](https://dart.dev/interop/js-interop/js-types) to interpret the bridge. Consult [Flutter's WebAssembly guidance](https://docs.flutter.dev/platform-integration/web/wasm#js-interop-wasm) if needed for a specific compatibility question. Also:
