@@ -24,6 +24,12 @@ This exclusion concerns the loading sequence only. It does not cover incorrect s
 - **Rationale:** The package delivers the token through `onChallengeSolved`; this is not an on-demand retrieval API.
 - **Re-evaluate if:** The package claims on-demand token retrieval while still not providing it. A claim that `onChallengeSolved` delivers a token does not meet this condition.
 
+## Native token sentinel normalization
+
+- **Excluded:** The native adapter treats the exact bridge argument string `"null"` as an absent token and invokes `onChallengeSolved(null)` instead of forwarding that string. An actually absent argument also produces `null`; the web adapter forwards JavaScript strings unchanged.
+- **Rationale:** The nullable callback provides an explicit no-token result, and normalizing this sentinel avoids presenting it to consumers as a usable verification token. This is defensive bridge handling, not a documented SmartCaptcha token rule: Yandex documents the callback value as a string but does not define whether `"null"` can occur as a token or as a bridge representation of absence.
+- **Re-evaluate if:** Yandex documents `"null"` as a valid verification token, explicitly requires forwarding that exact callback string unchanged, or the native adapter begins normalizing values beyond this exact sentinel.
+
 ## JavaScript error payload
 
 - **Excluded:** `onJavaScriptError` does not expose the `javascript-error` payload (`filename`, `message`, `col`, and `line`).
